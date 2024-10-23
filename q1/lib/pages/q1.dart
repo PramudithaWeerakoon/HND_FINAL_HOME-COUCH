@@ -141,11 +141,8 @@ class _Q1PageState extends State<Q1Page> {
             borderRadius: BorderRadius.circular(100),
           ),
           onPressed: () {
-            // Navigate to q2.dart when the button is pressed
-            Navigator.push(
-              context,
-              MaterialPageRoute(builder: (context) => const Q2Page()),
-            );
+            // Navigate using named route to q2 page
+            Navigator.pushNamed(context, '/question2');
           },
           child: const Icon(Icons.arrow_forward, color: Colors.white),
         ),

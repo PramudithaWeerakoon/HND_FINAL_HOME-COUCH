@@ -1,5 +1,8 @@
 import 'package:flutter/material.dart';
-import 'pages/q1.dart'; // Import your q1.dart page
+import 'package:q1/pages/q1.dart';
+import 'package:q1/pages/q2.dart';
+import 'pages/login_page.dart';
+import 'pages/register_page.dart';
 
 void main() {
   runApp(const MyApp());
@@ -8,36 +11,18 @@ void main() {
 class MyApp extends StatelessWidget {
   const MyApp({super.key});
 
+  // This widget is the root of your application.
   @override
   Widget build(BuildContext context) {
-    return const MaterialApp(
-      debugShowCheckedModeBanner: false,
-      home: HomePage(), // Set HomePage as the initial route
-    );
-  }
-}
+    return MaterialApp(
+      initialRoute: '/login',
+      routes: {
+        '/login': (context) => const LoginPage(),
+        '/register': (context) => const RegisterPage(),
+        '/question1': (context) => const Q1Page(),
+        '/question2': (context) => const Q2Page(),
 
-class HomePage extends StatelessWidget {
-  const HomePage({super.key});
-
-  @override
-  Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: AppBar(
-        title: const Text('Main Page'),
-      ),
-      body: Center(
-        child: ElevatedButton(
-          onPressed: () {
-            // Navigate to q1.dart when the button is pressed
-            Navigator.push(
-              context,
-              MaterialPageRoute(builder: (context) => const Q1Page()),
-            );
-          },
-          child: const Text('Go to Q1'),
-        ),
-      ),
+      },
     );
   }
 }
