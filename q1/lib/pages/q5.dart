@@ -12,9 +12,9 @@ class _BodyTypeSelectionScreenState extends State<BodyTypeSelectionScreen> {
   int? _selectedBodyType; // Nullable to track selected body type index
 
   // Define image paths
-  final String skinnyImagePath = 'lib/assets/images/Skinny.png';
-  final String skinnyFatImagePath = 'lib/assets/images/Skinny-Fat.png';
-  final String heavyImagePath = 'lib/assets/images/Heavy.png';
+  final String skinnyImagePath = 'lib/assets/Skinny.png';
+  final String skinnyFatImagePath = 'lib/assets/Skinny-Fat.png';
+  final String heavyImagePath = 'lib/assets/Heavy.png';
 
   @override
   Widget build(BuildContext context) {
