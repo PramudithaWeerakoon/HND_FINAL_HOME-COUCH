@@ -62,13 +62,7 @@
     This project is licensed under the MIT License. See the <a href="LICENSE">LICENSE</a> file for details.
 </p>
 
-<h2>Contact</h2>
-<p>
-    For inquiries or feedback, please contact the project maintainer:
-</p>
-<ul>
-    <li><a href="mailto:pramudithapaypal@gmail.com">Pramuditha Weerakoon</a></li>
-</ul>
+
 
 <p>Thank you for your interest in the AI-driven Exercise App!</p>
 
