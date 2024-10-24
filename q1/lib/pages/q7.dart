@@ -117,7 +117,7 @@ class _Q7ScreenState extends State<Q7Screen> {
             bottom: 32, // Adjust bottom position as needed
             child: FloatingActionButton(
               heroTag: 'back_to_q6', // Unique tag for the left FAB
-              backgroundColor: Colors.deepPurple,
+               backgroundColor: const Color(0xFF21007E),
               shape: RoundedRectangleBorder(
                 borderRadius: BorderRadius.circular(100),
               ),
@@ -133,7 +133,7 @@ class _Q7ScreenState extends State<Q7Screen> {
             bottom: 32, // Adjust bottom position as needed
             child: FloatingActionButton(
               heroTag: 'next_to_q8', // Unique tag for the right FAB
-              backgroundColor: Colors.deepPurple,
+               backgroundColor: const Color(0xFF21007E),
               shape: RoundedRectangleBorder(
                 borderRadius: BorderRadius.circular(100),
               ),
@@ -170,7 +170,7 @@ class _Q7ScreenState extends State<Q7Screen> {
       child: Container(
         padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 8),
         decoration: BoxDecoration(
-          color: isActive ? Colors.amber : Colors.grey[200],
+            color: isActive ? const Color(0xFFEAB804) : Colors.grey[200],
           borderRadius: BorderRadius.circular(10),
         ),
         child: Text(

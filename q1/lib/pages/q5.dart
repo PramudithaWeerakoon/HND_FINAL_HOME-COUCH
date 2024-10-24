@@ -83,7 +83,7 @@ class _BodyTypeSelectionScreenState extends State<BodyTypeSelectionScreen> {
             bottom: 32, // Adjust bottom position as needed
             child: FloatingActionButton(
               heroTag: 'back_to_q4', // Unique tag for the left FAB
-              backgroundColor: Colors.deepPurple,
+               backgroundColor: const Color(0xFF21007E),
               shape: RoundedRectangleBorder(
                 borderRadius: BorderRadius.circular(100),
               ),
@@ -101,7 +101,7 @@ class _BodyTypeSelectionScreenState extends State<BodyTypeSelectionScreen> {
               bottom: 32, // Adjust bottom position as needed
               child: FloatingActionButton(
                 heroTag: 'next_to_q6', // Unique tag for the right FAB
-                backgroundColor: Colors.deepPurple,
+                 backgroundColor: const Color(0xFF21007E),
                 shape: RoundedRectangleBorder(
                   borderRadius: BorderRadius.circular(100),
                 ),

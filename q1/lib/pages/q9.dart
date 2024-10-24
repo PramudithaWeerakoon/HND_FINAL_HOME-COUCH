@@ -74,7 +74,7 @@ class _Q9ScreenState extends State<Q9Screen> {
                         ),
                         decoration: BoxDecoration(
                           color: isSelected
-                              ? Colors.red
+                                ? const Color(0xFFB30000)
                               : Colors.grey[200],
                           borderRadius: BorderRadius.circular(50),
                         ),
@@ -115,7 +115,7 @@ class _Q9ScreenState extends State<Q9Screen> {
             bottom: 32, // Adjust bottom position as needed
             child: FloatingActionButton(
               heroTag: 'back_to_q8', // Unique tag for the left FAB
-              backgroundColor: Colors.deepPurple,
+               backgroundColor: const Color(0xFF21007E),
               shape: RoundedRectangleBorder(
                 borderRadius: BorderRadius.circular(100),
               ),
@@ -131,7 +131,7 @@ class _Q9ScreenState extends State<Q9Screen> {
             bottom: 32, // Adjust bottom position as needed
             child: FloatingActionButton(
               heroTag: 'next_to_q10', // Unique tag for the right FAB
-              backgroundColor: Colors.deepPurple,
+               backgroundColor: const Color(0xFF21007E),
               shape: RoundedRectangleBorder(
                 borderRadius: BorderRadius.circular(100),
               ),

@@ -164,7 +164,7 @@ class _WeightInputScreenState extends State<WeightInputScreen> {
             bottom: 32, // Bottom position for alignment
             child: FloatingActionButton(
               heroTag: 'back_to_q2', // Unique tag for FAB
-              backgroundColor: Colors.deepPurple,
+               backgroundColor: const Color(0xFF21007E),
               shape: RoundedRectangleBorder(
                 borderRadius: BorderRadius.circular(100),
               ),
@@ -181,7 +181,7 @@ class _WeightInputScreenState extends State<WeightInputScreen> {
             bottom: 32, // Bottom position for alignment
             child: FloatingActionButton(
               heroTag: 'next_to_q4', // Unique tag for FAB
-              backgroundColor: Colors.deepPurple,
+               backgroundColor: const Color(0xFF21007E),
               shape: RoundedRectangleBorder(
                 borderRadius: BorderRadius.circular(100),
               ),

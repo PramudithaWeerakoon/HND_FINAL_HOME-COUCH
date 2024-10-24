@@ -57,52 +57,69 @@ class _Q10ScreenState extends State<Q10Screen> {
                   itemCount: equipment.length,
                   itemBuilder: (context, index) {
                     String currentItem = equipment[index];
+                    bool isSelected = selectedEquipment == currentItem; // Check if the item is selected
+
                     return GestureDetector(
                       onTap: () {
                         setState(() {
-                          if (selectedEquipment == currentItem) {
+                          if (isSelected) {
                             selectedEquipment = ''; // Unselect if already selected
                           } else {
                             selectedEquipment = currentItem; // Select the current item
                           }
                         });
                       },
-                      child: Container(
-                        decoration: BoxDecoration(
-                          color: selectedEquipment == currentItem ? Colors.grey[300] : Colors.white,
-                          border: Border.all(
-                            color: selectedEquipment == currentItem ? Colors.blue : Colors.grey,
-                            width: selectedEquipment == currentItem ? 3 : 1,
-                          ),
-                          borderRadius: BorderRadius.circular(12),
-                        ),
-                        child: Center(
-                          child: Column(
-                            mainAxisAlignment: MainAxisAlignment.center,
-                            children: [
-                              // Placeholder for blank image
-                              Container(
-                                width: 80,
-                                height: 80,
-                                color: Colors.grey[200], // Grey placeholder
-                                child: const Icon(
-                                  Icons.image_not_supported_outlined,
-                                  size: 50,
-                                  color: Colors.grey,
-                                ),
+                      child: Stack( // Use Stack to position the tick icon
+                        children: [
+                          Container(
+                            decoration: BoxDecoration(
+                              color: isSelected ? Colors.grey[300] : Colors.white,
+                              border: Border.all(
+                                color: isSelected ? const Color.fromARGB(255, 0, 0, 0) : Colors.grey,
+                                width: isSelected ? 3 : 1,
                               ),
-                              const SizedBox(height: 10),
-                              Text(
-                                currentItem,
-                                style: const TextStyle(
-                                  fontSize: 16,
-                                  fontWeight: FontWeight.w600,
-                                  color: Colors.black,
-                                ),
+                              borderRadius: BorderRadius.circular(12),
+                            ),
+                            child: Center(
+                              child: Column(
+                                mainAxisAlignment: MainAxisAlignment.center,
+                                children: [
+                                  // Placeholder for blank image
+                                  Container(
+                                    width: 80,
+                                    height: 80,
+                                    color: Colors.grey[200], // Grey placeholder
+                                    child: const Icon(
+                                      Icons.image_not_supported_outlined,
+                                      size: 50,
+                                      color: Colors.grey,
+                                    ),
+                                  ),
+                                  const SizedBox(height: 10),
+                                  Text(
+                                    currentItem,
+                                    style: const TextStyle(
+                                      fontSize: 16,
+                                      fontWeight: FontWeight.w600,
+                                      color: Colors.black,
+                                    ),
+                                  ),
+                                ],
                               ),
-                            ],
+                            ),
                           ),
-                        ),
+                          // Add tick icon if selected
+                          if (isSelected) // Show tick icon only if selected
+                            const Positioned(
+                              top: 8,
+                              right: 8,
+                              child: Icon(
+                                Icons.check_circle,
+                                color: Color.fromARGB(255, 0, 0, 0),
+                                size: 24,
+                              ),
+                            ),
+                        ],
                       ),
                     );
                   },
@@ -132,7 +149,7 @@ class _Q10ScreenState extends State<Q10Screen> {
             bottom: 32, // Adjust bottom position as needed
             child: FloatingActionButton(
               heroTag: 'back_to_q9', // Unique tag for the left FAB
-              backgroundColor: Colors.deepPurple,
+              backgroundColor: const Color(0xFF21007E),
               shape: RoundedRectangleBorder(
                 borderRadius: BorderRadius.circular(100),
               ),
@@ -152,7 +169,7 @@ class _Q10ScreenState extends State<Q10Screen> {
               visible: selectedEquipment.isNotEmpty, // Show only if an item is selected
               child: FloatingActionButton(
                 heroTag: 'next_to_q11', // Unique tag for the right FAB
-                backgroundColor: Colors.deepPurple,
+                backgroundColor: const Color(0xFF21007E),
                 shape: RoundedRectangleBorder(
                   borderRadius: BorderRadius.circular(100),
                 ),

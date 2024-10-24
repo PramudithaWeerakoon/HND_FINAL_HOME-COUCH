@@ -112,7 +112,7 @@ class _Q2PageState extends State<Q2Page> {
             bottom: 32, // Adjust bottom position as needed
             child: FloatingActionButton(
               heroTag: 'back_to_q1', // Unique tag for the left FAB
-              backgroundColor: Colors.deepPurple,
+               backgroundColor: const Color(0xFF21007E),
               shape: RoundedRectangleBorder(
                 borderRadius: BorderRadius.circular(100),
               ),
@@ -126,7 +126,7 @@ class _Q2PageState extends State<Q2Page> {
               bottom: 32, // Adjust bottom position as needed
               child: FloatingActionButton(
                 heroTag: 'next_question', // Unique tag for the right FAB
-                backgroundColor: Colors.deepPurple,
+                 backgroundColor: const Color(0xFF21007E),
                 shape: RoundedRectangleBorder(
                   borderRadius: BorderRadius.circular(100),
                 ),

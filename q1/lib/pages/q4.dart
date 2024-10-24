@@ -124,7 +124,7 @@ class _Q4PageState extends State<Q4Page> {
                         });
                       },
                       style: ElevatedButton.styleFrom(
-                        backgroundColor: isMSelected ? Colors.white : Colors.red,
+                        backgroundColor: isMSelected ? Colors.white : const Color(0xFFB30000),
                         foregroundColor: isMSelected ? Colors.black : Colors.white,
                         shape: RoundedRectangleBorder(
                           borderRadius: BorderRadius.circular(10),
@@ -164,7 +164,7 @@ class _Q4PageState extends State<Q4Page> {
             bottom: 32, // Bottom position for alignment
             child: FloatingActionButton(
               heroTag: 'back_to_q3', // Unique tag for FAB
-              backgroundColor: Colors.deepPurple,
+               backgroundColor: const Color(0xFF21007E),
               shape: RoundedRectangleBorder(
                 borderRadius: BorderRadius.circular(100),
               ),
@@ -181,7 +181,7 @@ class _Q4PageState extends State<Q4Page> {
             bottom: 32, // Bottom position for alignment
             child: FloatingActionButton(
               heroTag: 'next_to_q5', // Unique tag for FAB
-              backgroundColor: Colors.deepPurple,
+               backgroundColor: const Color(0xFF21007E),
               shape: RoundedRectangleBorder(
                 borderRadius: BorderRadius.circular(100),
               ),

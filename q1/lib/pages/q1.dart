@@ -137,7 +137,7 @@ class _Q1PageState extends State<Q1Page> {
       floatingActionButtonLocation: FloatingActionButtonLocation.endFloat,
       floatingActionButton: Builder(
         builder: (context) => FloatingActionButton(
-          backgroundColor: Colors.deepPurple,
+           backgroundColor: const Color(0xFF21007E),
           shape: RoundedRectangleBorder(
             borderRadius: BorderRadius.circular(100),
           ),
