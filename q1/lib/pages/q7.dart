@@ -171,7 +171,7 @@ class _Q7ScreenState extends State<Q7Screen> {
         padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 8),
         decoration: BoxDecoration(
           color: isActive ? Colors.amber : Colors.grey[200],
-          borderRadius: BorderRadius.circular(50),
+          borderRadius: BorderRadius.circular(10),
         ),
         child: Text(
           label,
