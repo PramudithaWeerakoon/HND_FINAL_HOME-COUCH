@@ -9,8 +9,24 @@ class Q8Screen extends StatefulWidget {
 }
 
 class _Q8ScreenState extends State<Q8Screen> {
-  int _neckCircumference = 37; // Initial neck circumference
+  final TextEditingController _neckController = TextEditingController();
   bool isCm = true; // Variable to track if in cm (true) or inches (false)
+
+  @override
+  void initState() {
+    super.initState();
+    _neckController.text = '37'; // Default value for neck circumference
+    // Add listener to update the value as the user types
+    _neckController.addListener(() {
+      setState(() {});
+    });
+  }
+
+  @override
+  void dispose() {
+    _neckController.dispose(); // Dispose of the controller to free resources
+    super.dispose();
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -44,13 +60,18 @@ class _Q8ScreenState extends State<Q8Screen> {
               ),
               const SizedBox(height: 80),
 
-              // Display the neck circumference
-              Text(
-                '$_neckCircumference',
+              // Display and allow user to input the neck circumference
+              TextField(
+                controller: _neckController, // Use the controller
+                keyboardType: TextInputType.number,
+                textAlign: TextAlign.center,
                 style: const TextStyle(
                   fontSize: 70,
                   fontWeight: FontWeight.bold,
                   color: Colors.black,
+                ),
+                decoration: const InputDecoration(
+                  border: InputBorder.none, // No border around input
                 ),
               ),
               const SizedBox(height: 14),
@@ -76,7 +97,7 @@ class _Q8ScreenState extends State<Q8Screen> {
 
               // Page Indicator
               const Text(
-                "10/12",
+                "8/12",
                 style: TextStyle(
                   fontSize: 28,
                   fontWeight: FontWeight.bold,
@@ -137,7 +158,9 @@ class _Q8ScreenState extends State<Q8Screen> {
       onTap: () {
         setState(() {
           isCm = (label == "cm");
-          _neckCircumference = isCm ? 37 : (37 / 2.54).round(); // Convert to inches or cm
+          _neckController.text = isCm
+              ? '37'
+              : (37 / 2.54).toStringAsFixed(2); // Convert to inches or cm
         });
       },
       child: Container(
