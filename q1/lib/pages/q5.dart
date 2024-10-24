@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'q7.dart'; // Import q8.dart
 
 class BodyTypeSelectionScreen extends StatefulWidget {
   const BodyTypeSelectionScreen({super.key});
@@ -92,20 +93,25 @@ class _BodyTypeSelectionScreenState extends State<BodyTypeSelectionScreen> {
               child: const Icon(Icons.arrow_back, color: Colors.white),
             ),
           ),
-          // Conditionally show the "Next to Q6" button
+          // Conditionally show the "Next to Q8" button
           if (_selectedBodyType != null)
             Positioned(
               right: 16, // Position the next button on the right
               bottom: 32, // Adjust bottom position as needed
               child: FloatingActionButton(
-                heroTag: 'next_to_q6', // Unique tag for the right FAB
+                heroTag: 'next_to_q7', // Unique tag for the right FAB
                 backgroundColor: Colors.deepPurple,
                 shape: RoundedRectangleBorder(
                   borderRadius: BorderRadius.circular(100),
                 ),
                 onPressed: () {
-                  // Handle next screen navigation
-                  // For example, navigate to the next question screen
+                  // Navigate to q7.dart when clicked
+                  Navigator.push(
+                    context,
+                    MaterialPageRoute(
+                      builder: (context) => Q7Screen(), // Navigate to Q8Screen
+                    ),
+                  );
                 },
                 child: const Icon(Icons.arrow_forward, color: Colors.white),
               ),
