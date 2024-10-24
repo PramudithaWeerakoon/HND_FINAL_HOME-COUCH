@@ -9,8 +9,24 @@ class Q7Screen extends StatefulWidget {
 }
 
 class _Q7ScreenState extends State<Q7Screen> {
-  int _waistCircumference = 85; // Initial waist circumference
+  final TextEditingController _waistController = TextEditingController();
   bool isCm = true; // Variable to track if in cm (true) or inches (false)
+
+  @override
+  void initState() {
+    super.initState();
+    _waistController.text = '85'; // Default value
+    // Automatically update as the user types
+    _waistController.addListener(() {
+      setState(() {});
+    });
+  }
+
+  @override
+  void dispose() {
+    _waistController.dispose();
+    super.dispose();
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -43,21 +59,25 @@ class _Q7ScreenState extends State<Q7Screen> {
                 ),
               ),
               const SizedBox(height: 80),
-              
-              // Display the waist circumference
-              Text(
-                '$_waistCircumference',
+
+              // Editable waist input field
+              TextField(
+                controller: _waistController,
+                textAlign: TextAlign.center,
+                keyboardType: TextInputType.number,
                 style: const TextStyle(
                   fontSize: 70,
                   fontWeight: FontWeight.bold,
-                  color: Colors.black,
+                ),
+                decoration: const InputDecoration(
+                  border: InputBorder.none, // No visible border
                 ),
               ),
               const SizedBox(height: 14),
-              
+
               // Horizontal line
               Container(
-                height: 2, // Changed thickness to 2
+                height: 2, // Thickness of the line
                 width: 130,
                 color: Colors.black,
               ),
@@ -76,12 +96,12 @@ class _Q7ScreenState extends State<Q7Screen> {
 
               // Page Indicator
               const Text(
-                "9/12",
+                "7/12",
                 style: TextStyle(
-                    fontSize: 28,
-                    fontWeight: FontWeight.bold,
-                    color: Colors.black,
-                  ),
+                  fontSize: 28,
+                  fontWeight: FontWeight.bold,
+                  color: Colors.black,
+                ),
               ),
               const SizedBox(height: 20),
             ],
@@ -139,7 +159,11 @@ class _Q7ScreenState extends State<Q7Screen> {
       onTap: () {
         setState(() {
           isCm = (label == "cm");
-          _waistCircumference = isCm ? 85 : (85 / 2.54).round(); // Convert to inches or cm
+          double currentWaist = double.tryParse(_waistController.text) ?? 85.0;
+          // Convert to inches or cm based on selection
+          _waistController.text = isCm
+              ? (currentWaist * 2.54).toStringAsFixed(1)
+              : (currentWaist / 2.54).toStringAsFixed(1);
         });
       },
       child: Container(
