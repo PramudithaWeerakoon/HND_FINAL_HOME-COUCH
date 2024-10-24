@@ -1,21 +1,21 @@
 import 'package:flutter/material.dart';
-import 'q6.dart'; 
+import 'q7.dart'; // Import q7.dart
 
-class BodyTypeSelectionScreen extends StatefulWidget {
-  const BodyTypeSelectionScreen({super.key});
+class FitnessBackgroundSelectionScreen extends StatefulWidget {
+  const FitnessBackgroundSelectionScreen({super.key});
 
   @override
-  _BodyTypeSelectionScreenState createState() =>
-      _BodyTypeSelectionScreenState();
+  _FitnessBackgroundSelectionScreen createState() =>
+      _FitnessBackgroundSelectionScreen();
 }
 
-class _BodyTypeSelectionScreenState extends State<BodyTypeSelectionScreen> {
-  int? _selectedBodyType; // Nullable to track selected body type index
+class _FitnessBackgroundSelectionScreen extends State<FitnessBackgroundSelectionScreen> {
+  int? _selectedFitnessLevel; // Nullable to track selected fitness background
 
-  // Define image paths
-  final String skinnyImagePath = 'lib/assets/Skinny.png';
-  final String skinnyFatImagePath = 'lib/assets/Skinny-Fat.png';
-  final String heavyImagePath = 'lib/assets/Heavy.png';
+  // Define image paths (You can change these if necessary)
+  final String newbieImagePath = 'lib/assets/newbie.png';
+  final String competentImagePath = 'lib/assets/competent.png';
+  final String expertImagePath = 'lib/assets/expert.jpg';
 
   @override
   Widget build(BuildContext context) {
@@ -39,7 +39,7 @@ class _BodyTypeSelectionScreenState extends State<BodyTypeSelectionScreen> {
               ),
               const SizedBox(height: 90), // Space between title and question
               const Text(
-                'How would you describe your body type?',
+                'What is your fitness background?',
                 textAlign: TextAlign.center,
                 style: TextStyle(
                   fontSize: 30,
@@ -49,20 +49,20 @@ class _BodyTypeSelectionScreenState extends State<BodyTypeSelectionScreen> {
               ),
               const SizedBox(height: 90), // Space between question and options
 
-              // Images with body type options
+              // Images with fitness background options
               Expanded(
                 child: Row(
                   mainAxisAlignment: MainAxisAlignment.spaceAround,
                   children: [
-                    _buildBodyTypeOption('Skinny', skinnyImagePath, 0), // Use skinny image path
-                    _buildBodyTypeOption('Skinny-Fat', skinnyFatImagePath, 1), // Use skinny-fat image path
-                    _buildBodyTypeOption('Heavy', heavyImagePath, 2), // Use heavy image path
+                    _buildFitnessLevelOption('Newbie', newbieImagePath, 0), // Use Newbie image
+                    _buildFitnessLevelOption('Competent', competentImagePath, 1), // Use Competent image
+                    _buildFitnessLevelOption('Expert', expertImagePath, 2), // Use Expert image
                   ],
                 ),
               ),
               const SizedBox(height: 20), // Add space between body types and progress text
               const Text(
-                "5/12",
+                "6/12",
                 style: TextStyle(
                   fontSize: 28,
                   fontWeight: FontWeight.bold, // Make "5/12" bold
@@ -81,25 +81,25 @@ class _BodyTypeSelectionScreenState extends State<BodyTypeSelectionScreen> {
             left: 16, // Position the back button on the left
             bottom: 32, // Adjust bottom position as needed
             child: FloatingActionButton(
-              heroTag: 'back_to_q4', // Unique tag for the left FAB
+              heroTag: 'back_to_q5', // Unique tag for the left FAB
               backgroundColor: Colors.deepPurple,
               shape: RoundedRectangleBorder(
                 borderRadius: BorderRadius.circular(100),
               ),
               onPressed: () {
-                // Handle going back to Q4
+                // Handle going back to Q5
                 Navigator.pop(context);
               },
               child: const Icon(Icons.arrow_back, color: Colors.white),
             ),
           ),
-          // Conditionally show the "Next to Q8" button
-          if (_selectedBodyType != null)
+          // Conditionally show the "Next to Q7" button
+          if (_selectedFitnessLevel != null)
             Positioned(
               right: 16, // Position the next button on the right
               bottom: 32, // Adjust bottom position as needed
               child: FloatingActionButton(
-                heroTag: 'next_to_q6', // Unique tag for the right FAB
+                heroTag: 'next_to_q7', // Unique tag for the right FAB
                 backgroundColor: Colors.deepPurple,
                 shape: RoundedRectangleBorder(
                   borderRadius: BorderRadius.circular(100),
@@ -109,7 +109,7 @@ class _BodyTypeSelectionScreenState extends State<BodyTypeSelectionScreen> {
                   Navigator.push(
                     context,
                     MaterialPageRoute(
-                      builder: (context) => FitnessBackgroundSelectionScreen()
+                      builder: (context) => Q7Screen(), // Navigate to Q7Screen
                     ),
                   );
                 },
@@ -121,13 +121,13 @@ class _BodyTypeSelectionScreenState extends State<BodyTypeSelectionScreen> {
     );
   }
 
-  // Widget for building each body type option with an image and label
-  Widget _buildBodyTypeOption(String label, String imagePath, int index) {
+  // Widget for building each fitness background option with an image and label
+  Widget _buildFitnessLevelOption(String label, String imagePath, int index) {
     return GestureDetector(
       onTap: () {
         setState(() {
           // Toggle selection: if already selected, deselect; otherwise, select
-          _selectedBodyType = _selectedBodyType == index ? null : index;
+          _selectedFitnessLevel = _selectedFitnessLevel == index ? null : index;
         });
       },
       child: Column(
@@ -137,12 +137,12 @@ class _BodyTypeSelectionScreenState extends State<BodyTypeSelectionScreen> {
             width: 125, // Fixed size for the image box (customizable)
             height: 125,
             decoration: BoxDecoration(
-              color: _selectedBodyType == index
+              color: _selectedFitnessLevel == index
                   ? Colors.blueAccent.withOpacity(0.2)
                   : Colors.grey[300], // Placeholder color
               borderRadius: BorderRadius.circular(10),
               border: Border.all(
-                color: _selectedBodyType == index
+                color: _selectedFitnessLevel == index
                     ? Colors.blueAccent
                     : Colors.transparent,
                 width: 3.0, // Highlight selected image
@@ -160,7 +160,7 @@ class _BodyTypeSelectionScreenState extends State<BodyTypeSelectionScreen> {
             label,
             style: TextStyle(
               fontWeight: FontWeight.bold,
-              color: _selectedBodyType == index
+              color: _selectedFitnessLevel == index
                   ? Colors.blueAccent
                   : Colors.black,
             ),
