@@ -22,11 +22,12 @@ class _Q1PageState extends State<Q1Page> {
             mainAxisAlignment: MainAxisAlignment.center, // Center everything vertically
             crossAxisAlignment: CrossAxisAlignment.center, // Center everything horizontally
             children: [
+              const SizedBox(height: 50),
               const Text(
-                "Let's get to know you!",
+                "Let's get to know \n you!",
                 textAlign: TextAlign.center,
                 style: TextStyle(
-                  fontSize: 42,
+                  fontSize: 40,
                   fontWeight: FontWeight.bold,
                   color: Colors.black,
                 ),

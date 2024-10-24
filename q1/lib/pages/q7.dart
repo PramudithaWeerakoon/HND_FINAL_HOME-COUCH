@@ -39,11 +39,12 @@ class _Q7ScreenState extends State<Q7Screen> {
             mainAxisAlignment: MainAxisAlignment.center,
             crossAxisAlignment: CrossAxisAlignment.center,
             children: [
+             const SizedBox(height: 50),
               const Text(
-                "Let's get to know you!",
+                "Let's get to know \n you!",
                 textAlign: TextAlign.center,
                 style: TextStyle(
-                  fontSize: 36,
+                  fontSize: 40,
                   fontWeight: FontWeight.bold,
                   color: Colors.black,
                 ),

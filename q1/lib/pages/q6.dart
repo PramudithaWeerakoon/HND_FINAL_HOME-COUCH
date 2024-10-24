@@ -28,11 +28,12 @@ class _FitnessBackgroundSelectionScreen extends State<FitnessBackgroundSelection
             mainAxisAlignment: MainAxisAlignment.center,
             crossAxisAlignment: CrossAxisAlignment.center, // Center horizontally
             children: [
+             const SizedBox(height: 50),
               const Text(
-                "Let's get to know you!",
+                "Let's get to know \n you!",
                 textAlign: TextAlign.center,
                 style: TextStyle(
-                  fontSize: 36,
+                  fontSize: 40,
                   fontWeight: FontWeight.bold,
                   color: Colors.black,
                 ),

@@ -39,15 +39,14 @@ class _Q4PageState extends State<Q4Page> {
             mainAxisAlignment: MainAxisAlignment.center, // Center everything vertically
             crossAxisAlignment: CrossAxisAlignment.stretch, // Stretch to fill horizontally
             children: [
-              const Center(
-                child: Text(
-                  "Let's get to know you!",
-                  textAlign: TextAlign.center,
-                  style: TextStyle(
-                    fontSize: 36,
-                    fontWeight: FontWeight.bold,
-                    color: Colors.black,
-                  ),
+              const SizedBox(height: 50),
+              const Text(
+                "Let's get to know \n you!",
+                textAlign: TextAlign.center,
+                style: TextStyle(
+                  fontSize: 40,
+                  fontWeight: FontWeight.bold,
+                  color: Colors.black,
                 ),
               ),
               const SizedBox(height: 40), // Space between title and question

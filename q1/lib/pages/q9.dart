@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'q10.dart'; // Import q10.dart
 
 class Q9Screen extends StatefulWidget {
   const Q9Screen({super.key});
@@ -29,11 +30,12 @@ class _Q9ScreenState extends State<Q9Screen> {
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.center,
             children: [
+              const SizedBox(height: 50),
               const Text(
-                "let's get to know you!",
+                "Let's get to know \n you!",
                 textAlign: TextAlign.center,
                 style: TextStyle(
-                  fontSize: 36,
+                  fontSize: 40,
                   fontWeight: FontWeight.bold,
                   color: Colors.black,
                 ),
@@ -135,6 +137,10 @@ class _Q9ScreenState extends State<Q9Screen> {
               ),
               onPressed: () {
                 // Handle next screen navigation (Q10)
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(builder: (context) => const Q10Screen()),
+                );
               },
               child: const Icon(Icons.arrow_forward, color: Colors.white),
             ),
