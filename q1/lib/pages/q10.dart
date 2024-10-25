@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'q11.dart'; // Import q11.dart
 
 class Q10Screen extends StatefulWidget {
   const Q10Screen({super.key});
@@ -175,7 +176,7 @@ class _Q10ScreenState extends State<Q10Screen> {
                 ),
                 onPressed: () {
                   // Handle moving to the next question (Q11)
-                  // Navigator.push(context, MaterialPageRoute(builder: (context) => Q11Screen()));
+                   Navigator.push(context, MaterialPageRoute(builder: (context) => DumbbellSelectionScreen()));
                 },
                 child: const Icon(Icons.arrow_forward, color: Colors.white),
               ),
