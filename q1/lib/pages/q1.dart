@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'q2.dart'; // Import the q2.dart page
+// Import the q2.dart page
 
 class Q1Page extends StatefulWidget {
   const Q1Page({super.key});

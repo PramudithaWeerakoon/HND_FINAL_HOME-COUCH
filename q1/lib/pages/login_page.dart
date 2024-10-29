@@ -191,14 +191,14 @@ class _LoginPageState extends State<LoginPage> {
             
 
               // third party login buttons
-              Row(
+              const Row(
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [
-                  const AuthButton(imagePath: 'lib/assets/google.png'), // Google icon
+                  AuthButton(imagePath: 'lib/assets/google.png'), // Google icon
                   SizedBox(width: 20),
-                  const AuthButton(imagePath: 'lib/assets/apple.png'), // Apple icon
+                  AuthButton(imagePath: 'lib/assets/apple.png'), // Apple icon
                   SizedBox(width: 20),
-                  const AuthButton(imagePath: 'lib/assets/microsoft.png'), // Microsoft icon
+                  AuthButton(imagePath: 'lib/assets/microsoft.png'), // Microsoft icon
                 ],
               ),
 
@@ -209,9 +209,9 @@ class _LoginPageState extends State<LoginPage> {
                 child: RichText(
                   text: TextSpan(
                     children: [
-                      TextSpan(
+                      const TextSpan(
                         text: "Don't have an account? ",
-                        style: const TextStyle(
+                        style: TextStyle(
                           color: Color.fromARGB(255, 128, 127, 127), // Grey color
                           fontSize: 17,
                           fontWeight: FontWeight.bold,
@@ -219,7 +219,7 @@ class _LoginPageState extends State<LoginPage> {
                       ),
                       TextSpan(
                         text: "Sign up",
-                        style: TextStyle(
+                        style: const TextStyle(
                           color: Color(0xFF21007E), // Blue color
                           fontSize: 17,
                           fontWeight: FontWeight.bold,

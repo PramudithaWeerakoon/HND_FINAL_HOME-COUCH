@@ -110,7 +110,7 @@ class _FitnessBackgroundSelectionScreen extends State<FitnessBackgroundSelection
                   Navigator.push(
                     context,
                     MaterialPageRoute(
-                      builder: (context) => Q7Screen(), // Navigate to Q7Screen
+                      builder: (context) => const Q7Screen(), // Navigate to Q7Screen
                     ),
                   );
                 },

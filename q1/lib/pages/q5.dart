@@ -83,7 +83,7 @@ class _BodyTypeSelectionScreenState extends State<BodyTypeSelectionScreen> {
             bottom: 32, // Adjust bottom position as needed
             child: FloatingActionButton(
               heroTag: 'back_to_q4', // Unique tag for the left FAB
-               backgroundColor: const Color(0xFF21007E),
+              backgroundColor: const Color(0xFF21007E),
               shape: RoundedRectangleBorder(
                 borderRadius: BorderRadius.circular(100),
               ),
@@ -110,7 +110,7 @@ class _BodyTypeSelectionScreenState extends State<BodyTypeSelectionScreen> {
                   Navigator.push(
                     context,
                     MaterialPageRoute(
-                      builder: (context) => FitnessBackgroundSelectionScreen()
+                      builder: (context) => const FitnessBackgroundSelectionScreen()
                     ),
                   );
                 },
@@ -144,7 +144,7 @@ class _BodyTypeSelectionScreenState extends State<BodyTypeSelectionScreen> {
               borderRadius: BorderRadius.circular(10),
               border: Border.all(
                 color: _selectedBodyType == index
-                    ? Colors.blueAccent
+                    ? const Color.fromARGB(255, 31, 10, 80)
                     : Colors.transparent,
                 width: 3.0, // Highlight selected image
               ),
@@ -162,7 +162,7 @@ class _BodyTypeSelectionScreenState extends State<BodyTypeSelectionScreen> {
             style: TextStyle(
               fontWeight: FontWeight.bold,
               color: _selectedBodyType == index
-                  ? Colors.blueAccent
+                  ? const Color.fromARGB(255, 0, 0, 0)
                   : Colors.black,
             ),
           ),

@@ -176,7 +176,7 @@ class _Q10ScreenState extends State<Q10Screen> {
                 ),
                 onPressed: () {
                   // Handle moving to the next question (Q11)
-                   Navigator.push(context, MaterialPageRoute(builder: (context) => DumbbellSelectionScreen()));
+                   Navigator.push(context, MaterialPageRoute(builder: (context) => const DumbbellSelectionScreen()));
                 },
                 child: const Icon(Icons.arrow_forward, color: Colors.white),
               ),

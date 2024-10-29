@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'q12.dart';
 
 class DumbbellSelectionScreen extends StatefulWidget {
   const DumbbellSelectionScreen({super.key});
@@ -16,7 +17,7 @@ class _DumbbellSelectionScreenState extends State<DumbbellSelectionScreen> {
   final List<double> fixedDumbbellOptions = [
     1, 3, 5, 7, 10, 12, 15, 20
   ]; // Fixed dumbbell options
-  List<double> _selectedFixedDumbbells = [];
+  final List<double> _selectedFixedDumbbells = [];
 
 
   final List<double> platedDumbbellOptions = [
@@ -171,8 +172,9 @@ class _DumbbellSelectionScreenState extends State<DumbbellSelectionScreen> {
                 borderRadius: BorderRadius.circular(100),
               ),
               onPressed: () {
-                // Handle next screen navigation
-              },
+                  // Handle moving to the next question (Q12)
+                   Navigator.push(context, MaterialPageRoute(builder: (context) => Q12Screen()));
+                },
               child: const Icon(Icons.arrow_forward, color: Colors.white),
             ),
           ),

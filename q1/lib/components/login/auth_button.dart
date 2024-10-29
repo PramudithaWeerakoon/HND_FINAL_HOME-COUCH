@@ -4,7 +4,7 @@ class AuthButton extends StatelessWidget {
   final String imagePath;
 
   // Constructor to accept the image path
-  const AuthButton({Key? key, required this.imagePath}) : super(key: key);
+  const AuthButton({super.key, required this.imagePath});
 
   @override
   Widget build(BuildContext context) {
@@ -19,7 +19,7 @@ class AuthButton extends StatelessWidget {
             color: Colors.grey.withOpacity(0.5), // Shadow color
             spreadRadius: 1,
             blurRadius: 8,
-            offset: Offset(0, 3), // Offset to control the shadow position
+            offset: const Offset(0, 3), // Offset to control the shadow position
           ),
         ],
       ),
