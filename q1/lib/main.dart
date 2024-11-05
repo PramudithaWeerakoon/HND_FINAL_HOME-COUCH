@@ -1,8 +1,8 @@
 import 'package:flutter/material.dart';
-import 'package:q1/screens/q1.dart';
-import 'package:q1/screens/q2.dart';
-import 'screens/login_page.dart';
-import 'screens/register_page.dart';
+import 'package:q1/pages/q1.dart';
+import 'package:q1/pages/q2.dart';
+import 'pages/login_page.dart';
+import 'pages/register_page.dart';
 
 void main() {
   runApp(const MyApp());
