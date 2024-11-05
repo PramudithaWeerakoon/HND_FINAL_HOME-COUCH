@@ -57,71 +57,91 @@ class _DumbbellSelectionScreenState extends State<DumbbellSelectionScreen> {
               const SizedBox(height: 30),
 
               // Toggle between Fixed and Plated dumbbells
-              Row(
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: [
-                  GestureDetector(
-                    onTap: () {
-                      setState(() {
-                        selectedDumbbellType = 'Fixed';
-                      });
-                    },
-                    child: Container(
-                      padding: const EdgeInsets.symmetric(
-                        horizontal: 20,
-                        vertical: 12,
-                      ),
-                      decoration: BoxDecoration(
-                        color: selectedDumbbellType == 'Fixed'
-                            ? const Color(0xFFB30000)
-                            : Colors.grey[200],
-                        borderRadius: const BorderRadius.only(
-                          topLeft: Radius.circular(20),
-                          bottomLeft: Radius.circular(20),
-                        ),
-                      ),
-                      child: const Text(
-                        'Fixed',
-                        style: TextStyle(
-                          fontSize: 20,
-                          color: Color.fromARGB(255, 0, 0, 0),
-                          fontWeight: FontWeight.bold,
-                        ),
-                      ),
-                    ),
-                  ),
-                  GestureDetector(
-                    onTap: () {
-                      setState(() {
-                        selectedDumbbellType = 'Plated';
-                      });
-                    },
-                    child: Container(
-                      padding: const EdgeInsets.symmetric(
-                        horizontal: 20,
-                        vertical: 12,
-                      ),
-                      decoration: BoxDecoration(
-                        color: selectedDumbbellType == 'Plated'
-                            ? const Color(0xFFB30000)
-                            : const Color.fromARGB(255, 255, 255, 255),
-                        borderRadius: const BorderRadius.only(
-                          topRight: Radius.circular(20),
-                          bottomRight: Radius.circular(20),
-                        ),
-                      ),
-                      child: const Text(
-                        'Plated',
-                        style: TextStyle(
-                          fontSize: 20,
-                          color: Color.fromARGB(255, 0, 0, 0),
-                          fontWeight: FontWeight.bold,
+              Container(
+            margin: const EdgeInsets.symmetric(horizontal: 10), // Adds horizontal margin
+            child: Column(
+              children: [
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    Expanded(
+                      child: GestureDetector(
+                        onTap: () {
+                          setState(() {
+                            selectedDumbbellType = 'Fixed';
+                          });
+                        },
+                        child: Container(
+                          padding: const EdgeInsets.symmetric(vertical: 6),
+                          decoration: BoxDecoration(
+                            color: selectedDumbbellType == 'Fixed'
+                                ? const Color(0xFFB30000) // Red for selected
+                                : Colors.grey[200], // Light grey for unselected
+                            borderRadius: const BorderRadius.only(
+                              topLeft: Radius.circular(50),
+                              topRight: Radius.zero, // No radius on the right for Fixed
+                            ),
+                          ),
+                          child: Center(
+                            child: Text(
+                              'Fixed',
+                              style: TextStyle(
+                                fontSize: 20,
+                                color: selectedDumbbellType == 'Fixed'
+                                    ? Colors.white // White text on red background
+                                    : Colors.black, // Black text on light grey
+                                fontWeight: FontWeight.bold,
+                              ),
+                            ),
+                          ),
                         ),
                       ),
                     ),
-                  ),
-                ],
-              ),
+                    Expanded(
+                      child: GestureDetector(
+                        onTap: () {
+                          setState(() {
+                            selectedDumbbellType = 'Plated';
+                          });
+                        },
+                        child: Container(
+                          padding: const EdgeInsets.symmetric(vertical: 6),
+                          decoration: BoxDecoration(
+                            color: selectedDumbbellType == 'Plated'
+                                ? const Color(0xFFB30000) // Red for selected
+                                : Colors.grey[200], // Light grey for unselected
+                            borderRadius: const BorderRadius.only(
+                              topRight: Radius.circular(50),
+                              topLeft: Radius.zero, // No radius on the left for Plated
+                            ),
+                          ),
+                          child: Center(
+                            child: Text(
+                              'Plated',
+                              style: TextStyle(
+                                fontSize: 20,
+                                color: selectedDumbbellType == 'Plated'
+                                    ? Colors.white // White text on red background
+                                    : Colors.black, // Black text on light grey
+                                fontWeight: FontWeight.bold,
+                              ),
+                            ),
+                          ),
+                        ),
+                      ),
+                    ),
+                  ],
+                ),
+                // Underline Divider
+                Container(
+                  height: 2,
+                  color: Colors.black,
+                ),
+              ],
+            ),
+          ),
+
+
               const SizedBox(height: 20),
 
               // Render based on selected dumbbell type
@@ -185,29 +205,25 @@ class _DumbbellSelectionScreenState extends State<DumbbellSelectionScreen> {
 
   // Widget for Fixed Dumbbell Selection
   // Widget for Fixed Dumbbell Selection (now allows multiple selections)
+// Widget for Fixed Dumbbell Selection (single selection)
 Widget _buildFixedDumbbellOptions() {
   return Expanded(
     child: GridView.builder(
       itemCount: fixedDumbbellOptions.length,
       gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
-        crossAxisCount: 2, // Display dumbbells in two columns
+        crossAxisCount: 2,
         crossAxisSpacing: 10,
         mainAxisSpacing: 10,
-        childAspectRatio: 5, // Adjust the height to make them look like buttons
+        childAspectRatio: 5,
       ),
       itemBuilder: (context, index) {
         final dumbbell = fixedDumbbellOptions[index];
-        final bool isSelected = _selectedFixedDumbbells.contains(dumbbell); // Change this to check if the dumbbell is selected
+        final bool isSelected = _selectedFixedDumbbell == dumbbell; // Single selection
 
         return GestureDetector(
           onTap: () {
             setState(() {
-              // Toggle selection for multiple dumbbells
-              if (isSelected) {
-                _selectedFixedDumbbells.remove(dumbbell);
-              } else {
-                _selectedFixedDumbbells.add(dumbbell);
-              }
+              _selectedFixedDumbbell = dumbbell; // Update the selected weight
             });
           },
           child: Container(
@@ -217,11 +233,11 @@ Widget _buildFixedDumbbellOptions() {
               borderRadius: BorderRadius.circular(50),
             ),
             child: Text(
-              '$dumbbell kg',
+              '${dumbbell.toInt()} kg', // Display as integer (e.g., "5 kg")
               textAlign: TextAlign.center,
               style: TextStyle(
                 fontSize: 17,
-                color: isSelected ? const Color.fromARGB(255, 0, 0, 0) : Colors.black,
+                color: isSelected ? Colors.black : Colors.black,
                 fontWeight: FontWeight.bold,
               ),
             ),
@@ -232,8 +248,11 @@ Widget _buildFixedDumbbellOptions() {
   );
 }
 
-
- Widget _buildPlatedDumbbellOptions() {
+// Widget for Plated Dumbbell Selection
+// Widget for Plated Dumbbell Selection
+// Widget for Plated Dumbbell Selection
+// Widget for Plated Dumbbell Selection
+Widget _buildPlatedDumbbellOptions() {
   return Expanded(
     child: ListView.builder(
       itemCount: platedDumbbellOptions.length,
@@ -244,49 +263,50 @@ Widget _buildFixedDumbbellOptions() {
         return Padding(
           padding: const EdgeInsets.symmetric(vertical: 8.0),
           child: Row(
-            mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
-              // Plate Weight Text
-              Text(
-                '$plateWeight Kg Plates',
-                style: const TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
+              // Plate Weight Text with a fixed width
+              SizedBox(
+                width: 130, // Adjusted width to fit all options
+                child: Text(
+                  '${plateWeight.toInt()} Kg Plates',
+                  style: const TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
+                ),
               ),
               
-              // Multiplier 'x'
-              const Text(
-                'x',
-                style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
+              // Space between weight text and 'x'
+              const SizedBox(width: 30),  // Adjust space as needed
+              
+              // Multiplier 'x' with fixed width
+              const SizedBox(
+                width: 80, // Consistent width for alignment
+                child: Text(
+                  'x',
+                  style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
+                  textAlign: TextAlign.center,
+                ),
               ),
 
-              // Quantity Input Box
-              Container(
-                width: 120,
-                height: 30,
-                decoration: BoxDecoration(
-                  color: const Color.fromARGB(255, 196, 194, 194),
-                  borderRadius: BorderRadius.circular(50),
-                ),
-                child: TextField(
-                  keyboardType: TextInputType.number,
-                  textAlign: TextAlign.center,
-                  decoration: InputDecoration(
-                    border: InputBorder.none,
-                    hintText: plateCount.toString(),
+              // Space between 'x' and quantity box
+              const SizedBox(width: 30), // Adjust space as needed
+
+              // Move the quantity box to the end using Expanded widget
+              Expanded(
+                child: Align(
+                  alignment: Alignment.centerRight,
+                  child: Container(
+                    width: 160,
+                    height: 30,
+                    decoration: BoxDecoration(
+                      color: const Color.fromARGB(255, 230, 230, 230),
+                      borderRadius: BorderRadius.circular(10),
+                    ),
+                    child: Center(
+                      child: Text(
+                        plateCount.toString(),
+                        style: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+                      ),
+                    ),
                   ),
-                  onChanged: (value) {
-                    // Validate input and update count
-                    int? newCount = int.tryParse(value);
-                    if (newCount != null && newCount >= 0) {
-                      setState(() {
-                        _platedDumbbellCount[plateWeight] = newCount;
-                      });
-                    } else {
-                      // Reset to 0 if the input is invalid
-                      setState(() {
-                        _platedDumbbellCount[plateWeight] = 0;
-                      });
-                    }
-                  },
                 ),
               ),
             ],
@@ -296,5 +316,8 @@ Widget _buildFixedDumbbellOptions() {
     ),
   );
 }
+
+
+
 
 }

@@ -28,7 +28,7 @@ class _FitnessBackgroundSelectionScreen extends State<FitnessBackgroundSelection
             mainAxisAlignment: MainAxisAlignment.center,
             crossAxisAlignment: CrossAxisAlignment.center, // Center horizontally
             children: [
-             const SizedBox(height: 50),
+              const SizedBox(height: 50),
               const Text(
                 "Let's get to know \n you!",
                 textAlign: TextAlign.center,
@@ -54,10 +54,11 @@ class _FitnessBackgroundSelectionScreen extends State<FitnessBackgroundSelection
               Expanded(
                 child: Row(
                   mainAxisAlignment: MainAxisAlignment.spaceAround,
+                  crossAxisAlignment: CrossAxisAlignment.start, // Align at top
                   children: [
-                    _buildFitnessLevelOption('Newbie', newbieImagePath, 0), // Use Newbie image
-                    _buildFitnessLevelOption('Competent', competentImagePath, 1), // Use Competent image
-                    _buildFitnessLevelOption('Expert', expertImagePath, 2), // Use Expert image
+                    _buildFitnessLevelOption('Newbie', newbieImagePath, 0),
+                    _buildFitnessLevelOption('Competent', competentImagePath, 1),
+                    _buildFitnessLevelOption('Expert', expertImagePath, 2),
                   ],
                 ),
               ),
@@ -66,7 +67,7 @@ class _FitnessBackgroundSelectionScreen extends State<FitnessBackgroundSelection
                 "6/12",
                 style: TextStyle(
                   fontSize: 28,
-                  fontWeight: FontWeight.bold, // Make "5/12" bold
+                  fontWeight: FontWeight.bold,
                   color: Colors.black,
                 ),
               ),
@@ -83,7 +84,7 @@ class _FitnessBackgroundSelectionScreen extends State<FitnessBackgroundSelection
             bottom: 32, // Adjust bottom position as needed
             child: FloatingActionButton(
               heroTag: 'back_to_q5', // Unique tag for the left FAB
-               backgroundColor: const Color(0xFF21007E),
+              backgroundColor: const Color(0xFF21007E),
               shape: RoundedRectangleBorder(
                 borderRadius: BorderRadius.circular(100),
               ),
@@ -94,14 +95,13 @@ class _FitnessBackgroundSelectionScreen extends State<FitnessBackgroundSelection
               child: const Icon(Icons.arrow_back, color: Colors.white),
             ),
           ),
-          // Conditionally show the "Next to Q7" button
           if (_selectedFitnessLevel != null)
             Positioned(
               right: 16, // Position the next button on the right
               bottom: 32, // Adjust bottom position as needed
               child: FloatingActionButton(
                 heroTag: 'next_to_q7', // Unique tag for the right FAB
-                 backgroundColor: const Color(0xFF21007E),
+                backgroundColor: const Color(0xFF21007E),
                 shape: RoundedRectangleBorder(
                   borderRadius: BorderRadius.circular(100),
                 ),
@@ -124,6 +124,9 @@ class _FitnessBackgroundSelectionScreen extends State<FitnessBackgroundSelection
 
   // Widget for building each fitness background option with an image and label
   Widget _buildFitnessLevelOption(String label, String imagePath, int index) {
+    // Calculate size based on selection state
+    double boxSize = _selectedFitnessLevel == index ? 140 : (_selectedFitnessLevel == null ? 125 : 90);
+
     return GestureDetector(
       onTap: () {
         setState(() {
@@ -132,11 +135,11 @@ class _FitnessBackgroundSelectionScreen extends State<FitnessBackgroundSelection
         });
       },
       child: Column(
+        mainAxisSize: MainAxisSize.min, // Adjust to min size of contents
         children: [
-          // Image box itself is selectable
           Container(
-            width: 125, // Fixed size for the image box (customizable)
-            height: 125,
+            width: boxSize,
+            height: boxSize,
             decoration: BoxDecoration(
               color: _selectedFitnessLevel == index
                   ? Colors.blueAccent.withOpacity(0.2)
@@ -151,8 +154,8 @@ class _FitnessBackgroundSelectionScreen extends State<FitnessBackgroundSelection
             ),
             child: Image.asset(
               imagePath,
-              width: 125,
-              height: 125,
+              width: boxSize,
+              height: boxSize,
               fit: BoxFit.cover, // Ensures the image fits within the box
             ),
           ),
