@@ -250,8 +250,6 @@ Widget _buildFixedDumbbellOptions() {
 
 // Widget for Plated Dumbbell Selection
 // Widget for Plated Dumbbell Selection
-// Widget for Plated Dumbbell Selection
-// Widget for Plated Dumbbell Selection
 Widget _buildPlatedDumbbellOptions() {
   return Expanded(
     child: ListView.builder(
@@ -261,7 +259,7 @@ Widget _buildPlatedDumbbellOptions() {
         final plateCount = _platedDumbbellCount[plateWeight] ?? 0;
 
         return Padding(
-          padding: const EdgeInsets.symmetric(vertical: 8.0),
+          padding: const EdgeInsets.symmetric(vertical: 5.0),
           child: Row(
             children: [
               // Plate Weight Text with a fixed width
@@ -289,7 +287,7 @@ Widget _buildPlatedDumbbellOptions() {
               // Space between 'x' and quantity box
               const SizedBox(width: 30), // Adjust space as needed
 
-              // Move the quantity box to the end using Expanded widget
+              // Quantity box with TextField for input
               Expanded(
                 child: Align(
                   alignment: Alignment.centerRight,
@@ -300,10 +298,22 @@ Widget _buildPlatedDumbbellOptions() {
                       color: const Color.fromARGB(255, 230, 230, 230),
                       borderRadius: BorderRadius.circular(10),
                     ),
-                    child: Center(
-                      child: Text(
-                        plateCount.toString(),
-                        style: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+                    child: TextField(
+                      onChanged: (value) {
+                        setState(() {
+                          _platedDumbbellCount[plateWeight] = int.tryParse(value) ?? 0;
+                        });
+                      },
+                      keyboardType: TextInputType.number,
+                      textAlign: TextAlign.center,
+                      style: const TextStyle(
+                        fontSize: 18,
+                        fontWeight: FontWeight.bold,
+                        height: 0.9, // Adjust height to move text slightly upward
+                      ),
+                      decoration: const InputDecoration(
+                        border: InputBorder.none,
+                        contentPadding: EdgeInsets.only(bottom: 17), // Adjust padding to fit text better
                       ),
                     ),
                   ),
@@ -316,6 +326,8 @@ Widget _buildPlatedDumbbellOptions() {
     ),
   );
 }
+
+
 
 
 
