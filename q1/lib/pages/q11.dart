@@ -193,7 +193,7 @@ class _DumbbellSelectionScreenState extends State<DumbbellSelectionScreen> {
               ),
               onPressed: () {
                   // Handle moving to the next question (Q12)
-                   Navigator.push(context, MaterialPageRoute(builder: (context) => Q12Screen()));
+                   Navigator.push(context, MaterialPageRoute(builder: (context) => const Q12Screen()));
                 },
               child: const Icon(Icons.arrow_forward, color: Colors.white),
             ),
