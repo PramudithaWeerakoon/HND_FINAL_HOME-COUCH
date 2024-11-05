@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'q5.dart';
 
 class Q4Page extends StatefulWidget {
@@ -72,7 +73,7 @@ class _Q4PageState extends State<Q4Page> {
                       child: TextField(
                         controller: _heightController,
                         textAlign: TextAlign.center,
-                        keyboardType: TextInputType.number,
+                        keyboardType: TextInputType.numberWithOptions(decimal: true), // Allow decimals
                         style: const TextStyle(
                           fontSize: 70,
                           fontWeight: FontWeight.bold,
@@ -80,6 +81,9 @@ class _Q4PageState extends State<Q4Page> {
                         decoration: const InputDecoration(
                           border: InputBorder.none, // No visible border
                         ),
+                        inputFormatters: <TextInputFormatter>[
+                          FilteringTextInputFormatter.allow(RegExp(r'^\d+\.?\d*')), // Only allow numbers and decimal
+                        ],
                       ),
                     ),
                     // Smaller black line under the input
@@ -164,7 +168,7 @@ class _Q4PageState extends State<Q4Page> {
             bottom: 32, // Bottom position for alignment
             child: FloatingActionButton(
               heroTag: 'back_to_q3', // Unique tag for FAB
-               backgroundColor: const Color(0xFF21007E),
+              backgroundColor: const Color(0xFF21007E),
               shape: RoundedRectangleBorder(
                 borderRadius: BorderRadius.circular(100),
               ),
@@ -181,7 +185,7 @@ class _Q4PageState extends State<Q4Page> {
             bottom: 32, // Bottom position for alignment
             child: FloatingActionButton(
               heroTag: 'next_to_q5', // Unique tag for FAB
-               backgroundColor: const Color(0xFF21007E),
+              backgroundColor: const Color(0xFF21007E),
               shape: RoundedRectangleBorder(
                 borderRadius: BorderRadius.circular(100),
               ),

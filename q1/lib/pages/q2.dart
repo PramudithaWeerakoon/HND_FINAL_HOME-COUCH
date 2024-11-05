@@ -71,14 +71,14 @@ class _Q2PageState extends State<Q2Page> {
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [
                   GenderOptionButton(
-                    icon: Icons.male,
+                    imagePath: 'lib/assets/male.png',
                     label: 'Male',
                     isSelected: selectedGender == Gender.male,
                     onPressed: () => toggleGender(Gender.male), // Toggle male selection
                   ),
                   const SizedBox(height: 20), // Space between the buttons
                   GenderOptionButton(
-                    icon: Icons.female,
+                    imagePath: 'lib/assets/female.png',
                     label: 'Female',
                     isSelected: selectedGender == Gender.female,
                     onPressed: () => toggleGender(Gender.female), // Toggle female selection
@@ -145,15 +145,15 @@ class _Q2PageState extends State<Q2Page> {
     );
   }
 }
-
 class GenderOptionButton extends StatelessWidget {
-  final IconData icon;
+  final String imagePath; // New parameter for image path
   final String label;
-  final bool isSelected; // New parameter to track selection
+  final bool isSelected; // Parameter to track selection
   final VoidCallback onPressed;
 
-  const GenderOptionButton({super.key, 
-    required this.icon,
+  const GenderOptionButton({
+    super.key,
+    required this.imagePath,
     required this.label,
     required this.isSelected,
     required this.onPressed,
@@ -161,28 +161,64 @@ class GenderOptionButton extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return ElevatedButton(
-      onPressed: onPressed,
-      style: ElevatedButton.styleFrom(
-        backgroundColor: isSelected ? Colors.blueAccent : Colors.blue, // Highlight if selected
-        minimumSize: const Size(180, 180), // Set button size to 180x180
-        shape: RoundedRectangleBorder(
-          borderRadius: BorderRadius.circular(10),
-          side: isSelected // Add border if selected
-              ? const BorderSide(color: Color.fromARGB(255, 0, 0, 0), width: 2)
-              : BorderSide.none,
+    return GestureDetector(
+      onTap: onPressed,
+      child: Container(
+        decoration: BoxDecoration(
+          gradient: label == 'Male'
+              ? LinearGradient(
+                  colors: [Color(0xFFFFFFFF), Color(0xFFE7EAFF)],
+                  begin: Alignment.topCenter,
+                  end: Alignment.bottomCenter,
+                )
+              : LinearGradient(
+                  colors: [Color(0xFFFFFFFF), Color(0xFFFFE7FE)],
+                  begin: Alignment.topCenter,
+                  end: Alignment.bottomCenter,
+                ),
+          borderRadius: BorderRadius.circular(30), // Set curve to 30
+          border: isSelected
+              ? Border.all(color: label == 'Male' ? Color(0xFF21007E) : Color(0xFFD00A6A), width: 5)
+              : Border.all(color: Colors.transparent),
+          boxShadow: isSelected
+              ? [
+                  BoxShadow(
+                    color: label == 'Male' ? Color(0xFF68A4FF).withOpacity(0.4) : Color(0xFFF263E9).withOpacity(0.4),
+                    offset: Offset(0, 0), // Position x=0, y=0
+                    blurRadius: 44, // Blur effect
+                    spreadRadius: 4, // Spread effect
+                  ),
+                ]
+              : [
+                  BoxShadow(
+                    color: Color(0xFF000000).withOpacity(0.25), // Black with 25% opacity
+                    offset: Offset(0, 0), // Position x=0, y=0
+                    blurRadius: 4, // Blur effect for unselected state
+                    spreadRadius: 0, // No spread effect for unselected state
+                  ),
+                ],
         ),
-      ),
-      child: Column(
-        mainAxisAlignment: MainAxisAlignment.center,
-        children: [
-          Icon(icon, size: 40),
-          const SizedBox(height: 10),
-          Text(
-            label,
-            style: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+        child: SizedBox(
+          width: 160, // Box width
+          height: 160, // Box height
+          child: Center(
+            child: Column(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                Image.asset(
+                  imagePath,
+                  width: 85, // Adjust image size as needed
+                  height: 85,
+                ),
+                const SizedBox(height: 10),
+                Text(
+                  label,
+                  style: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+                ),
+              ],
+            ),
           ),
-        ],
+        ),
       ),
     );
   }

@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart'; // Import the services package for input formatters
 import 'q8.dart'; // Import Q8Screen
 
 class Q7Screen extends StatefulWidget {
@@ -39,7 +40,7 @@ class _Q7ScreenState extends State<Q7Screen> {
             mainAxisAlignment: MainAxisAlignment.center,
             crossAxisAlignment: CrossAxisAlignment.center,
             children: [
-             const SizedBox(height: 50),
+              const SizedBox(height: 50),
               const Text(
                 "Let's get to know \n you!",
                 textAlign: TextAlign.center,
@@ -65,7 +66,10 @@ class _Q7ScreenState extends State<Q7Screen> {
               TextField(
                 controller: _waistController,
                 textAlign: TextAlign.center,
-                keyboardType: TextInputType.number,
+                keyboardType: TextInputType.numberWithOptions(decimal: true),
+                inputFormatters: [
+                  FilteringTextInputFormatter.allow(RegExp(r'^\d*\.?\d*')), // Allow numbers and one decimal
+                ],
                 style: const TextStyle(
                   fontSize: 70,
                   fontWeight: FontWeight.bold,
@@ -117,7 +121,7 @@ class _Q7ScreenState extends State<Q7Screen> {
             bottom: 32, // Adjust bottom position as needed
             child: FloatingActionButton(
               heroTag: 'back_to_q6', // Unique tag for the left FAB
-               backgroundColor: const Color(0xFF21007E),
+              backgroundColor: const Color(0xFF21007E),
               shape: RoundedRectangleBorder(
                 borderRadius: BorderRadius.circular(100),
               ),
@@ -133,7 +137,7 @@ class _Q7ScreenState extends State<Q7Screen> {
             bottom: 32, // Adjust bottom position as needed
             child: FloatingActionButton(
               heroTag: 'next_to_q8', // Unique tag for the right FAB
-               backgroundColor: const Color(0xFF21007E),
+              backgroundColor: const Color(0xFF21007E),
               shape: RoundedRectangleBorder(
                 borderRadius: BorderRadius.circular(100),
               ),
@@ -170,7 +174,7 @@ class _Q7ScreenState extends State<Q7Screen> {
       child: Container(
         padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 8),
         decoration: BoxDecoration(
-            color: isActive ? const Color(0xFFEAB804) : Colors.grey[200],
+          color: isActive ? const Color(0xFFEAB804) : Colors.grey[200],
           borderRadius: BorderRadius.circular(10),
         ),
         child: Text(

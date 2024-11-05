@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'q4.dart';
 
 class WeightInputScreen extends StatefulWidget {
@@ -72,11 +73,14 @@ class _WeightInputScreenState extends State<WeightInputScreen> {
                       child: TextField(
                         controller: _weightController,
                         textAlign: TextAlign.center,
-                        keyboardType: TextInputType.number,
+                        keyboardType: TextInputType.numberWithOptions(decimal: true),
                         style: const TextStyle(
                           fontSize: 70,
                           fontWeight: FontWeight.bold,
                         ),
+                        inputFormatters: [
+                          FilteringTextInputFormatter.allow(RegExp(r'^\d*\.?\d*')),
+                        ],
                         decoration: const InputDecoration(
                           border: InputBorder.none, // No visible border
                         ),
@@ -164,7 +168,7 @@ class _WeightInputScreenState extends State<WeightInputScreen> {
             bottom: 32, // Bottom position for alignment
             child: FloatingActionButton(
               heroTag: 'back_to_q2', // Unique tag for FAB
-               backgroundColor: const Color(0xFF21007E),
+              backgroundColor: const Color(0xFF21007E),
               shape: RoundedRectangleBorder(
                 borderRadius: BorderRadius.circular(100),
               ),
@@ -181,7 +185,7 @@ class _WeightInputScreenState extends State<WeightInputScreen> {
             bottom: 32, // Bottom position for alignment
             child: FloatingActionButton(
               heroTag: 'next_to_q4', // Unique tag for FAB
-               backgroundColor: const Color(0xFF21007E),
+              backgroundColor: const Color(0xFF21007E),
               shape: RoundedRectangleBorder(
                 borderRadius: BorderRadius.circular(100),
               ),
@@ -189,7 +193,7 @@ class _WeightInputScreenState extends State<WeightInputScreen> {
                 // Navigate to q4.dart when the button is pressed
                 Navigator.push(
                   context,
-                  MaterialPageRoute(builder: (context) => const Q4Page()),
+                  MaterialPageRoute(builder: (consds3text) => const Q4Page()),
                 );
               },
               child: const Icon(Icons.arrow_forward, color: Colors.white),

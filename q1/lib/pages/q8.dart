@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart'; // Import this for FilteringTextInputFormatter
 import 'q9.dart'; // Import the Q9 screen
 
 class Q8Screen extends StatefulWidget {
@@ -39,7 +40,7 @@ class _Q8ScreenState extends State<Q8Screen> {
             mainAxisAlignment: MainAxisAlignment.center,
             crossAxisAlignment: CrossAxisAlignment.center,
             children: [
-             const SizedBox(height: 50),
+              const SizedBox(height: 50),
               const Text(
                 "Let's get to know \n you!",
                 textAlign: TextAlign.center,
@@ -64,13 +65,16 @@ class _Q8ScreenState extends State<Q8Screen> {
               // Display and allow user to input the neck circumference
               TextField(
                 controller: _neckController, // Use the controller
-                keyboardType: TextInputType.number,
+                keyboardType: TextInputType.numberWithOptions(decimal: true), // Allow decimal input
                 textAlign: TextAlign.center,
                 style: const TextStyle(
                   fontSize: 70,
                   fontWeight: FontWeight.bold,
                   color: Colors.black,
                 ),
+                inputFormatters: [
+                  FilteringTextInputFormatter.allow(RegExp(r'^\d*\.?\d*')), // Allow only numbers and decimal points
+                ],
                 decoration: const InputDecoration(
                   border: InputBorder.none, // No border around input
                 ),
@@ -118,7 +122,7 @@ class _Q8ScreenState extends State<Q8Screen> {
             bottom: 32, // Adjust bottom position as needed
             child: FloatingActionButton(
               heroTag: 'back_to_q7', // Unique tag for the left FAB
-               backgroundColor: const Color(0xFF21007E),
+              backgroundColor: const Color(0xFF21007E),
               shape: RoundedRectangleBorder(
                 borderRadius: BorderRadius.circular(100),
               ),
@@ -134,7 +138,7 @@ class _Q8ScreenState extends State<Q8Screen> {
             bottom: 32, // Adjust bottom position as needed
             child: FloatingActionButton(
               heroTag: 'next_to_q9', // Unique tag for the right FAB
-                backgroundColor: const Color(0xFF21007E),
+              backgroundColor: const Color(0xFF21007E),
               shape: RoundedRectangleBorder(
                 borderRadius: BorderRadius.circular(100),
               ),

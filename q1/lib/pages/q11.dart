@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'q12.dart';
 
 class DumbbellSelectionScreen extends StatefulWidget {
@@ -204,8 +205,6 @@ class _DumbbellSelectionScreenState extends State<DumbbellSelectionScreen> {
   }
 
   // Widget for Fixed Dumbbell Selection
-  // Widget for Fixed Dumbbell Selection (now allows multiple selections)
-// Widget for Fixed Dumbbell Selection (single selection)
 Widget _buildFixedDumbbellOptions() {
   return Expanded(
     child: GridView.builder(
@@ -218,16 +217,20 @@ Widget _buildFixedDumbbellOptions() {
       ),
       itemBuilder: (context, index) {
         final dumbbell = fixedDumbbellOptions[index];
-        final bool isSelected = _selectedFixedDumbbell == dumbbell; // Single selection
+        final bool isSelected = _selectedFixedDumbbells.contains(dumbbell); // Multiple selection check
 
         return GestureDetector(
           onTap: () {
             setState(() {
-              _selectedFixedDumbbell = dumbbell; // Update the selected weight
+              if (isSelected) {
+                _selectedFixedDumbbells.remove(dumbbell); // Deselect if already selected
+              } else {
+                _selectedFixedDumbbells.add(dumbbell); // Select if not already selected
+              }
             });
           },
           child: Container(
-            padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 4),
+            padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 5),
             decoration: BoxDecoration(
               color: isSelected ? const Color.fromARGB(255, 231, 216, 4) : Colors.grey[200],
               borderRadius: BorderRadius.circular(50),
@@ -262,32 +265,23 @@ Widget _buildPlatedDumbbellOptions() {
           padding: const EdgeInsets.symmetric(vertical: 5.0),
           child: Row(
             children: [
-              // Plate Weight Text with a fixed width
               SizedBox(
-                width: 130, // Adjusted width to fit all options
+                width: 130,
                 child: Text(
                   '${plateWeight.toInt()} Kg Plates',
                   style: const TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
                 ),
               ),
-              
-              // Space between weight text and 'x'
-              const SizedBox(width: 30),  // Adjust space as needed
-              
-              // Multiplier 'x' with fixed width
+              const SizedBox(width: 30),
               const SizedBox(
-                width: 80, // Consistent width for alignment
+                width: 80,
                 child: Text(
                   'x',
                   style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
                   textAlign: TextAlign.center,
                 ),
               ),
-
-              // Space between 'x' and quantity box
-              const SizedBox(width: 30), // Adjust space as needed
-
-              // Quantity box with TextField for input
+              const SizedBox(width: 30),
               Expanded(
                 child: Align(
                   alignment: Alignment.centerRight,
@@ -309,12 +303,15 @@ Widget _buildPlatedDumbbellOptions() {
                       style: const TextStyle(
                         fontSize: 18,
                         fontWeight: FontWeight.bold,
-                        height: 0.9, // Adjust height to move text slightly upward
+                        height: 0.9,
                       ),
                       decoration: const InputDecoration(
                         border: InputBorder.none,
-                        contentPadding: EdgeInsets.only(bottom: 17), // Adjust padding to fit text better
+                        contentPadding: EdgeInsets.only(bottom: 17),
                       ),
+                      inputFormatters: [
+                        FilteringTextInputFormatter.digitsOnly, // Allow digits only
+                      ],
                     ),
                   ),
                 ),
