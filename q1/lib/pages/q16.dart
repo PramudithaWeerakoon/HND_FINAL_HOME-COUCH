@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'q17.dart';
 
 class Q16Screen extends StatefulWidget {
   const Q16Screen({super.key});
@@ -86,8 +87,12 @@ class _Q16ScreenState extends State<Q16Screen> {
                   borderRadius: BorderRadius.circular(100),
                 ),
                 onPressed: () {
-                  // Navigate to Q17 when pressed
-                  // Navigator.push(context, MaterialPageRoute(builder: (context) => Q17Screen()));
+                  Navigator.push(
+                    context,
+                    MaterialPageRoute(
+                      builder: (context) => const Q17Screen(), // Navigate to Q17
+                    ),
+                  );
                 },
                 child: const Icon(Icons.arrow_forward, color: Colors.white),
               ),
