@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'fitnessgoal.dart'; // Import fitnessgoal.dart
 
 class Q13Screen extends StatelessWidget {
   const Q13Screen({super.key});
@@ -115,7 +116,13 @@ class Q13Screen extends StatelessWidget {
                     ),
                   ),
                   onPressed: () {
-                    // Handle fine-tune goals action
+                    // Navigate to fitnessgoal.dart page
+                    Navigator.push(
+                      context,
+                      MaterialPageRoute(
+                        builder: (context) => const FitnessGoalSelectionScreen(),
+                      ),
+                    );
                   },
                   child: const Text(
                     "Let’s Fine-Tune Your Goals",
