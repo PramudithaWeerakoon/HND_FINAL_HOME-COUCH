@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'q18.dart'; // Import Q18Screen
 
 class Q17Screen extends StatefulWidget {
   const Q17Screen({super.key});
@@ -204,7 +205,12 @@ class _Q17ScreenState extends State<Q17Screen> {
                 borderRadius: BorderRadius.circular(100),
               ),
               onPressed: () {
-                // Navigate to q4.dart when the button is pressed
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(
+                    builder: (context) => SelectDate(), // Navigate to Q18
+                  ),
+                );
               },
               child: const Icon(Icons.arrow_forward, color: Colors.white),
             ),
