@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:q1/pages/q1.dart';
 import 'package:q1/pages/q2.dart';
+import 'package:q1/pages/Home.dart';
 import 'pages/login_page.dart';
 import 'pages/register_page.dart';
 
@@ -15,12 +16,13 @@ class MyApp extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
-      initialRoute: '/login',
+      initialRoute: '/home',
       routes: {
         '/login': (context) => const LoginPage(),
         '/register': (context) => const RegisterPage(),
         '/question1': (context) => const Q1Page(),
         '/question2': (context) => const Q2Page(),
+        '/home': (context) => const HomePage(),
 
       },
     );
