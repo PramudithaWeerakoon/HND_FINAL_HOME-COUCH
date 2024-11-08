@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:q1/components/menuBar/menuBar.dart'; // Adjust the path based on your project structure
 
 class HomePage extends StatefulWidget {
-  const HomePage({Key? key}) : super(key: key);
+  const HomePage({super.key});
 
   @override
   _HomePageState createState() => _HomePageState();
