@@ -30,6 +30,7 @@ environment:
 dependencies:
   flutter:
     sdk: flutter
+<<<<<<< HEAD
   intl: ^0.19.0
   camera: ^0.11.0+2
   google_ml_kit: ^0.19.0
@@ -38,6 +39,9 @@ dependencies:
   tflite_flutter: ^0.9.5
   tflite_flutter_helper: ^0.2.0
   fl_chart: ^0.69.0
+=======
+  intl: ^0.17.0
+>>>>>>> parent of 4400faf (creation of live tracking)
 
   # The following adds the Cupertino Icons font to your application.
   # Use with the CupertinoIcons class for iOS style icons.
