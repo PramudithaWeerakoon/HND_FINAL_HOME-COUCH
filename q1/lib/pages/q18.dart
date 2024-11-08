@@ -2,6 +2,7 @@ import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 import 'package:q1/widgets/gradient_background.dart';
+import 'q19.dart';
 
 class SelectDate extends StatefulWidget {
   const SelectDate({super.key});
@@ -121,7 +122,7 @@ class _FitnessGoalPageState extends State<SelectDate> {
                 onPressed: () {
                   Navigator.push(
                     context,
-                    MaterialPageRoute(builder: (context) => const NextPage()),
+                    MaterialPageRoute(builder: (context) => CustomizedPlanScreen()),
                   );
                 },
                 child: const Icon(Icons.arrow_forward, color: Colors.white),
