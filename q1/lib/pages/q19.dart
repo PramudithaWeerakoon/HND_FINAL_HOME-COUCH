@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:fl_chart/fl_chart.dart';
+import 'q20.dart';
 
 class CustomizedPlanScreen extends StatelessWidget {
   @override
@@ -167,6 +168,11 @@ class CustomizedPlanScreen extends StatelessWidget {
                 ),
                 onPressed: () {
                   // Handle button press
+                   Navigator.push(
+                    context,
+                    MaterialPageRoute(
+                        builder: (context) => PlanSummaryScreen()),
+                  );
                 },
                 child: Text(
                   "Generate Your Customized Plan",
