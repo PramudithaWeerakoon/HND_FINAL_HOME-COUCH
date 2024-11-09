@@ -5,6 +5,7 @@ import 'package:q1/pages/Home.dart';
 import 'pages/login_page.dart';
 import 'pages/register_page.dart';
 import 'pages/instructionPage.dart';
+import 'pages/settings.dart';
 
 void main() {
   runApp(const MyApp());
@@ -17,7 +18,7 @@ class MyApp extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
-      initialRoute: '/instruction',
+      initialRoute: '/settings',
       routes: {
         '/login': (context) => const LoginPage(),
         '/register': (context) => const RegisterPage(),
@@ -25,6 +26,7 @@ class MyApp extends StatelessWidget {
         '/question2': (context) => const Q2Page(),
         '/home': (context) => const HomePage(),
         '/instruction': (context) => const InstructionPage(),
+        '/settings': (context) => const SettingsPage(),
 
       },
     );
