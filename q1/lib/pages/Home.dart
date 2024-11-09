@@ -50,11 +50,11 @@ class _HomePageState extends State<HomePage> {
                     Text(
                       'Good Morning 👋',
                       style:
-                          TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
+                          TextStyle(fontSize: 16)
                     ),
                     Text(
                       'Pramudtha', // Replace with dynamic user name if needed
-                      style: TextStyle(fontSize: 16),
+                      style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
                     ),
                   ],
                 ),
