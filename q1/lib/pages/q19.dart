@@ -3,6 +3,8 @@ import 'package:fl_chart/fl_chart.dart';
 import 'q20.dart';
 
 class CustomizedPlanScreen extends StatelessWidget {
+  const CustomizedPlanScreen({super.key});
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -48,7 +50,7 @@ class CustomizedPlanScreen extends StatelessWidget {
                 child: Column(
                   children: [
                     // Stretched Line Chart
-                    Container(
+                    SizedBox(
                       height: 250, // Increased height to stretch the chart
                       child: LineChart(
                         LineChartData(

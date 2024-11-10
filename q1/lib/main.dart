@@ -8,7 +8,6 @@ import 'pages/instructionPage.dart';
 import 'pages/settings.dart';
 import 'pages/q19.dart';
 import 'pages/mealoptions.dart';
-import 'pages/week-stats.dart';
 
 
 void main() {

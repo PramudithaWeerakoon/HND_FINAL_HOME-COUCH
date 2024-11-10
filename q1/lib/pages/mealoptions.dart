@@ -6,6 +6,8 @@ class MealPlanScreen extends StatelessWidget {
   final String shakeImage = 'lib/assets/Mixed-Berry-Banana-Smoothie.jpg';
   final String yogurtImage = 'lib/assets/blueberry-almond-yogurt.jpeg';
 
+  const MealPlanScreen({super.key});
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(

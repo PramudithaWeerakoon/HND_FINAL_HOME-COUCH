@@ -12,7 +12,9 @@ class MuscleWeightProgressScreen extends StatelessWidget {
 
   // Define a color map to keep consistent color assignments
   final Map<String, Color> colorMap = {};
-  final Set<Color> usedColors = {}; // Set to track used colors
+  final Set<Color> usedColors = {};
+
+  MuscleWeightProgressScreen({super.key}); // Set to track used colors
 
   // Generate a random color for each day
   Color getColorForDay(String day) {
