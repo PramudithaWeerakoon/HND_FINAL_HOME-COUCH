@@ -5,6 +5,7 @@ import 'package:q1/pages/Home.dart';
 import 'pages/login_page.dart';
 import 'pages/register_page.dart';
 import 'pages/q19.dart';
+import 'pages/mealoptions.dart';
 
 void main() {
   runApp(const MyApp());
@@ -25,6 +26,7 @@ class MyApp extends StatelessWidget {
         '/question2': (context) => const Q2Page(),
         '/home': (context) => const HomePage(),
         '/q19': (context) => CustomizedPlanScreen(),
+        '/q20': (context) => MealPlanScreen(),
 
       },
     );
