@@ -1,4 +1,6 @@
 import 'package:flutter/material.dart';
+import 'package:q1/widgets/gradient_background.dart'; // Make sure to adjust the path based on your folder structure
+import 'carddetails.dart';
 
 class SubscriptionPage extends StatefulWidget {
   const SubscriptionPage({Key? key}) : super(key: key);
@@ -11,6 +13,7 @@ class _SubscriptionPageState extends State<SubscriptionPage> {
   String selectedPlan = 'AI Coach PRO';
   String price = '\$9.99 / month';
   bool isReoccurring = true;
+  String cardNumber = '**** **** **** 289'; // Initial masked card number
 
   void _removeSubscription() {
     setState(() {
@@ -32,20 +35,23 @@ class _SubscriptionPageState extends State<SubscriptionPage> {
     });
   }
 
+  void _updateCardNumber(String newCardNumber) {
+    setState(() {
+      // Mask all but the last four digits of the card number
+      cardNumber = '**** **** **** ${newCardNumber.substring(newCardNumber.length - 4)}';
+    });
+  }
+
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      backgroundColor: Colors.white,
-      appBar: AppBar(
+    return GradientBackground(
+      child: Scaffold(
         backgroundColor: Colors.transparent,
-        elevation: 0,
-        leading: IconButton(
-          icon: const Icon(Icons.arrow_back, color: Colors.black),
-          onPressed: () {
-            Navigator.pop(context);
-          },
+        appBar: AppBar(
+          backgroundColor: Colors.transparent,
+          elevation: 0,
         ),
-      ),
+      
       body: Padding(
         padding: const EdgeInsets.symmetric(horizontal: 20.0),
         child: Column(
@@ -54,12 +60,12 @@ class _SubscriptionPageState extends State<SubscriptionPage> {
             const SizedBox(height: 16),
             const Center(
               child: Text(
-              'Subscriptions \n& Payments',
-              textAlign: TextAlign.center,
-              style: TextStyle(
-                fontSize: 45,
-                fontWeight: FontWeight.bold,
-              ),
+                'Subscriptions \n& Payments',
+                textAlign: TextAlign.center,
+                style: TextStyle(
+                  fontSize: 45,
+                  fontWeight: FontWeight.bold,
+                ),
               ),
             ),
             const SizedBox(height: 40),
@@ -74,24 +80,24 @@ class _SubscriptionPageState extends State<SubscriptionPage> {
               ),
             ),
             const SizedBox(height: 16),
-            Center(  // Centering the cards
+            Center(
               child: Row(
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [
                   _buildPlanCard(
                     'AI Coach PRO',
                     '\$9.99 / month',
-                    'Ai Driven Tailored Coaching, Real- Time Workout Feedback, Real-Time Coaching, Meal Plans etc.',
+                    'Ai Driven Tailored Coaching, Real-Time Workout Feedback, Real-Time Coaching, Meal Plans etc.',
                     selectedPlan == 'AI Coach PRO',
-                    'lib/assets/premium.png',  // Image for premium plan
+                    'lib/assets/premium.png',
                   ),
                   const SizedBox(width: 16),
                   _buildPlanCard(
                     'Basic',
                     'Free',
-                    'Limited Features. Free Workout Plan , Exercise  Tutorials',
+                    'Limited Features. Free Workout Plan, Exercise Tutorials',
                     selectedPlan == 'Basic',
-                    'lib/assets/basic.png',  // Image for basic plan
+                    'lib/assets/basic.png',
                   ),
                 ],
               ),
@@ -99,6 +105,7 @@ class _SubscriptionPageState extends State<SubscriptionPage> {
           ],
         ),
       ),
+    )
     );
   }
 
@@ -136,17 +143,25 @@ class _SubscriptionPageState extends State<SubscriptionPage> {
                 ],
               ),
               TextButton(
-                onPressed: () {
-                  // Empty onTap for now
+                onPressed: () async {
+                  final updatedCard = await Navigator.push(
+                    context,
+                    MaterialPageRoute(
+                      builder: (context) => CardDetailsPage(),
+                    ),
+                  );
+                  if (updatedCard != null) {
+                    _updateCardNumber(updatedCard);
+                  }
                 },
                 child: const Text('Change'),
               ),
             ],
           ),
           const SizedBox(height: 8),
-          const Text(
-            '**** **** **** 289',
-            style: TextStyle(fontSize: 19, color: Colors.black, fontWeight: FontWeight.w600),
+          Text(
+            cardNumber, // Display the masked card number
+            style: const TextStyle(fontSize: 19, color: Colors.black, fontWeight: FontWeight.w600),
           ),
           const Divider(),
           const SizedBox(height: 8),
@@ -210,72 +225,72 @@ class _SubscriptionPageState extends State<SubscriptionPage> {
   }
 
   Widget _buildPlanCard(String title, String price, String description, bool isSelected, String imagePath) {
-  return GestureDetector(
-    onTap: () => _selectPlan(title),
-    child: Container(
-      width: 198,
-      height: 125, // Adjusted height to accommodate the new layout
-      padding: const EdgeInsets.all(10),
-      decoration: BoxDecoration(
-        color: Colors.white,
-        borderRadius: BorderRadius.circular(15),
-        border: Border.all(
-          color: isSelected ? Colors.black : const Color.fromARGB(255, 194, 193, 193),
-          width: 2,
-        ),
-        boxShadow: [
-          BoxShadow(
-            color: Colors.black.withOpacity(0.25),
-            blurRadius: 4,
-            offset: const Offset(0, 4),
+    return GestureDetector(
+      onTap: () => _selectPlan(title),
+      child: Container(
+        width: 198,
+        height: 125,
+        padding: const EdgeInsets.all(10),
+        decoration: BoxDecoration(
+          color: Colors.white,
+          borderRadius: BorderRadius.circular(15),
+          border: Border.all(
+            color: isSelected ? Colors.black : const Color.fromARGB(255, 194, 193, 193),
+            width: 2,
           ),
-        ],
-      ),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Row(
-            children: [
-              Image.asset(
-                imagePath,
-                width: 50,
-                height: 50,
-              ),
-              const SizedBox(width: 4),
-              Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Text(
-                    title,
-                    style: const TextStyle(
-                      fontSize: 18,
-                      fontWeight: FontWeight.bold,
-                      color: Colors.black,
-                    ),
-                  ),
-                  Text(
-                    price,
-                    style: const TextStyle(
-                      fontSize: 14,
-                      color: Color(0xFF626060),
-                    ),
-                  ),
-                ],
-              ),
-            ],
-          ),
-          const SizedBox(height: 8),
-          Text(
-            description,
-            textAlign: TextAlign.center,
-            style: const TextStyle(
-              fontSize: 10,
-              color: Color.fromARGB(255, 0, 0, 0),
+          boxShadow: [
+            BoxShadow(
+              color: Colors.black.withOpacity(0.25),
+              blurRadius: 4,
+              offset: const Offset(0, 4),
             ),
-          ),
-        ],
+          ],
+        ),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Row(
+              children: [
+                Image.asset(
+                  imagePath,
+                  width: 50,
+                  height: 50,
+                ),
+                const SizedBox(width: 4),
+                Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      title,
+                      style: const TextStyle(
+                        fontSize: 18,
+                        fontWeight: FontWeight.bold,
+                        color: Colors.black,
+                      ),
+                    ),
+                    Text(
+                      price,
+                      style: const TextStyle(
+                        fontSize: 14,
+                        color: Color(0xFF626060),
+                      ),
+                    ),
+                  ],
+                ),
+              ],
+            ),
+            const SizedBox(height: 8),
+            Text(
+              description,
+              textAlign: TextAlign.center,
+              style: const TextStyle(
+                fontSize: 10,
+                color: Color.fromARGB(255, 0, 0, 0),
+              ),
+            ),
+          ],
+        ),
       ),
-    ),
-  );
-}
+    );
+  }
 }
