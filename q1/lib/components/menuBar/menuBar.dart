@@ -7,10 +7,10 @@ class BottomMenuBar extends StatelessWidget {
   final Function(int) onTabSelected;
 
   const BottomMenuBar({
-    Key? key,
+    super.key,
     required this.currentIndex,
     required this.onTabSelected,
-  }) : super(key: key);
+  });
 
   @override
   Widget build(BuildContext context) {

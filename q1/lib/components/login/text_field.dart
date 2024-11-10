@@ -7,12 +7,12 @@ class MyTextField extends StatefulWidget {
   final FormFieldValidator<String>? validator;
 
   const MyTextField({
-    Key? key,
+    super.key,
     required this.controller,
     required this.hintText,
     required this.obscureText,
     this.validator,
-  }) : super(key: key);
+  });
 
   @override
   _MyTextFieldState createState() => _MyTextFieldState();

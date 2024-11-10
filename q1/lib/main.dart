@@ -6,6 +6,10 @@ import 'pages/login_page.dart';
 import 'pages/register_page.dart';
 import 'pages/instructionPage.dart';
 import 'pages/settings.dart';
+import 'pages/q19.dart';
+import 'pages/mealoptions.dart';
+import 'pages/week-stats.dart';
+
 
 void main() {
   runApp(const MyApp());
@@ -27,6 +31,8 @@ class MyApp extends StatelessWidget {
         '/home': (context) => const HomePage(),
         '/instruction': (context) => const InstructionPage(),
         '/settings': (context) => const SettingsPage(),
+        '/q19': (context) => CustomizedPlanScreen(),
+        '/q20': (context) => MealPlanScreen(),
 
       },
     );

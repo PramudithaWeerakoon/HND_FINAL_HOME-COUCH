@@ -10,7 +10,7 @@ class Q15Screen extends StatefulWidget {
 
 class _Q15ScreenState extends State<Q15Screen> {
   // List to hold the selected muscle group indices
-  List<int> _selectedGroups = [];
+  final List<int> _selectedGroups = [];
 
   // Define image paths for each muscle group (update paths as necessary)
   final String chestImagePath = 'lib/assets/Skinny.png';
