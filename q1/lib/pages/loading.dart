@@ -1,6 +1,5 @@
 import 'dart:math';
 import 'package:flutter/material.dart';
-import 'package:q1/widgets/gradient_background.dart'; // Import your gradient background widget
 
 class LoadingScreen extends StatefulWidget {
   const LoadingScreen({super.key});
@@ -34,37 +33,35 @@ class _LoadingScreenState extends State<LoadingScreen>
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: Colors.white,
-      body: GradientBackground( // Use the gradient background here
-        child: Center(
-          child: Column(
-            mainAxisAlignment: MainAxisAlignment.center,
-            children: [
-              // Logo image positioned higher
-              Padding(
-                padding: const EdgeInsets.only(bottom: 80.0), // Increased bottom padding for more space
-                child: Image.asset(
-                  'lib/assets/logo.png', // Replace with your logo path
-                  height: 100, // Adjust the height as needed
+      body: Center(
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            // Logo image positioned higher
+            Padding(
+              padding: const EdgeInsets.only(bottom: 80.0), // Increased bottom padding for more space
+              child: Image.asset(
+                'lib/assets/logo.png', // Replace with your logo path
+                height: 100, // Adjust the height as needed
+              ),
+            ),
+            // Circular loading animation with additional top padding
+            Padding(
+              padding: const EdgeInsets.only(top: 40.0), // Adjust padding to move the circle down
+              child: SizedBox(
+                height: 60, // Reduced height for the animation
+                width: 60,  // Reduced width for the animation
+                child: AnimatedBuilder(
+                  animation: _controller,
+                  builder: (context, child) {
+                    return CustomPaint(
+                      painter: DotLoadingPainter(_controller.value),
+                    );
+                  },
                 ),
               ),
-              // Circular loading animation with additional top padding
-              Padding(
-                padding: const EdgeInsets.only(top: 40.0), // Adjust padding to move the circle down
-                child: SizedBox(
-                  height: 60, // Reduced height for the animation
-                  width: 60,  // Reduced width for the animation
-                  child: AnimatedBuilder(
-                    animation: _controller,
-                    builder: (context, child) {
-                      return CustomPaint(
-                        painter: DotLoadingPainter(_controller.value),
-                      );
-                    },
-                  ),
-                ),
-              ),
-            ],
-          ),
+            ),
+          ],
         ),
       ),
     );
