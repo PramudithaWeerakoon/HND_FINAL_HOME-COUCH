@@ -82,16 +82,13 @@ class _RegisterPageState extends State<RegisterPage> {
             key: _formKey,
             child: Column(
               children: [
-                const SizedBox(height: 85),
-                const Text(
-                  'Coach@Home',
-                  style: TextStyle(
-                    color: Color(0xFF21007E),
-                    fontSize: 35,
-                    fontWeight: FontWeight.bold,
-                  ),
+                const SizedBox(height: 50),
+                Image.asset(
+                  'lib/assets/logo.png',
+                  width: 300, // Adjust the width as needed
+                  height: 100, // Adjust the height as needed
                 ),
-                const SizedBox(height: 45),
+                const SizedBox(height: 30),
                 const Text(
                   'Let\'s Begin The Journey!',
                   style: TextStyle(

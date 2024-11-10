@@ -1,4 +1,3 @@
-// menuBar.dart
 import 'package:flutter/material.dart';
 import 'package:curved_navigation_bar/curved_navigation_bar.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
@@ -29,22 +28,23 @@ class BottomMenuBar extends StatelessWidget {
         _buildIcon(FontAwesomeIcons.gear, 4),
       ],
       onTap: (index) {
+        if (index == currentIndex) return; // Do nothing if the same tab is selected
         onTabSelected(index); // Update the selected index
         switch (index) {
           case 0:
-            Navigator.pushNamed(context, '/home');
+            Navigator.pushReplacementNamed(context, '/home');
             break;
           case 1:
-            Navigator.pushNamed(context, '/meals');
+            Navigator.pushReplacementNamed(context, '/meals');
             break;
           case 2:
-            Navigator.pushNamed(context, '/statistics');
+            Navigator.pushReplacementNamed(context, '/statistics');
             break;
           case 3:
-            Navigator.pushNamed(context, '/goals');
+            Navigator.pushReplacementNamed(context, '/goals');
             break;
           case 4:
-            Navigator.pushNamed(context, '/settings');
+            Navigator.pushReplacementNamed(context, '/settings');
             break;
         }
       },

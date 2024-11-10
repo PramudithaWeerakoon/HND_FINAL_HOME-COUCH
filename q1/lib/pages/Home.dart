@@ -47,6 +47,7 @@ class _HomePageState extends State<HomePage> {
                 const SizedBox(width: 10),
                 Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
+                  
                   children: const [
                     Text(
                       'Good Morning 👋',
@@ -269,4 +270,4 @@ class _HomePageState extends State<HomePage> {
       ),
     );
   }
-}
+
