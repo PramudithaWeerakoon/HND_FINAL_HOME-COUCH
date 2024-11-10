@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:q1/components/menuBar/menuBar.dart'; // Adjust path if needed
+import 'workoutsummary.dart';
 
 class HomePage extends StatefulWidget {
   const HomePage({super.key});
@@ -167,47 +168,56 @@ class _HomePageState extends State<HomePage> {
   // Helper method for creating plan cards
   Widget _buildPlanCard(
       String title, String time, String progress, String imageUrl) {
-    return Container(
-      width: 250, // Increased width for better visibility
-      padding: const EdgeInsets.all(8),
-      decoration: BoxDecoration(
-        color: Colors.white,
-        borderRadius: BorderRadius.circular(8),
-        boxShadow: [
-          BoxShadow(
-            color: Colors.grey.shade300,
-            blurRadius: 6,
-            spreadRadius: 2,
-            offset: const Offset(0, 3),
-          ),
-        ],
-      ),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Image.asset(
-            imageUrl,
-            height: 80,
-            width: double.infinity,
-            fit: BoxFit.cover,
-          ),
-          const SizedBox(height: 8),
-          Text(
-            title,
-            style: const TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
-          ),
-          Text(
-            time,
-            style: const TextStyle(fontSize: 14, color: Colors.grey),
-          ),
-          Text(
-            progress,
-            style: const TextStyle(fontSize: 14, color: Colors.grey),
-          ),
-        ],
+    return GestureDetector(
+      onTap: () {
+        Navigator.push(
+          context,
+          MaterialPageRoute(builder: (context) => WorkoutPlanScreen(title: title)),
+        );
+      },
+      child: Container(
+        width: 250, // Increased width for better visibility
+        padding: const EdgeInsets.all(8),
+        decoration: BoxDecoration(
+          color: Colors.white,
+          borderRadius: BorderRadius.circular(8),
+          boxShadow: [
+            BoxShadow(
+              color: Colors.grey.shade300,
+              blurRadius: 6,
+              spreadRadius: 2,
+              offset: const Offset(0, 3),
+            ),
+          ],
+        ),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Image.asset(
+              imageUrl,
+              height: 80,
+              width: double.infinity,
+              fit: BoxFit.cover,
+            ),
+            const SizedBox(height: 8),
+            Text(
+              title,
+              style: const TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
+            ),
+            Text(
+              time,
+              style: const TextStyle(fontSize: 14, color: Colors.grey),
+            ),
+            Text(
+              progress,
+              style: const TextStyle(fontSize: 14, color: Colors.grey),
+            ),
+          ],
+        ),
       ),
     );
   }
+
 
   // Helper method for creating goal items with images
   Widget _buildGoalItem(
