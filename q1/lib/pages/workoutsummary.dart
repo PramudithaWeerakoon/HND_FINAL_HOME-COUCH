@@ -194,3 +194,4 @@ class WorkoutPlanScreen extends StatelessWidget {
     );
   }
 
+}
