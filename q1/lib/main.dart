@@ -8,6 +8,7 @@ import 'pages/instructionPage.dart';
 import 'pages/settings.dart';
 import 'pages/q19.dart';
 import 'pages/mealoptions.dart';
+import 'pages/goals.dart';
 
 
 void main() {
@@ -30,6 +31,7 @@ class MyApp extends StatelessWidget {
         '/home': (context) => const HomePage(),
         '/instruction': (context) => const InstructionPage(),
         '/settings': (context) => const SettingsPage(),
+        '/goals': (context) =>  FitnessHomePage(),
         '/q19': (context) => CustomizedPlanScreen(),
         '/q20': (context) => MealPlanScreen(),
 
