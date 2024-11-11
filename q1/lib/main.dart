@@ -35,6 +35,7 @@ class MyApp extends StatelessWidget {
         '/goals': (context) =>  FitnessHomePage(),
         '/q19': (context) => CustomizedPlanScreen(),
         '/q20': (context) => MealPlanScreen(),
+        '/meals': (context) => DailyMealPlan(),
 
       },
     );
