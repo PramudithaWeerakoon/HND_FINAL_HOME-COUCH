@@ -1,7 +1,8 @@
-import 'package:q1/components/login/auth_button.dart';
-import 'package:q1/components/login/text_field.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/gestures.dart';
+import 'package:q1/components/login/auth_button.dart';
+import 'package:firebase_auth/firebase_auth.dart';
+import 'package:google_sign_in/google_sign_in.dart';
 
 class LoginPage extends StatefulWidget {
   const LoginPage({super.key});
@@ -47,6 +48,40 @@ class _LoginPageState extends State<LoginPage> {
     return null;
   }
 
+  // Google Sign-In method
+  Future<void> _signInWithGoogle(BuildContext context) async {
+    final GoogleSignIn googleSignIn = GoogleSignIn();
+    final GoogleSignInAccount? googleUser = await googleSignIn.signIn();
+
+    if (googleUser != null) {
+      final GoogleSignInAuthentication googleAuth = await googleUser.authentication;
+
+      // Create a new credential from the Google account
+      final OAuthCredential credential = GoogleAuthProvider.credential(
+        accessToken: googleAuth.accessToken,
+        idToken: googleAuth.idToken,
+      );
+
+      // Sign in to Firebase with the Google credential
+      try {
+        final UserCredential userCredential = await FirebaseAuth.instance.signInWithCredential(credential);
+        User? user = userCredential.user;
+
+        if (user != null) {
+          // Print the user data in terminal
+          print('User signed in: ${user.displayName}');
+          print('Email: ${user.email}');
+          print('Photo URL: ${user.photoURL}');
+          print('UID: ${user.uid}');
+        }
+      } catch (e) {
+        print("Google Sign-In failed: $e");
+      }
+    } else {
+      print("Google sign-in aborted");
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -60,8 +95,8 @@ class _LoginPageState extends State<LoginPage> {
                 const SizedBox(height: 50),
                 Image.asset(
                   'lib/assets/logo.png',
-                  width: 300, // Adjust the width as needed
-                  height: 100, // Adjust the height as needed
+                  width: 300,
+                  height: 100,
                 ),
                 const SizedBox(height: 30),
                 const Text(
@@ -90,19 +125,18 @@ class _LoginPageState extends State<LoginPage> {
                 const SizedBox(height: 15),
 
                 // Email text field with validation
-                MyTextField(
+                TextFormField(
                   controller: usernameController,
-                  hintText: 'Email',
-                  obscureText: false,
+                  decoration: InputDecoration(hintText: 'Email'),
                   validator: _validateEmail,
                 ),
                 const SizedBox(height: 10),
 
                 // Password text field with validation
-                MyTextField(
+                TextFormField(
                   controller: passwordController,
-                  hintText: 'Password',
                   obscureText: true,
+                  decoration: InputDecoration(hintText: 'Password'),
                   validator: _validatePassword,
                 ),
 
@@ -149,7 +183,6 @@ class _LoginPageState extends State<LoginPage> {
                 GestureDetector(
                   onTap: () {
                     if (_formKey.currentState?.validate() ?? false) {
-                      // Navigate to /question1 route if the form is valid
                       Navigator.pushNamed(context, '/question1');
                     }
                   },
