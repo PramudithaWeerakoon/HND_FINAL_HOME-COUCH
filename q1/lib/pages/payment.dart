@@ -3,7 +3,7 @@ import 'package:q1/widgets/gradient_background.dart'; // Make sure to adjust the
 import 'carddetails.dart';
 
 class SubscriptionPage extends StatefulWidget {
-  const SubscriptionPage({Key? key}) : super(key: key);
+  const SubscriptionPage({super.key});
 
   @override
   _SubscriptionPageState createState() => _SubscriptionPageState();

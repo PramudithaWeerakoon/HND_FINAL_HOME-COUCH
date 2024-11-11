@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:q1/widgets/gradient_background.dart'; // Use your gradient background widget
 
 class ProfilePage extends StatelessWidget {
-  const ProfilePage({Key? key}) : super(key: key);
+  const ProfilePage({super.key});
 
   @override
   Widget build(BuildContext context) {
@@ -90,10 +90,10 @@ class LinkedAccountRow extends StatefulWidget {
   final String initialStatus;
 
   const LinkedAccountRow({
-    Key? key,
+    super.key,
     required this.platform,
     required this.initialStatus,
-  }) : super(key: key);
+  });
 
   @override
   _LinkedAccountRowState createState() => _LinkedAccountRowState();
@@ -174,11 +174,11 @@ class ProfileRow extends StatefulWidget {
   final bool isPassword;
 
   const ProfileRow({
-    Key? key,
+    super.key,
     required this.label,
     required this.initialValue,
     this.isPassword = false,
-  }) : super(key: key);
+  });
 
   @override
   _ProfileRowState createState() => _ProfileRowState();

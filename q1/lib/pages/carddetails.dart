@@ -3,7 +3,7 @@ import 'package:flutter/services.dart';
 import 'package:q1/widgets/gradient_background.dart'; // Make sure to adjust the path based on your folder structure
 
 class CardDetailsPage extends StatefulWidget {
-  const CardDetailsPage({Key? key}) : super(key: key);
+  const CardDetailsPage({super.key});
 
   @override
   _CardDetailsPageState createState() => _CardDetailsPageState();

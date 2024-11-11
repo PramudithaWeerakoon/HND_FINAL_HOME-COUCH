@@ -30,6 +30,8 @@ class PlanSummaryScreen extends StatelessWidget {
     // Add more day data as needed
   ];
 
+  PlanSummaryScreen({super.key});
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(

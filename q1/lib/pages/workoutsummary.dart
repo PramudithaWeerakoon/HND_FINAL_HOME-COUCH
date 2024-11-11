@@ -1,9 +1,10 @@
 import 'package:flutter/material.dart';
+import 'getting-ready-1.dart';
 
 class WorkoutPlanScreen extends StatelessWidget {
   final String title;
 
-  const WorkoutPlanScreen({Key? key, required this.title}) : super(key: key);
+  const WorkoutPlanScreen({super.key, required this.title});
 
   // Add your images for each exercise here
   final String overheadPressImage = 'lib/assets/dumbell.jpg';
@@ -127,6 +128,12 @@ class WorkoutPlanScreen extends StatelessWidget {
             child: ElevatedButton(
               onPressed: () {
                 // Add start action here
+                 Navigator.push(
+                  context,
+                  MaterialPageRoute(
+                    builder: (context) => GettingReadyPage(), // Navigate to Q18
+                  ),
+                );
               },
               style: ElevatedButton.styleFrom(
                 backgroundColor: Color(0xFF21007E),
@@ -193,5 +200,4 @@ class WorkoutPlanScreen extends StatelessWidget {
       ),
     );
   }
-
 }

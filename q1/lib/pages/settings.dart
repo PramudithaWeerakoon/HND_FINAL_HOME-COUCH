@@ -5,7 +5,7 @@ import 'editprofile.dart'; // Import the EditProfilePage
 import 'payment.dart'; // Import the PaymentPage
 
 class SettingsPage extends StatefulWidget {
-  const SettingsPage({Key? key}) : super(key: key);
+  const SettingsPage({super.key});
 
   @override
   _SettingsPageState createState() => _SettingsPageState();
