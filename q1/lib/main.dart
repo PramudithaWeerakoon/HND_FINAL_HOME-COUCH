@@ -9,6 +9,7 @@ import 'pages/settings.dart';
 import 'pages/q19.dart';
 import 'pages/mealoptions.dart';
 import 'pages/goals.dart';
+import 'pages/mealplan.dart';
 
 
 void main() {
