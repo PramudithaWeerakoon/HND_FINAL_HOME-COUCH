@@ -1,7 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/gestures.dart';
-import 'package:q1/components/login/auth_button.dart';
-import 'package:q1/components/login/text_field.dart';
 
 class RegisterPage extends StatefulWidget {
   const RegisterPage({super.key});
@@ -55,15 +53,15 @@ class _RegisterPageState extends State<RegisterPage> {
   }
 
   String? _validatePassword(String? value) {
-  if (value == null || value.isEmpty) {
-    return 'Please enter your password';
+    if (value == null || value.isEmpty) {
+      return 'Please enter your password';
+    }
+    final passwordRegex = RegExp(r'^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&])[A-Za-z\d@$!%*?&]{8,}$');
+    if (!passwordRegex.hasMatch(value)) {
+      return 'Password must be at least 8 characters, include uppercase, lowercase, a number, and a special character';
+    }
+    return null;
   }
-  final passwordRegex = RegExp(r'^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&])[A-Za-z\d@$!%*?&]{8,}$');
-  if (!passwordRegex.hasMatch(value)) {
-    return 'Password must be at least 8 characters, include uppercase, lowercase, a number, and a special character';
-  }
-  return null;
-}
 
   String? _validateConfirmPassword(String? value) {
     if (value != passwordController.text) {
@@ -85,8 +83,8 @@ class _RegisterPageState extends State<RegisterPage> {
                 const SizedBox(height: 50),
                 Image.asset(
                   'lib/assets/logo.png',
-                  width: 300, // Adjust the width as needed
-                  height: 100, // Adjust the height as needed
+                  width: 300,
+                  height: 100,
                 ),
                 const SizedBox(height: 30),
                 const Text(
@@ -175,7 +173,7 @@ class _RegisterPageState extends State<RegisterPage> {
                 ),
                 const SizedBox(height: 5),
 
-                // Sign up button with form validation check
+                // Sign up button
                 GestureDetector(
                   onTap: () {
                     if (_formKey.currentState?.validate() ?? false) {
@@ -279,3 +277,108 @@ class _RegisterPageState extends State<RegisterPage> {
     );
   }
 }
+
+// MyTextField widget
+class MyTextField extends StatefulWidget {
+  final TextEditingController controller;
+  final String hintText;
+  final bool obscureText;
+  final FormFieldValidator<String>? validator;
+
+  const MyTextField({
+    super.key,
+    required this.controller,
+    required this.hintText,
+    required this.obscureText,
+    this.validator,
+  });
+
+  @override
+  _MyTextFieldState createState() => _MyTextFieldState();
+}
+
+class _MyTextFieldState extends State<MyTextField> {
+  final FocusNode _focusNode = FocusNode();
+  bool _isPasswordVisible = false;
+
+  @override
+  void initState() {
+    super.initState();
+    _focusNode.addListener(() {
+      setState(() {});
+    });
+  }
+
+  @override
+  void dispose() {
+    _focusNode.dispose();
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return Padding(
+      padding: const EdgeInsets.symmetric(horizontal: 35.0),
+      child: TextFormField(
+        controller: widget.controller,
+        obscureText: widget.obscureText && !_isPasswordVisible,
+        focusNode: _focusNode,
+        validator: widget.validator,
+        decoration: InputDecoration(
+          enabledBorder: const OutlineInputBorder(
+            borderRadius: BorderRadius.all(Radius.circular(50.0)),
+            borderSide: BorderSide(color: Colors.grey, width: 0.0),
+          ),
+                    focusedBorder: const OutlineInputBorder(
+            borderRadius: BorderRadius.all(Radius.circular(50.0)),
+            borderSide: BorderSide(color: Color(0xFF21007E), width: 2.0),
+          ),
+          hintText: widget.hintText,
+          hintStyle: TextStyle(
+            color: _focusNode.hasFocus ? Colors.grey[600] : Colors.grey[400],
+          ),
+          suffixIcon: widget.obscureText
+              ? IconButton(
+                  icon: Icon(
+                    _isPasswordVisible
+                        ? Icons.visibility
+                        : Icons.visibility_off,
+                    color: Colors.grey,
+                  ),
+                  onPressed: () {
+                    setState(() {
+                      _isPasswordVisible = !_isPasswordVisible;
+                    });
+                  },
+                )
+              : null,
+        ),
+      ),
+    );
+  }
+}
+
+// AuthButton widget
+class AuthButton extends StatelessWidget {
+  final String imagePath;
+
+  const AuthButton({super.key, required this.imagePath});
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      padding: const EdgeInsets.all(10),
+      decoration: BoxDecoration(
+        border: Border.all(color: Colors.grey),
+        borderRadius: BorderRadius.circular(10),
+        color: Colors.white,
+      ),
+      child: Image.asset(
+        imagePath,
+        width: 30,
+        height: 30,
+      ),
+    );
+  }
+}
+

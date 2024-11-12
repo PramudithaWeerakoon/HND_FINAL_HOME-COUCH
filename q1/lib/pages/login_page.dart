@@ -1,5 +1,3 @@
-import 'package:q1/components/login/auth_button.dart';
-import 'package:q1/components/login/text_field.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/gestures.dart';
 
@@ -61,8 +59,8 @@ class _LoginPageState extends State<LoginPage> {
                 const SizedBox(height: 50),
                 Image.asset(
                   'lib/assets/logo.png',
-                  width: 300, // Adjust the width as needed
-                  height: 100, // Adjust the height as needed
+                  width: 300,
+                  height: 100,
                 ),
                 const SizedBox(height: 30),
                 const Text(
@@ -150,7 +148,6 @@ class _LoginPageState extends State<LoginPage> {
                 GestureDetector(
                   onTap: () {
                     if (_formKey.currentState?.validate() ?? false) {
-                      // Navigate to /question1 route if the form is valid
                       Navigator.pushNamed(context, '/question1');
                     }
                   },
@@ -188,8 +185,8 @@ class _LoginPageState extends State<LoginPage> {
                         padding: EdgeInsets.symmetric(horizontal: 10.0),
                         child: Text(
                           'or continue with',
-                          style:
-                              TextStyle(color: Color.fromARGB(255, 77, 76, 76)),
+                          style: TextStyle(
+                              color: Color.fromARGB(255, 77, 76, 76)),
                         ),
                       ),
                       Expanded(
@@ -250,3 +247,120 @@ class _LoginPageState extends State<LoginPage> {
     );
   }
 }
+
+// Custom text field widget
+class MyTextField extends StatefulWidget {
+  final TextEditingController controller;
+  final String hintText;
+  final bool obscureText;
+  final FormFieldValidator<String>? validator;
+
+  const MyTextField({
+    super.key,
+    required this.controller,
+    required this.hintText,
+    required this.obscureText,
+    this.validator,
+  });
+
+  @override
+  _MyTextFieldState createState() => _MyTextFieldState();
+}
+
+class _MyTextFieldState extends State<MyTextField> {
+  final FocusNode _focusNode = FocusNode();
+  bool _isPasswordVisible = false;
+
+  @override
+  void initState() {
+    super.initState();
+    _focusNode.addListener(() {
+      setState(() {});
+    });
+  }
+
+  @override
+  void dispose() {
+    _focusNode.dispose();
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return Padding(
+      padding: const EdgeInsets.symmetric(horizontal: 35.0),
+      child: TextFormField(
+        controller: widget.controller,
+        obscureText: widget.obscureText && !_isPasswordVisible,
+        focusNode: _focusNode,
+        validator: widget.validator,
+        decoration: InputDecoration(
+          enabledBorder: const OutlineInputBorder(
+            borderRadius: BorderRadius.all(Radius.circular(50.0)),
+            borderSide: BorderSide(color: Colors.grey, width: 0.0),
+          ),
+          focusedBorder: const OutlineInputBorder(
+            borderRadius: BorderRadius.all(Radius.circular(50.0)),
+            borderSide: BorderSide(color: Colors.black, width: 2.0),
+          ),
+          hintText: widget.hintText,
+          hintStyle: const TextStyle(
+            color: Color.fromARGB(255, 128, 127, 127),
+            fontSize: 18,
+          ),
+          fillColor: _focusNode.hasFocus ? Colors.white : const Color(0xFFD9D9D9),
+          filled: true,
+          contentPadding: const EdgeInsets.symmetric(horizontal: 30.0, vertical: 12.0),
+          suffixIcon: widget.obscureText
+              ? IconButton(
+                  icon: Icon(
+                    _isPasswordVisible ? Icons.visibility : Icons.visibility_off,
+                    color: Colors.grey,
+                  ),
+                  onPressed: () {
+                    setState(() {
+                      _isPasswordVisible = !_isPasswordVisible;
+                    });
+                  },
+                )
+              : null,
+        ),
+      ),
+    );
+  }
+}
+
+// Custom authentication button widget
+class AuthButton extends StatelessWidget {
+  final String imagePath;
+
+  const AuthButton({super.key, required this.imagePath});
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      width: 65,
+      height: 65,
+      decoration: BoxDecoration(
+        color: Colors.white,
+        shape: BoxShape.circle,
+        boxShadow: [
+          BoxShadow(
+                        color: Colors.grey.withOpacity(0.5), // Shadow color
+            spreadRadius: 1,
+            blurRadius: 8,
+            offset: const Offset(0, 3), // Offset to control the shadow position
+          ),
+        ],
+      ),
+      child: Center(
+        child: Image.asset(
+          imagePath,
+          width: 29, // Adjust the icon size as needed
+          height: 29,
+        ),
+      ),
+    );
+  }
+}
+

@@ -7,6 +7,8 @@ void main() {
 }
 
 class MyApp extends StatelessWidget {
+  const MyApp({super.key});
+
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
@@ -17,6 +19,8 @@ class MyApp extends StatelessWidget {
 }
 
 class DailyMealPlan extends StatefulWidget {
+  const DailyMealPlan({super.key});
+
   @override
   _DailyMealPlanState createState() => _DailyMealPlanState();
 }
@@ -95,9 +99,11 @@ class _DailyMealPlanState extends State<DailyMealPlan> {
 }
 
 class PieChartWidget extends StatelessWidget {
+  const PieChartWidget({super.key});
+
   @override
   Widget build(BuildContext context) {
-    return Container(
+    return SizedBox(
       height: 250, // Increased height for a larger pie chart
       child: Padding(
         padding: const EdgeInsets.all(8.0),
@@ -155,7 +161,7 @@ class MealCard extends StatelessWidget {
   final IconData icon;
   final VoidCallback onTap; // Add onTap callback
 
-  MealCard({
+  const MealCard({super.key, 
     required this.mealType,
     required this.calories,
     required this.details,

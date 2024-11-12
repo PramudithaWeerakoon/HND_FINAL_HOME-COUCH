@@ -6,6 +6,8 @@ import 'package:q1/widgets/gradient_background.dart';
 void main() => runApp(FitnessApp());
 
 class FitnessApp extends StatelessWidget {
+  const FitnessApp({super.key});
+
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
@@ -18,6 +20,8 @@ class FitnessApp extends StatelessWidget {
 }
 
 class FitnessHomePage extends StatefulWidget {
+  const FitnessHomePage({super.key});
+
   @override
   _FitnessHomePageState createState() => _FitnessHomePageState();
 }
@@ -181,7 +185,7 @@ class WeekProgressCard extends StatelessWidget {
   final String hours;
   final Color progressColor;
 
-  const WeekProgressCard({
+  const WeekProgressCard({super.key, 
     required this.week,
     required this.progress,
     required this.hours,
