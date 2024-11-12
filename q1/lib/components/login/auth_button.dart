@@ -9,7 +9,7 @@ class AuthButton extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Container(
-      width: 65,  // Adjust the size as needed
+      width: 65, // Adjust the size as needed
       height: 65,
       decoration: BoxDecoration(
         color: Colors.white,

@@ -32,7 +32,8 @@ class _LoginPageState extends State<LoginPage> {
     if (value == null || value.isEmpty) {
       return 'Please enter your email';
     }
-    final emailRegex = RegExp(r'^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$');
+    final emailRegex =
+        RegExp(r'^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$');
     if (!emailRegex.hasMatch(value)) {
       return 'Please enter a valid email';
     }
@@ -187,7 +188,8 @@ class _LoginPageState extends State<LoginPage> {
                         padding: EdgeInsets.symmetric(horizontal: 10.0),
                         child: Text(
                           'or continue with',
-                          style: TextStyle(color: Color.fromARGB(255, 77, 76, 76)),
+                          style:
+                              TextStyle(color: Color.fromARGB(255, 77, 76, 76)),
                         ),
                       ),
                       Expanded(
