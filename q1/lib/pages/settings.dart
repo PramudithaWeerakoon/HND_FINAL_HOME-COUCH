@@ -196,7 +196,7 @@ class _SettingsPageState extends State<SettingsPage> {
             activeColor: Colors.white,
             activeTrackColor: const Color(0xFFEAB804),
             inactiveThumbColor: Colors.white,
-            inactiveTrackColor: const Color(0xFFEAB804),
+            inactiveTrackColor: const Color.fromARGB(255, 133, 133, 133),
           ),
         ),
       ),

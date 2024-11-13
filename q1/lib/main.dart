@@ -9,6 +9,7 @@ import 'pages/settings.dart';
 import 'pages/q19.dart';
 import 'pages/mealoptions.dart';
 import 'pages/mealplan.dart';
+import 'pages/goals.dart';
 
 
 void main() {
@@ -22,7 +23,7 @@ class MyApp extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
-      initialRoute: '/register',
+      initialRoute: '/settings',
       routes: {
         '/login': (context) => const LoginPage(),
         '/register': (context) => const RegisterPage(),
