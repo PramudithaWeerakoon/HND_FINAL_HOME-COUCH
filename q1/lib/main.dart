@@ -10,6 +10,7 @@ import 'pages/q19.dart';
 import 'pages/mealoptions.dart';
 import 'pages/mealplan.dart';
 import 'pages/goals.dart';
+import 'pages/loading.dart';
 
 
 void main() {
@@ -37,6 +38,7 @@ class MyApp extends StatelessWidget {
         '/q19': (context) => CustomizedPlanScreen(),
         '/q20': (context) => MealPlanScreen(),
         '/meals': (context) => DailyMealPlan(),
+        '/loading': (context) => const LoadingScreen(),
 
       },
     );
