@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'q6.dart'; 
+import 'q6.dart';
 
 class BodyTypeSelectionScreen extends StatefulWidget {
   const BodyTypeSelectionScreen({super.key});
@@ -13,9 +13,9 @@ class _BodyTypeSelectionScreenState extends State<BodyTypeSelectionScreen> {
   int? _selectedBodyType; // Nullable to track selected body type index
 
   // Define image paths
-  final String skinnyImagePath = 'lib/assets/Skinny.png';
-  final String skinnyFatImagePath = 'lib/assets/Skinny-Fat.png';
-  final String heavyImagePath = 'lib/assets/Heavy.png';
+  final String skinnyImagePath = 'lib/assets/s.png';
+  final String skinnyFatImagePath = 'lib/assets/sf.png';
+  final String heavyImagePath = 'lib/assets/h.png';
 
   @override
   Widget build(BuildContext context) {
@@ -55,9 +55,9 @@ class _BodyTypeSelectionScreenState extends State<BodyTypeSelectionScreen> {
                 child: Row(
                   mainAxisAlignment: MainAxisAlignment.spaceAround,
                   children: [
-                    _buildBodyTypeOption('Skinny', skinnyImagePath, 0), // Use skinny image path
-                    _buildBodyTypeOption('Skinny-Fat', skinnyFatImagePath, 1), // Use skinny-fat image path
-                    _buildBodyTypeOption('Heavy', heavyImagePath, 2), // Use heavy image path
+                    _buildBodyTypeOption('Skinny', skinnyImagePath, 0),
+                    _buildBodyTypeOption('Skinny-Fat', skinnyFatImagePath, 1),
+                    _buildBodyTypeOption('Heavy', heavyImagePath, 2),
                   ],
                 ),
               ),
@@ -94,14 +94,13 @@ class _BodyTypeSelectionScreenState extends State<BodyTypeSelectionScreen> {
               child: const Icon(Icons.arrow_back, color: Colors.white),
             ),
           ),
-          // Conditionally show the "Next to Q8" button
           if (_selectedBodyType != null)
             Positioned(
               right: 16, // Position the next button on the right
               bottom: 32, // Adjust bottom position as needed
               child: FloatingActionButton(
                 heroTag: 'next_to_q6', // Unique tag for the right FAB
-                 backgroundColor: const Color(0xFF21007E),
+                backgroundColor: const Color(0xFF21007E),
                 shape: RoundedRectangleBorder(
                   borderRadius: BorderRadius.circular(100),
                 ),
@@ -110,7 +109,7 @@ class _BodyTypeSelectionScreenState extends State<BodyTypeSelectionScreen> {
                   Navigator.push(
                     context,
                     MaterialPageRoute(
-                      builder: (context) => const FitnessBackgroundSelectionScreen()
+                      builder: (context) => const FitnessBackgroundSelectionScreen(),
                     ),
                   );
                 },
@@ -124,50 +123,54 @@ class _BodyTypeSelectionScreenState extends State<BodyTypeSelectionScreen> {
 
   // Widget for building each body type option with an image and label
   Widget _buildBodyTypeOption(String label, String imagePath, int index) {
-    return GestureDetector(
-      onTap: () {
-        setState(() {
-          // Toggle selection: if already selected, deselect; otherwise, select
-          _selectedBodyType = _selectedBodyType == index ? null : index;
-        });
-      },
-      child: Column(
-        children: [
-          // Image box itself is selectable
-          Container(
-            width: 125, // Fixed size for the image box (customizable)
-            height: 125,
-            decoration: BoxDecoration(
+  // Calculate size based on selection state
+  double boxSize = _selectedBodyType == index ? 140 : (_selectedBodyType == null ? 125 : 90);
+
+  return GestureDetector(
+    onTap: () {
+      setState(() {
+        // Toggle selection: if already selected, deselect; otherwise, select
+        _selectedBodyType = _selectedBodyType == index ? null : index;
+      });
+    },
+    child: Column(
+      children: [
+        Container(
+          width: boxSize,
+          height: boxSize,
+          decoration: BoxDecoration(
+            color: _selectedBodyType == index
+                ? Colors.blueAccent.withOpacity(0.2)
+                : Colors.grey[300], // Placeholder color
+            borderRadius: BorderRadius.circular(10),
+            border: Border.all(
               color: _selectedBodyType == index
-                  ? Colors.blueAccent.withOpacity(0.2)
-                  : Colors.grey[300], // Placeholder color
-              borderRadius: BorderRadius.circular(10),
-              border: Border.all(
-                color: _selectedBodyType == index
-                    ? const Color.fromARGB(255, 31, 10, 80)
-                    : Colors.transparent,
-                width: 3.0, // Highlight selected image
-              ),
-            ),
-            child: Image.asset(
-              imagePath,
-              width: 125,
-              height: 125,
-              fit: BoxFit.cover, // Ensures the image fits within the box
+                  ? const Color.fromARGB(255, 31, 10, 80)
+                  : Colors.transparent,
+              width: 3.0, // Highlight selected image
             ),
           ),
-          const SizedBox(height: 8.0), // Space between image and label
-          Text(
-            label,
-            style: TextStyle(
-              fontWeight: FontWeight.bold,
-              color: _selectedBodyType == index
-                  ? const Color.fromARGB(255, 0, 0, 0)
-                  : Colors.black,
-            ),
+          child: Image.asset(
+            imagePath,
+            width: boxSize,
+            height: boxSize,
+            fit: BoxFit.cover, // Ensures the image fits within the box
+            alignment: _selectedBodyType != null ? const Alignment(0.0, -0.9) : const Alignment(0.0, -0.6), // Aligns the image to the top for all boxes when any box is selected
           ),
-        ],
-      ),
-    );
-  }
+        ),
+        const SizedBox(height: 8.0), // Space between image and label
+        Text(
+          label,
+          style: TextStyle(
+            fontWeight: FontWeight.bold,
+            color: _selectedBodyType == index
+                ? const Color.fromARGB(255, 0, 0, 0)
+                : Colors.black,
+          ),
+        ),
+      ],
+    ),
+  );
+}
+
 }

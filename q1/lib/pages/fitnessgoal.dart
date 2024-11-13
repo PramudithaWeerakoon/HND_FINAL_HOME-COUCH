@@ -12,9 +12,9 @@ class _FitnessGoalSelectionScreen extends State<FitnessGoalSelectionScreen> {
   int? _selectedGoal; // Nullable to track selected fitness goal
 
   // Define image paths (adjust these as needed)
-  final String loseWeightImagePath = 'lib/assets/Heavy.png';
-  final String buildMuscleImagePath = 'lib/assets/Heavy.png';
-  final String bothImagePath = 'lib/assets/Heavy.png';
+  final String loseWeightImagePath = 'lib/assets/h.png';
+  final String buildMuscleImagePath = 'lib/assets/h.png';
+  final String bothImagePath = 'lib/assets/h.png';
 
   @override
   Widget build(BuildContext context) {
@@ -97,50 +97,54 @@ class _FitnessGoalSelectionScreen extends State<FitnessGoalSelectionScreen> {
 
   // Widget for building each fitness goal option with an image and label
   Widget _buildGoalOption(String label, String imagePath, int index) {
-    // Calculate size based on selection state
-    double boxSize = _selectedGoal == index ? 140 : (_selectedGoal == null ? 125 : 90);
+  // Calculate size based on selection state
+  double boxSize = _selectedGoal == index ? 140 : (_selectedGoal == null ? 125 : 90);
 
-    return GestureDetector(
-      onTap: () {
-        setState(() {
-          // Toggle selection: if already selected, deselect; otherwise, select
-          _selectedGoal = _selectedGoal == index ? null : index;
-        });
-      },
-      child: Column(
-        mainAxisSize: MainAxisSize.min,
-        children: [
-          Container(
+  return GestureDetector(
+    onTap: () {
+      setState(() {
+        // Toggle selection: if already selected, deselect; otherwise, select
+        _selectedGoal = _selectedGoal == index ? null : index;
+      });
+    },
+    child: Column(
+      mainAxisSize: MainAxisSize.min,
+      children: [
+        Container(
+          width: boxSize,
+          height: boxSize,
+          decoration: BoxDecoration(
+            color: _selectedGoal == index
+                ? Colors.blueAccent.withOpacity(0.2)
+                : Colors.grey[300], // Placeholder color
+            borderRadius: BorderRadius.circular(10),
+            border: Border.all(
+              color: _selectedGoal == index
+                  ? const Color.fromARGB(255, 31, 10, 80)
+                  : Colors.transparent,
+              width: 3.0, // Highlight selected image
+            ),
+          ),
+          child: Image.asset(
+            imagePath,
             width: boxSize,
             height: boxSize,
-            decoration: BoxDecoration(
-              color: _selectedGoal == index
-                  ? Colors.blueAccent.withOpacity(0.2)
-                  : Colors.grey[300], // Placeholder color
-              borderRadius: BorderRadius.circular(10),
-              border: Border.all(
-                color: _selectedGoal == index ? Colors.blueAccent : Colors.transparent,
-                width: 3.0, // Highlight selected image
-              ),
-            ),
-            child: Image.asset(
-              imagePath,
-              width: boxSize,
-              height: boxSize,
-              fit: BoxFit.cover,
-            ),
+            fit: BoxFit.cover, // Ensures the image fits within the box
+            alignment: _selectedGoal != null ? const Alignment(0.0, -0.9) : const Alignment(0.0, -0.6), // Aligns the image to the top for all boxes when any box is selected
           ),
-          const SizedBox(height: 8.0),
-          Text(
-            label,
-            textAlign: TextAlign.center,
-            style: TextStyle(
-              fontWeight: FontWeight.bold,
-              color: _selectedGoal == index ? Colors.blueAccent : Colors.black,
-            ),
+        ),
+        const SizedBox(height: 8.0), // Space between image and label
+        Text(
+          label,
+          style: TextStyle(
+            fontWeight: FontWeight.bold,
+            color: _selectedGoal == index
+                ? const Color.fromARGB(255, 0, 0, 0)
+                : Colors.black,
           ),
-        ],
-      ),
-    );
-  }
+        ),
+      ],
+    ),
+  );
+}
 }

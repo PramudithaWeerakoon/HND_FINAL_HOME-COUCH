@@ -11,6 +11,7 @@ import 'pages/mealoptions.dart';
 import 'pages/mealplan.dart';
 import 'pages/goals.dart';
 import 'pages/loading.dart';
+import 'pages/fitnessgoal.dart';
 
 
 void main() {
@@ -24,7 +25,7 @@ class MyApp extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
-      initialRoute: '/loading',
+      initialRoute: '/fitnessgoal',
 
       routes: {
         '/login': (context) => const LoginPage(),
@@ -39,6 +40,7 @@ class MyApp extends StatelessWidget {
         '/q20': (context) => MealPlanScreen(),
         '/meals': (context) => DailyMealPlan(),
         '/loading': (context) => const LoadingScreen(),
+        '/fitnessgoal': (context) => FitnessGoalSelectionScreen(),
 
       },
     );
