@@ -12,9 +12,9 @@ class _FitnessGoalSelectionScreen extends State<FitnessGoalSelectionScreen> {
   int? _selectedGoal; // Nullable to track selected fitness goal
 
   // Define image paths (adjust these as needed)
-  final String loseWeightImagePath = 'lib/assets/lose_weight.png';
-  final String buildMuscleImagePath = 'lib/assets/build_muscle.png';
-  final String bothImagePath = 'lib/assets/lose_weight_build_muscle.png';
+  final String loseWeightImagePath = 'lib/assets/Heavy.png';
+  final String buildMuscleImagePath = 'lib/assets/Heavy.png';
+  final String bothImagePath = 'lib/assets/Heavy.png';
 
   @override
   Widget build(BuildContext context) {

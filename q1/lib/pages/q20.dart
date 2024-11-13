@@ -105,9 +105,9 @@ class PlanSummaryScreen extends StatelessWidget {
                       borderRadius: BorderRadius.circular(19),
                     ),
                   ),
-                  onPressed: () {
-                    // Navigate to home
-                  },
+                    onPressed: () {
+                    Navigator.pushNamed(context, '/home');
+                    },
                   child: Text(
                     "Continue To Home",
                     style: TextStyle(fontSize: 16, color: Colors.white),
