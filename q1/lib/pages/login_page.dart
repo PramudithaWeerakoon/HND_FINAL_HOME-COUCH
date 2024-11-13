@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'database_helper.dart';
 import 'package:flutter/gestures.dart';
 
 class LoginPage extends StatefulWidget {
@@ -9,13 +10,9 @@ class LoginPage extends StatefulWidget {
 }
 
 class _LoginPageState extends State<LoginPage> {
-  // Form key
   final _formKey = GlobalKey<FormState>();
-
-  // Text controllers
   final usernameController = TextEditingController();
   final passwordController = TextEditingController();
-
   bool rememberMe = false;
 
   @override
@@ -44,6 +41,23 @@ class _LoginPageState extends State<LoginPage> {
       return 'Please enter your password';
     }
     return null;
+  }
+
+  // Login function
+  Future<void> _loginUser() async {
+    final dbHelper = DatabaseHelper();
+    bool loginSuccess = await dbHelper.loginUser(
+      usernameController.text,
+      passwordController.text,
+    );
+
+    if (loginSuccess) {
+      Navigator.pushNamed(context, '/question1'); // Navigate on successful login
+    } else {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('Invalid email or password')),
+      );
+    }
   }
 
   @override
@@ -148,7 +162,7 @@ class _LoginPageState extends State<LoginPage> {
                 GestureDetector(
                   onTap: () {
                     if (_formKey.currentState?.validate() ?? false) {
-                      Navigator.pushNamed(context, '/question1');
+                      _loginUser(); // Attempt login with database
                     }
                   },
                   child: Container(
@@ -268,22 +282,7 @@ class MyTextField extends StatefulWidget {
 }
 
 class _MyTextFieldState extends State<MyTextField> {
-  final FocusNode _focusNode = FocusNode();
   bool _isPasswordVisible = false;
-
-  @override
-  void initState() {
-    super.initState();
-    _focusNode.addListener(() {
-      setState(() {});
-    });
-  }
-
-  @override
-  void dispose() {
-    _focusNode.dispose();
-    super.dispose();
-  }
 
   @override
   Widget build(BuildContext context) {
@@ -292,29 +291,25 @@ class _MyTextFieldState extends State<MyTextField> {
       child: TextFormField(
         controller: widget.controller,
         obscureText: widget.obscureText && !_isPasswordVisible,
-        focusNode: _focusNode,
         validator: widget.validator,
         decoration: InputDecoration(
           enabledBorder: const OutlineInputBorder(
             borderRadius: BorderRadius.all(Radius.circular(50.0)),
-            borderSide: BorderSide(color: Colors.grey, width: 0.0),
+            borderSide: BorderSide(color: Colors.grey),
           ),
           focusedBorder: const OutlineInputBorder(
             borderRadius: BorderRadius.all(Radius.circular(50.0)),
             borderSide: BorderSide(color: Colors.black, width: 2.0),
           ),
           hintText: widget.hintText,
-          hintStyle: const TextStyle(
-            color: Color.fromARGB(255, 128, 127, 127),
-            fontSize: 18,
-          ),
-          fillColor: _focusNode.hasFocus ? Colors.white : const Color(0xFFD9D9D9),
-          filled: true,
-          contentPadding: const EdgeInsets.symmetric(horizontal: 30.0, vertical: 12.0),
+          contentPadding:
+              const EdgeInsets.symmetric(horizontal: 30.0, vertical: 12.0),
           suffixIcon: widget.obscureText
               ? IconButton(
                   icon: Icon(
-                    _isPasswordVisible ? Icons.visibility : Icons.visibility_off,
+                    _isPasswordVisible
+                        ? Icons.visibility
+                        : Icons.visibility_off,
                     color: Colors.grey,
                   ),
                   onPressed: () {
@@ -330,7 +325,6 @@ class _MyTextFieldState extends State<MyTextField> {
   }
 }
 
-// Custom authentication button widget
 class AuthButton extends StatelessWidget {
   final String imagePath;
 
@@ -346,21 +340,20 @@ class AuthButton extends StatelessWidget {
         shape: BoxShape.circle,
         boxShadow: [
           BoxShadow(
-                        color: Colors.grey.withOpacity(0.5), // Shadow color
+            color: Colors.grey.withOpacity(0.5),
             spreadRadius: 1,
             blurRadius: 8,
-            offset: const Offset(0, 3), // Offset to control the shadow position
+            offset: const Offset(0, 3),
           ),
         ],
       ),
       child: Center(
         child: Image.asset(
           imagePath,
-          width: 29, // Adjust the icon size as needed
+          width: 29,
           height: 29,
         ),
       ),
     );
   }
 }
-
