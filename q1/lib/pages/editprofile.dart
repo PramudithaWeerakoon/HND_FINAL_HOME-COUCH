@@ -6,6 +6,8 @@ class ProfilePage extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    double screenWidth = MediaQuery.of(context).size.width;
+
     return GradientBackground(
       child: Scaffold(
         backgroundColor: Colors.transparent,
@@ -20,64 +22,80 @@ class ProfilePage extends StatelessWidget {
           ),
         ),
         body: Padding(
-          padding: const EdgeInsets.symmetric(horizontal: 35.0),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.center,
-            children: [
-              const SizedBox(height: 16),
-              const Text(
-                'Edit Profile',
-                style: TextStyle(
-                  fontSize: 45,
-                  fontWeight: FontWeight.bold,
-                  color: Colors.black,
+          padding: EdgeInsets.symmetric(horizontal: screenWidth * 0.05),
+          child: SingleChildScrollView(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.center,
+              children: [
+                const SizedBox(height: 16),
+                const Text(
+                  'Edit Profile',
+                  style: TextStyle(
+                    fontSize: 45,
+                    fontWeight: FontWeight.bold,
+                    color: Colors.black,
+                  ),
                 ),
-              ),
-              const SizedBox(height: 24),
-              const Text(
-                'Personal Information',
-                style: TextStyle(
-                  fontSize: 24,
-                  fontWeight: FontWeight.w700,
-                  color: Color.fromARGB(255, 0, 0, 0),
+                const SizedBox(height: 24),
+                const Text(
+                  'Personal Information',
+                  style: TextStyle(
+                    fontSize: 24,
+                    fontWeight: FontWeight.w700,
+                    color: Color.fromARGB(255, 0, 0, 0),
+                  ),
                 ),
-              ),
-              const SizedBox(height: 16),
-              Container(
-                padding: const EdgeInsets.all(16),
-                decoration: BoxDecoration(
-                  color: Colors.white,
-                  borderRadius: BorderRadius.circular(15),
-                  boxShadow: [
-                    BoxShadow(
-                      color: Colors.black.withOpacity(0.25),
-                      blurRadius: 4,
-                      offset: const Offset(0, 4),
-                    ),
-                  ],
-                ),
-                child: Column(
-                  children: [
-                    ProfileRow(label: 'Name', initialValue: 'Pramuditha Weerakoon'),
-                    ProfileRow(label: 'Email', initialValue: 'pramud2002@gmail.com'),
-                    ProfileRow(label: 'Password', initialValue: '********', isPassword: true),
-                    const SizedBox(height: 30),
-                    const Text(
-                      'Linked Accounts',
-                      style: TextStyle(
-                        fontSize: 16,
-                        fontWeight: FontWeight.w600,
-                        color: Color.fromARGB(255, 0, 0, 0),
+                const SizedBox(height: 16),
+                Container(
+                  padding: const EdgeInsets.all(16),
+                  decoration: BoxDecoration(
+                    color: Colors.white,
+                    borderRadius: BorderRadius.circular(15),
+                    boxShadow: [
+                      BoxShadow(
+                        color: Colors.black.withOpacity(0.25),
+                        blurRadius: 4,
+                        offset: const Offset(0, 4),
                       ),
-                    ),
-                    const SizedBox(height: 10),
-                    LinkedAccountRow(platform: 'Google', initialStatus: 'Un-Link'),
-                    LinkedAccountRow(platform: 'Meta', initialStatus: 'Link'),
-                    LinkedAccountRow(platform: 'Apple ID', initialStatus: 'Link'),
-                  ],
+                    ],
+                  ),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      ProfileRow(
+                        label: 'Name',
+                        initialValue: 'Pramuditha Weerakoon',
+                        maxWidth: screenWidth * 0.8,
+                      ),
+                      ProfileRow(
+                        label: 'Email',
+                        initialValue: 'pramud2002@gmail.com',
+                        maxWidth: screenWidth * 0.8,
+                      ),
+                      ProfileRow(
+                        label: 'Password',
+                        initialValue: '********',
+                        isPassword: true,
+                        maxWidth: screenWidth * 0.8,
+                      ),
+                      const SizedBox(height: 30),
+                      const Text(
+                        'Linked Accounts',
+                        style: TextStyle(
+                          fontSize: 16,
+                          fontWeight: FontWeight.w600,
+                          color: Color.fromARGB(255, 0, 0, 0),
+                        ),
+                      ),
+                      const SizedBox(height: 10),
+                      LinkedAccountRow(platform: 'Google', initialStatus: 'Un-Link'),
+                      LinkedAccountRow(platform: 'Meta', initialStatus: 'Link'),
+                      LinkedAccountRow(platform: 'Apple ID', initialStatus: 'Link'),
+                    ],
+                  ),
                 ),
-              ),
-            ],
+              ],
+            ),
           ),
         ),
       ),
@@ -115,15 +133,24 @@ class _LinkedAccountRowState extends State<LinkedAccountRow> {
       child: Row(
         mainAxisAlignment: MainAxisAlignment.spaceBetween,
         children: [
-          Row(
-            children: [
-              _getPlatformIcon(widget.platform), // Use the widget returned by _getPlatformIcon
-              const SizedBox(width: 8),
-              Text(
-                widget.platform,
-                style: const TextStyle(fontSize: 16, fontWeight: FontWeight.w500, color: Color.fromARGB(255, 0, 0, 0)),
-              ),
-            ],
+          Expanded(
+            child: Row(
+              children: [
+                _getPlatformIcon(widget.platform),
+                const SizedBox(width: 8),
+                Flexible(
+                  child: Text(
+                    widget.platform,
+                    style: const TextStyle(
+                      fontSize: 16,
+                      fontWeight: FontWeight.w500,
+                      color: Color.fromARGB(255, 0, 0, 0),
+                    ),
+                    overflow: TextOverflow.ellipsis,
+                  ),
+                ),
+              ],
+            ),
           ),
           TextButton(
             onPressed: _toggleLinkStatus,
@@ -172,12 +199,14 @@ class ProfileRow extends StatefulWidget {
   final String label;
   final String initialValue;
   final bool isPassword;
+  final double maxWidth;
 
   const ProfileRow({
     super.key,
     required this.label,
     required this.initialValue,
     this.isPassword = false,
+    required this.maxWidth,
   });
 
   @override
@@ -207,47 +236,49 @@ class _ProfileRowState extends State<ProfileRow> {
       child: Row(
         mainAxisAlignment: MainAxisAlignment.spaceBetween,
         children: [
-          Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Text(
-                widget.label,
-                style: const TextStyle(
-                  fontSize: 14,
-                  color: Colors.black54,
-                ),
-              ),
-              const SizedBox(height: 1),
-              SizedBox(
-                width: 270,
-                child: TextField(
-                  controller: controller,
-                  obscureText: widget.isPassword,
-                  enabled: isEditing,
-                  decoration: InputDecoration(
-                    isDense: true,
-                    enabledBorder: const UnderlineInputBorder(
-                      borderSide: BorderSide(color: Colors.black), // Darker border for inactive state
-                    ),
-                    focusedBorder: const UnderlineInputBorder(
-                      borderSide: BorderSide(color: Colors.black), // Solid border for focused state
-                    ),
-                  ),
+          Expanded(
+            flex: 2,
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  widget.label,
                   style: const TextStyle(
-                    fontSize: 16,
-                    fontWeight: FontWeight.w600,
-                    color: Colors.black,
+                    fontSize: 14,
+                    color: Colors.black54,
                   ),
                 ),
-              ),
-            ],
+                const SizedBox(height: 1),
+                SizedBox(
+                  width: widget.maxWidth,
+                  child: TextField(
+                    controller: controller,
+                    obscureText: widget.isPassword,
+                    enabled: isEditing,
+                    decoration: InputDecoration(
+                      isDense: true,
+                      enabledBorder: const UnderlineInputBorder(
+                        borderSide: BorderSide(color: Colors.black),
+                      ),
+                      focusedBorder: const UnderlineInputBorder(
+                        borderSide: BorderSide(color: Colors.black),
+                      ),
+                    ),
+                    style: const TextStyle(
+                      fontSize: 16,
+                      fontWeight: FontWeight.w600,
+                      color: Colors.black,
+                    ),
+                  ),
+                ),
+              ],
+            ),
           ),
           TextButton(
             onPressed: () {
               setState(() {
                 if (isEditing) {
                   // Save the edited value
-                  // In a real app, this is where you would update the backend
                 }
                 isEditing = !isEditing;
               });
