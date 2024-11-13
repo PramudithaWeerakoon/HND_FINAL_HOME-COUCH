@@ -9,7 +9,11 @@ import 'pages/settings.dart';
 import 'pages/q19.dart';
 import 'pages/mealoptions.dart';
 import 'pages/goals.dart';
+<<<<<<< Updated upstream
 import 'pages/mealplan.dart';
+=======
+import 'pages/analysis.dart';
+>>>>>>> Stashed changes
 
 
 void main() {
@@ -23,7 +27,12 @@ class MyApp extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
+<<<<<<< Updated upstream
       initialRoute: '/register',
+=======
+      initialRoute: '/settings',
+
+>>>>>>> Stashed changes
       routes: {
         '/login': (context) => const LoginPage(),
         '/register': (context) => const RegisterPage(),
@@ -35,7 +44,12 @@ class MyApp extends StatelessWidget {
         '/goals': (context) =>  FitnessHomePage(),
         '/q19': (context) => CustomizedPlanScreen(),
         '/q20': (context) => MealPlanScreen(),
+<<<<<<< Updated upstream
 
+=======
+        '/meals': (context) => DailyMealPlan(),
+        '/statistics': (context) => WeightTrackerPage(),
+>>>>>>> Stashed changes
       },
     );
   }
