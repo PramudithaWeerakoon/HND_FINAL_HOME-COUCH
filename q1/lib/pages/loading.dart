@@ -21,6 +21,11 @@ class _LoadingScreenState extends State<LoadingScreen>
       vsync: this,
       duration: const Duration(seconds: 2),
     )..repeat(); // Repeat the animation indefinitely
+
+    // Navigate to the login page after 2 seconds
+    Future.delayed(const Duration(seconds: 2), () {
+      Navigator.pushReplacementNamed(context, '/login');
+    });
   }
 
   @override

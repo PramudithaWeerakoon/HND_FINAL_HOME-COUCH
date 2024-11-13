@@ -10,7 +10,7 @@ import 'pages/q19.dart';
 import 'pages/mealoptions.dart';
 import 'pages/goals.dart';
 import 'pages/mealplan.dart';
-
+import 'pages/loading.dart';
 
 void main() {
   runApp(const MyApp());
@@ -23,7 +23,7 @@ class MyApp extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
-      initialRoute: '/register',
+      initialRoute: '/instruction',
       routes: {
         '/login': (context) => const LoginPage(),
         '/register': (context) => const RegisterPage(),
@@ -32,11 +32,11 @@ class MyApp extends StatelessWidget {
         '/home': (context) => const HomePage(),
         '/instruction': (context) => const InstructionPage(),
         '/settings': (context) => const SettingsPage(),
-        '/goals': (context) =>  FitnessHomePage(),
-        '/q19': (context) => CustomizedPlanScreen(),
-        '/q20': (context) => MealPlanScreen(),
-        '/meals': (context) => DailyMealPlan(),
-
+        '/goals': (context) => const FitnessHomePage(),
+        '/q19': (context) => const CustomizedPlanScreen(),
+        '/q20': (context) => const MealPlanScreen(),
+        '/meals': (context) => const DailyMealPlan(),
+        '/loading': (context) => const LoadingScreen(),
       },
     );
   }

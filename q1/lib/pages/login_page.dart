@@ -65,78 +65,93 @@ class _LoginPageState extends State<LoginPage> {
     return Scaffold(
       backgroundColor: Colors.white,
       body: SafeArea(
-        child: Center(
-          child: Form(
-            key: _formKey,
-            child: Column(
-              children: [
-                const SizedBox(height: 50),
-                Image.asset(
-                  'lib/assets/logo.png',
-                  width: 300,
-                  height: 100,
-                ),
-                const SizedBox(height: 30),
-                const Text(
-                  'Welcome back!',
-                  style: TextStyle(
-                    color: Colors.black,
-                    fontSize: 27,
-                    fontWeight: FontWeight.bold,
-                  ),
-                ),
-                const SizedBox(height: 25),
-                const Padding(
-                  padding: EdgeInsets.symmetric(horizontal: 45.0),
-                  child: Align(
-                    alignment: Alignment.centerLeft,
-                    child: Text(
-                      'Sign in',
+        child: SingleChildScrollView(
+          child: Padding(
+            padding: EdgeInsets.only(
+              bottom: MediaQuery.of(context).viewInsets.bottom,
+            ),
+            child: Center(
+              child: Form(
+                key: _formKey,
+                child: Column(
+                  children: [
+                    const SizedBox(height: 50),
+                    Image.asset(
+                      'lib/assets/logo.png',
+                      width: 300,
+                      height: 100,
+                    ),
+                    const SizedBox(height: 30),
+                    const Text(
+                      'Welcome back!',
                       style: TextStyle(
                         color: Colors.black,
-                        fontSize: 28,
+                        fontSize: 27,
                         fontWeight: FontWeight.bold,
                       ),
                     ),
-                  ),
-                ),
-                const SizedBox(height: 15),
+                    const SizedBox(height: 25),
+                    const Padding(
+                      padding: EdgeInsets.symmetric(horizontal: 45.0),
+                      child: Align(
+                        alignment: Alignment.centerLeft,
+                        child: Text(
+                          'Sign in',
+                          style: TextStyle(
+                            color: Colors.black,
+                            fontSize: 28,
+                            fontWeight: FontWeight.bold,
+                          ),
+                        ),
+                      ),
+                    ),
+                    const SizedBox(height: 15),
 
-                // Email text field with validation
-                MyTextField(
-                  controller: usernameController,
-                  hintText: 'Email',
-                  obscureText: false,
-                  validator: _validateEmail,
-                ),
-                const SizedBox(height: 10),
+                    // Email text field with validation
+                    MyTextField(
+                      controller: usernameController,
+                      hintText: 'Email',
+                      obscureText: false,
+                      validator: _validateEmail,
+                    ),
+                    const SizedBox(height: 10),
 
-                // Password text field with validation
-                MyTextField(
-                  controller: passwordController,
-                  hintText: 'Password',
-                  obscureText: true,
-                  validator: _validatePassword,
-                ),
+                    // Password text field with validation
+                    MyTextField(
+                      controller: passwordController,
+                      hintText: 'Password',
+                      obscureText: true,
+                      validator: _validatePassword,
+                    ),
 
-                // Remember me and Forgot Password
-                Padding(
-                  padding: const EdgeInsets.symmetric(horizontal: 35.0),
-                  child: Row(
-                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                    children: [
-                      Row(
+                    // Remember me and Forgot Password
+                    Padding(
+                      padding: const EdgeInsets.symmetric(horizontal: 35.0),
+                      child: Row(
+                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
                         children: [
-                          Checkbox(
-                            value: rememberMe,
-                            onChanged: (bool? value) {
-                              setState(() {
-                                rememberMe = value ?? false;
-                              });
-                            },
+                          Row(
+                            children: [
+                              Checkbox(
+                                value: rememberMe,
+                                onChanged: (bool? value) {
+                                  setState(() {
+                                    rememberMe = value ?? false;
+                                  });
+                                },
+                              ),
+                              const Text(
+                                'Remember me',
+                                style: TextStyle(
+                                  color: Color.fromARGB(255, 128, 127, 127),
+                                  fontSize: 17,
+                                  fontWeight: FontWeight.bold,
+                                ),
+                              ),
+                            ],
                           ),
                           const Text(
-                            'Remember me',
+                            'Forgot Password?',
                             style: TextStyle(
                               color: Color.fromARGB(255, 128, 127, 127),
                               fontSize: 17,
@@ -145,115 +160,107 @@ class _LoginPageState extends State<LoginPage> {
                           ),
                         ],
                       ),
-                      const Text(
-                        'Forgot Password?',
-                        style: TextStyle(
-                          color: Color.fromARGB(255, 128, 127, 127),
-                          fontSize: 17,
-                          fontWeight: FontWeight.bold,
-                        ),
-                      ),
-                    ],
-                  ),
-                ),
-                const SizedBox(height: 5),
+                    ),
+                    const SizedBox(height: 5),
 
-                // Sign in button with form validation check
-                GestureDetector(
-                  onTap: () {
-                    if (_formKey.currentState?.validate() ?? false) {
-                      _loginUser(); // Attempt login with database
-                    }
-                  },
-                  child: Container(
-                    padding: const EdgeInsets.all(12.0),
-                    margin: const EdgeInsets.symmetric(horizontal: 35),
-                    decoration: BoxDecoration(
-                      color: const Color(0xFF21007E),
-                      borderRadius: BorderRadius.circular(50),
-                    ),
-                    child: const Center(
-                      child: Text(
-                        'Sign in',
-                        style: TextStyle(
-                          color: Colors.white,
-                          fontSize: 20,
-                          fontWeight: FontWeight.bold,
+                    // Sign in button with form validation check
+                    GestureDetector(
+                      onTap: () {
+                        if (_formKey.currentState?.validate() ?? false) {
+                          _loginUser(); // Attempt login with database
+                        }
+                      },
+                      child: Container(
+                        padding: const EdgeInsets.all(12.0),
+                        margin: const EdgeInsets.symmetric(horizontal: 35),
+                        decoration: BoxDecoration(
+                          color: const Color(0xFF21007E),
+                          borderRadius: BorderRadius.circular(50),
+                        ),
+                        child: const Center(
+                          child: Text(
+                            'Sign in',
+                            style: TextStyle(
+                              color: Colors.white,
+                              fontSize: 20,
+                              fontWeight: FontWeight.bold,
+                            ),
+                          ),
                         ),
                       ),
                     ),
-                  ),
-                ),
-                const SizedBox(height: 15),
-                Padding(
-                  padding: const EdgeInsets.symmetric(horizontal: 70.0),
-                  child: Row(
-                    children: [
-                      Expanded(
-                        child: Divider(
-                          color: Colors.grey[400],
-                          thickness: 1,
-                        ),
+                    const SizedBox(height: 15),
+                    Padding(
+                      padding: const EdgeInsets.symmetric(horizontal: 70.0),
+                      child: Row(
+                        children: [
+                          Expanded(
+                            child: Divider(
+                              color: Colors.grey[400],
+                              thickness: 1,
+                            ),
+                          ),
+                          const Padding(
+                            padding: EdgeInsets.symmetric(horizontal: 10.0),
+                            child: Text(
+                              'or continue with',
+                              style: TextStyle(
+                                  color: Color.fromARGB(255, 77, 76, 76)),
+                            ),
+                          ),
+                          Expanded(
+                            child: Divider(
+                              color: Colors.grey[400],
+                              thickness: 1,
+                            ),
+                          ),
+                        ],
                       ),
-                      const Padding(
-                        padding: EdgeInsets.symmetric(horizontal: 10.0),
-                        child: Text(
-                          'or continue with',
-                          style: TextStyle(
-                              color: Color.fromARGB(255, 77, 76, 76)),
-                        ),
-                      ),
-                      Expanded(
-                        child: Divider(
-                          color: Colors.grey[400],
-                          thickness: 1,
-                        ),
-                      ),
-                    ],
-                  ),
-                ),
-                const SizedBox(height: 16),
-                const Row(
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  children: [
-                    AuthButton(imagePath: 'lib/assets/google.png'),
-                    SizedBox(width: 20),
-                    AuthButton(imagePath: 'lib/assets/apple.png'),
-                    SizedBox(width: 20),
-                    AuthButton(imagePath: 'lib/assets/microsoft.png'),
-                  ],
-                ),
-                const SizedBox(height: 170),
-                TextButton(
-                  onPressed: null,
-                  child: RichText(
-                    text: TextSpan(
+                    ),
+                    const SizedBox(height: 16),
+                    const Row(
+                      mainAxisAlignment: MainAxisAlignment.center,
                       children: [
-                        const TextSpan(
-                          text: "Don't have an account? ",
-                          style: TextStyle(
-                            color: Color.fromARGB(255, 128, 127, 127),
-                            fontSize: 17,
-                            fontWeight: FontWeight.bold,
-                          ),
-                        ),
-                        TextSpan(
-                          text: "Sign up",
-                          style: const TextStyle(
-                            color: Color(0xFF21007E),
-                            fontSize: 17,
-                            fontWeight: FontWeight.bold,
-                          ),
-                          recognizer: TapGestureRecognizer()
-                            ..onTap = () {
-                              Navigator.pushNamed(context, '/register');
-                            },
-                        ),
+                        AuthButton(imagePath: 'lib/assets/google.png'),
+                        SizedBox(width: 20),
+                        AuthButton(imagePath: 'lib/assets/apple.png'),
+                        SizedBox(width: 20),
+                        AuthButton(imagePath: 'lib/assets/microsoft.png'),
                       ],
                     ),
-                  ),
+                    const SizedBox(height: 170),
+                    TextButton(
+                      onPressed: null,
+                      child: RichText(
+                        text: TextSpan(
+                          children: [
+                            const TextSpan(
+                              text: "Don't have an account? ",
+                              style: TextStyle(
+                                color: Color.fromARGB(255, 128, 127, 127),
+                                fontSize: 17,
+                                fontWeight: FontWeight.bold,
+                              ),
+                            ),
+                            TextSpan(
+                              text: "Sign up",
+                              style: const TextStyle(
+                                color: Color(0xFF21007E),
+                                fontSize: 17,
+                                fontWeight: FontWeight.bold,
+                              ),
+                              recognizer: TapGestureRecognizer()
+                                ..onTap = () {
+                                  Navigator.pushNamed(context, '/register');
+                                },
+                            ),
+                          ],
+                        ),
+                      ),
+                    ),
+                  ],
                 ),
-              ],
+              ),
             ),
           ),
         ),

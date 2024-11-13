@@ -99,212 +99,210 @@ class _RegisterPageState extends State<RegisterPage> {
 
   @override
   Widget build(BuildContext context) {
+    final screenSize = MediaQuery.of(context).size;
+
     return Scaffold(
       backgroundColor: Colors.white,
       body: SafeArea(
-        child: LayoutBuilder(
-          builder: (context, constraints) {
-            return SingleChildScrollView(
-              child: Center(
-                child: Form(
-                  key: _formKey,
-                  child: Column(
-                    children: [
-                      SizedBox(height: constraints.maxHeight * 0.05),
-                      Image.asset(
-                        'lib/assets/logo.png',
-                        width: constraints.maxWidth * 0.75,
-                        height: constraints.maxHeight * 0.15,
-                      ),
-                      SizedBox(height: constraints.maxHeight * 0.03),
-                      const Text(
-                        'Let\'s Begin The Journey!',
+        child: SingleChildScrollView(
+          child: Center(
+            child: Form(
+              key: _formKey,
+              child: Column(
+                children: [
+                  SizedBox(height: screenSize.height * 0.05),
+                  Image.asset(
+                    'lib/assets/logo.png',
+                    width: screenSize.width * 0.75,
+                    height: screenSize.height * 0.15,
+                  ),
+                  SizedBox(height: screenSize.height * 0.03),
+                  const Text(
+                    'Let\'s Begin The Journey!',
+                    style: TextStyle(
+                      color: Colors.black,
+                      fontSize: 27,
+                      fontWeight: FontWeight.bold,
+                    ),
+                  ),
+                  SizedBox(height: screenSize.height * 0.025),
+                  Padding(
+                    padding: EdgeInsets.symmetric(horizontal: screenSize.width * 0.1),
+                    child: Align(
+                      alignment: Alignment.centerLeft,
+                      child: const Text(
+                        'Sign up',
                         style: TextStyle(
                           color: Colors.black,
-                          fontSize: 27,
+                          fontSize: 28,
                           fontWeight: FontWeight.bold,
                         ),
                       ),
-                      SizedBox(height: constraints.maxHeight * 0.025),
-                      Padding(
-                        padding: EdgeInsets.symmetric(horizontal: constraints.maxWidth * 0.1),
-                        child: Align(
-                          alignment: Alignment.centerLeft,
-                          child: const Text(
-                            'Sign up',
+                    ),
+                  ),
+                  SizedBox(height: screenSize.height * 0.015),
+
+                  // Name field
+                  MyTextField(
+                    controller: usernameController,
+                    hintText: 'Name',
+                    obscureText: false,
+                    validator: _validateName,
+                  ),
+                  SizedBox(height: screenSize.height * 0.01),
+
+                  // Email field
+                  MyTextField(
+                    controller: emailController,
+                    hintText: 'Email',
+                    obscureText: false,
+                    validator: _validateEmail,
+                  ),
+                  SizedBox(height: screenSize.height * 0.01),
+
+                  // Password field
+                  MyTextField(
+                    controller: passwordController,
+                    hintText: 'Password',
+                    obscureText: true,
+                    validator: _validatePassword,
+                  ),
+                  SizedBox(height: screenSize.height * 0.01),
+
+                  // Confirm Password field
+                  MyTextField(
+                    controller: confirmPasswordController,
+                    hintText: 'Confirm Password',
+                    obscureText: true,
+                    validator: _validateConfirmPassword,
+                  ),
+
+                  // Remember me checkbox
+                  Padding(
+                    padding: EdgeInsets.symmetric(horizontal: screenSize.width * 0.1),
+                    child: Row(
+                      children: [
+                        Checkbox(
+                          value: rememberMe,
+                          onChanged: (bool? value) {
+                            setState(() {
+                              rememberMe = value ?? false;
+                            });
+                          },
+                        ),
+                        const Text(
+                          'Remember me',
+                          style: TextStyle(
+                            color: Color.fromARGB(255, 128, 127, 127),
+                            fontSize: 17,
+                            fontWeight: FontWeight.bold,
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                  SizedBox(height: screenSize.height * 0.005),
+
+                  // Sign up button
+                  GestureDetector(
+                    onTap: () {
+                      if (_formKey.currentState?.validate() ?? false) {
+                        registerUser(); // Register the user on successful validation
+                      }
+                    },
+                    child: Container(
+                      padding: const EdgeInsets.all(12.0),
+                      margin: EdgeInsets.symmetric(horizontal: screenSize.width * 0.1),
+                      decoration: BoxDecoration(
+                        color: const Color(0xFF21007E),
+                        borderRadius: BorderRadius.circular(50),
+                      ),
+                      child: const Center(
+                        child: Text(
+                          'Sign up',
+                          style: TextStyle(
+                            color: Colors.white,
+                            fontSize: 20,
+                            fontWeight: FontWeight.bold,
+                          ),
+                        ),
+                      ),
+                    ),
+                  ),
+                  SizedBox(height: screenSize.height * 0.015),
+                  Padding(
+                    padding: EdgeInsets.symmetric(horizontal: screenSize.width * 0.2),
+                    child: Row(
+                      children: [
+                        Expanded(
+                          child: Divider(
+                            color: Colors.grey[400],
+                            thickness: 1,
+                          ),
+                        ),
+                        const Padding(
+                          padding: EdgeInsets.symmetric(horizontal: 10.0),
+                          child: Text(
+                            'or continue with',
+                            style: TextStyle(color: Color.fromARGB(255, 77, 76, 76)),
+                          ),
+                        ),
+                        Expanded(
+                          child: Divider(
+                            color: Colors.grey[400],
+                            thickness: 1,
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                  SizedBox(height: screenSize.height * 0.016),
+
+                  // Third-party login buttons
+                  const Row(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: [
+                      AuthButton(imagePath: 'lib/assets/google.png'),
+                      SizedBox(width: 20),
+                      AuthButton(imagePath: 'lib/assets/apple.png'),
+                      SizedBox(width: 20),
+                      AuthButton(imagePath: 'lib/assets/microsoft.png'),
+                    ],
+                  ),
+                  SizedBox(height: screenSize.height * 0.05),
+                  TextButton(
+                    onPressed: null,
+                    child: RichText(
+                      text: TextSpan(
+                        children: [
+                          const TextSpan(
+                            text: "Already have an account? ",
                             style: TextStyle(
-                              color: Colors.black,
-                              fontSize: 28,
+                              color: Color.fromARGB(255, 128, 127, 127),
+                              fontSize: 17,
                               fontWeight: FontWeight.bold,
                             ),
                           ),
-                        ),
-                      ),
-                      SizedBox(height: constraints.maxHeight * 0.015),
-
-                      // Name field
-                      MyTextField(
-                        controller: usernameController,
-                        hintText: 'Name',
-                        obscureText: false,
-                        validator: _validateName,
-                      ),
-                      SizedBox(height: constraints.maxHeight * 0.01),
-
-                      // Email field
-                      MyTextField(
-                        controller: emailController,
-                        hintText: 'Email',
-                        obscureText: false,
-                        validator: _validateEmail,
-                      ),
-                      SizedBox(height: constraints.maxHeight * 0.01),
-
-                      // Password field
-                      MyTextField(
-                        controller: passwordController,
-                        hintText: 'Password',
-                        obscureText: true,
-                        validator: _validatePassword,
-                      ),
-                      SizedBox(height: constraints.maxHeight * 0.01),
-
-                      // Confirm Password field
-                      MyTextField(
-                        controller: confirmPasswordController,
-                        hintText: 'Confirm Password',
-                        obscureText: true,
-                        validator: _validateConfirmPassword,
-                      ),
-
-                      // Remember me checkbox
-                      Padding(
-                        padding: EdgeInsets.symmetric(horizontal: constraints.maxWidth * 0.1),
-                        child: Row(
-                          children: [
-                            Checkbox(
-                              value: rememberMe,
-                              onChanged: (bool? value) {
-                                setState(() {
-                                  rememberMe = value ?? false;
-                                });
+                          TextSpan(
+                            text: "Sign in",
+                            style: const TextStyle(
+                              color: Color(0xFF21007E),
+                              fontSize: 17,
+                              fontWeight: FontWeight.bold,
+                            ),
+                            recognizer: TapGestureRecognizer()
+                              ..onTap = () {
+                                Navigator.pushNamed(context, '/login');
                               },
-                            ),
-                            const Text(
-                              'Remember me',
-                              style: TextStyle(
-                                color: Color.fromARGB(255, 128, 127, 127),
-                                fontSize: 17,
-                                fontWeight: FontWeight.bold,
-                              ),
-                            ),
-                          ],
-                        ),
-                      ),
-                      SizedBox(height: constraints.maxHeight * 0.005),
-
-                      // Sign up button
-                      GestureDetector(
-                        onTap: () {
-                          if (_formKey.currentState?.validate() ?? false) {
-                            registerUser(); // Register the user on successful validation
-                          }
-                        },
-                        child: Container(
-                          padding: const EdgeInsets.all(12.0),
-                          margin: EdgeInsets.symmetric(horizontal: constraints.maxWidth * 0.1),
-                          decoration: BoxDecoration(
-                            color: const Color(0xFF21007E),
-                            borderRadius: BorderRadius.circular(50),
                           ),
-                          child: const Center(
-                            child: Text(
-                              'Sign up',
-                              style: TextStyle(
-                                color: Colors.white,
-                                fontSize: 20,
-                                fontWeight: FontWeight.bold,
-                              ),
-                            ),
-                          ),
-                        ),
-                      ),
-                      SizedBox(height: constraints.maxHeight * 0.015),
-                      Padding(
-                        padding: EdgeInsets.symmetric(horizontal: constraints.maxWidth * 0.2),
-                        child: Row(
-                          children: [
-                            Expanded(
-                              child: Divider(
-                                color: Colors.grey[400],
-                                thickness: 1,
-                              ),
-                            ),
-                            const Padding(
-                              padding: EdgeInsets.symmetric(horizontal: 10.0),
-                              child: Text(
-                                'or continue with',
-                                style: TextStyle(color: Color.fromARGB(255, 77, 76, 76)),
-                              ),
-                            ),
-                            Expanded(
-                              child: Divider(
-                                color: Colors.grey[400],
-                                thickness: 1,
-                              ),
-                            ),
-                          ],
-                        ),
-                      ),
-                      SizedBox(height: constraints.maxHeight * 0.016),
-
-                      // Third-party login buttons
-                      const Row(
-                        mainAxisAlignment: MainAxisAlignment.center,
-                        children: [
-                          AuthButton(imagePath: 'lib/assets/google.png'),
-                          SizedBox(width: 20),
-                          AuthButton(imagePath: 'lib/assets/apple.png'),
-                          SizedBox(width: 20),
-                          AuthButton(imagePath: 'lib/assets/microsoft.png'),
                         ],
                       ),
-                      SizedBox(height: constraints.maxHeight * 0.05),
-                      TextButton(
-                        onPressed: null,
-                        child: RichText(
-                          text: TextSpan(
-                            children: [
-                              const TextSpan(
-                                text: "Already have an account? ",
-                                style: TextStyle(
-                                  color: Color.fromARGB(255, 128, 127, 127),
-                                  fontSize: 17,
-                                  fontWeight: FontWeight.bold,
-                                ),
-                              ),
-                              TextSpan(
-                                text: "Sign in",
-                                style: const TextStyle(
-                                  color: Color(0xFF21007E),
-                                  fontSize: 17,
-                                  fontWeight: FontWeight.bold,
-                                ),
-                                recognizer: TapGestureRecognizer()
-                                  ..onTap = () {
-                                    Navigator.pushNamed(context, '/login');
-                                  },
-                              ),
-                            ],
-                          ),
-                        ),
-                      ),
-                    ],
+                    ),
                   ),
-                ),
+                ],
               ),
-            );
-          },
+            ),
+          ),
         ),
       ),
     );
