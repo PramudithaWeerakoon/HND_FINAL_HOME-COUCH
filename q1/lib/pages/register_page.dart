@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/gestures.dart';
 import 'database_helper.dart'; // Import the DatabaseHelper file
+import 'q1.dart';
 
 class RegisterPage extends StatefulWidget {
   const RegisterPage({super.key});
@@ -83,18 +84,27 @@ class _RegisterPageState extends State<RegisterPage> {
     };
 
     try {
+      // Register the user with email and password
       await dbHelper.registerUser(
           emailController.text, passwordController.text);
 
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(content: Text('Registration successful!')),
       );
-      Navigator.pushNamed(context, '/question1'); // Navigate to next page
+
+      // Pass the email to the next screen (Q1Page)
+      Navigator.push(
+        context,
+        MaterialPageRoute(
+          builder: (context) => Q1Page(userEmail: emailController.text),
+        ),
+      );
     } catch (e) {
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(content: Text('Error: ${e.toString()}')),
       );
     }
+
   }
 
   @override
