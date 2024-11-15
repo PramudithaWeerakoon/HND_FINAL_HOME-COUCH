@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'database_helper.dart';
 import 'package:flutter/gestures.dart';
 
 class LoginPage extends StatefulWidget {
@@ -43,22 +42,7 @@ class _LoginPageState extends State<LoginPage> {
     return null;
   }
 
-  // Login function
-  Future<void> _loginUser() async {
-    final dbHelper = DatabaseHelper();
-    bool loginSuccess = await dbHelper.loginUser(
-      usernameController.text,
-      passwordController.text,
-    );
 
-    if (loginSuccess) {
-      Navigator.pushNamed(context, '/question1'); // Navigate on successful login
-    } else {
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Invalid email or password')),
-      );
-    }
-  }
 
   @override
   Widget build(BuildContext context) {
@@ -167,7 +151,7 @@ class _LoginPageState extends State<LoginPage> {
                     GestureDetector(
                       onTap: () {
                         if (_formKey.currentState?.validate() ?? false) {
-                          _loginUser(); // Attempt login with database
+                           // Attempt login with database
                         }
                       },
                       child: Container(

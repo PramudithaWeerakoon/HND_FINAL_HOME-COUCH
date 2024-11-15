@@ -1,26 +1,21 @@
 import 'package:flutter/material.dart';
-import 'q3.dart'; // Assuming this is the next page after gender selection
-import 'database_helper.dart'; // Import your DatabaseHelper for DB operations
+import 'q3.dart';
 
 enum Gender { male, female }
 
 class Q2Page extends StatefulWidget {
-  final String currentUserEmail; // Expect email as a named parameter
-
-  const Q2Page({super.key, required this.currentUserEmail});
+  const Q2Page({super.key});
 
   @override
   _Q2PageState createState() => _Q2PageState();
 }
 
-
 class _Q2PageState extends State<Q2Page> {
   Gender? selectedGender; // Track the selected gender
-  final DatabaseHelper dbHelper = DatabaseHelper();
 
-  // Function to toggle the gender selection
   void toggleGender(Gender gender) {
     setState(() {
+      // Toggle the selected gender
       if (selectedGender == gender) {
         selectedGender = null; // Deselect if already selected
       } else {
@@ -29,39 +24,13 @@ class _Q2PageState extends State<Q2Page> {
     });
   }
 
-  // Go back to the previous page (Q1)
   void goBackToQ1() {
+    // Handle the action to go back to Q1
     Navigator.pop(context);
   }
 
-  // Function to navigate to the next question page
-  void goToNextQuestion() async {
-    if (selectedGender != null) {
-      String genderStr = selectedGender == Gender.male ? 'Male' : 'Female';
-
-      try {
-        // Save the selected gender to the database
-        await dbHelper.saveUserGender(
-            widget.currentUserEmail, genderStr); // Pass the email and gender
-
-        // Navigate to the next question
-        
-        Navigator.push(
-          context,
-          MaterialPageRoute(
-              builder: (context) =>
-                  const WeightInputScreen()), // Replace with actual next screen
-        );
-      } catch (e) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text("Failed to save gender: $e")),
-        );
-      }
-    } else {
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text("Please select a gender")),
-      );
-    }
+  void goToNextQuestion() {
+    // Handle the action for going to the next question
   }
 
   @override
@@ -72,8 +41,10 @@ class _Q2PageState extends State<Q2Page> {
         child: Padding(
           padding: const EdgeInsets.all(16.0),
           child: Column(
-            mainAxisAlignment: MainAxisAlignment.center,
-            crossAxisAlignment: CrossAxisAlignment.center,
+            mainAxisAlignment:
+                MainAxisAlignment.center, // Center everything vertically
+            crossAxisAlignment:
+                CrossAxisAlignment.center, // Center everything horizontally
             children: [
               const SizedBox(height: 50),
               const Text(
@@ -85,17 +56,18 @@ class _Q2PageState extends State<Q2Page> {
                   color: Colors.black,
                 ),
               ),
-              const SizedBox(height: 60),
+              const SizedBox(height: 60), // Space between title and question
               const Text(
                 'What is your gender?',
                 textAlign: TextAlign.center,
                 style: TextStyle(
                   fontSize: 30,
-                  fontWeight: FontWeight.w600,
+                  fontWeight: FontWeight.w600, // Bold the question
                   color: Colors.black,
                 ),
               ),
-              const SizedBox(height: 40),
+              const SizedBox(height: 40), // Space between question and buttons
+
               // Gender buttons container
               Column(
                 mainAxisAlignment: MainAxisAlignment.center,
@@ -104,32 +76,36 @@ class _Q2PageState extends State<Q2Page> {
                     imagePath: 'lib/assets/male.png',
                     label: 'Male',
                     isSelected: selectedGender == Gender.male,
-                    onPressed: () => toggleGender(Gender.male),
+                    onPressed: () =>
+                        toggleGender(Gender.male), // Toggle male selection
                   ),
-                  const SizedBox(height: 20),
+                  const SizedBox(height: 20), // Space between the buttons
                   GenderOptionButton(
                     imagePath: 'lib/assets/female.png',
                     label: 'Female',
                     isSelected: selectedGender == Gender.female,
-                    onPressed: () => toggleGender(Gender.female),
+                    onPressed: () =>
+                        toggleGender(Gender.female), // Toggle female selection
                   ),
                 ],
               ),
-              const Spacer(),
+              const Spacer(), // This spacer will push the 2/12 text to the bottom
               const Row(
-                mainAxisAlignment: MainAxisAlignment.center,
+                mainAxisAlignment:
+                    MainAxisAlignment.center, // Center the "2/12" text
                 children: [
                   Text(
                     "2/12",
                     style: TextStyle(
                       fontSize: 28,
-                      fontWeight: FontWeight.bold,
+                      fontWeight: FontWeight.bold, // Make "2/12" bold
                       color: Colors.black,
                     ),
                   ),
                 ],
               ),
-              const SizedBox(height: 20),
+              const SizedBox(
+                  height: 20), // Add a small gap between the text and FAB
             ],
           ),
         ),
@@ -138,10 +114,10 @@ class _Q2PageState extends State<Q2Page> {
       floatingActionButton: Stack(
         children: [
           Positioned(
-            left: 16,
-            bottom: 32,
+            left: 16, // Position the back button on the left
+            bottom: 32, // Adjust bottom position as needed
             child: FloatingActionButton(
-              heroTag: 'back_to_q1',
+              heroTag: 'back_to_q1', // Unique tag for the left FAB
               backgroundColor: const Color(0xFF21007E),
               shape: RoundedRectangleBorder(
                 borderRadius: BorderRadius.circular(100),
@@ -152,15 +128,22 @@ class _Q2PageState extends State<Q2Page> {
           ),
           if (selectedGender != null) // Only show if a gender is selected
             Positioned(
-              right: 16,
-              bottom: 32,
+              right: 16, // Position the next button on the right
+              bottom: 32, // Adjust bottom position as needed
               child: FloatingActionButton(
-                heroTag: 'next_question',
+                heroTag: 'next_question', // Unique tag for the right FAB
                 backgroundColor: const Color(0xFF21007E),
                 shape: RoundedRectangleBorder(
                   borderRadius: BorderRadius.circular(100),
                 ),
-                onPressed: goToNextQuestion,
+                onPressed: () {
+                  // Navigate to q2.dart when the button is pressed
+                  Navigator.push(
+                    context,
+                    MaterialPageRoute(
+                        builder: (context) => const WeightInputScreen()),
+                  );
+                },
                 child: const Icon(Icons.arrow_forward, color: Colors.white),
               ),
             ),
@@ -201,7 +184,7 @@ class GenderOptionButton extends StatelessWidget {
                   begin: Alignment.topCenter,
                   end: Alignment.bottomCenter,
                 ),
-          borderRadius: BorderRadius.circular(30),
+          borderRadius: BorderRadius.circular(30), // Set curve to 30
           border: isSelected
               ? Border.all(
                   color:
@@ -214,30 +197,31 @@ class GenderOptionButton extends StatelessWidget {
                     color: label == 'Male'
                         ? Color(0xFF68A4FF).withOpacity(0.4)
                         : Color(0xFFF263E9).withOpacity(0.4),
-                    offset: Offset(0, 0),
-                    blurRadius: 44,
-                    spreadRadius: 4,
+                    offset: Offset(0, 0), // Position x=0, y=0
+                    blurRadius: 44, // Blur effect
+                    spreadRadius: 4, // Spread effect
                   ),
                 ]
               : [
                   BoxShadow(
-                    color: Color(0xFF000000).withOpacity(0.25),
-                    offset: Offset(0, 0),
-                    blurRadius: 4,
-                    spreadRadius: 0,
+                    color: Color(0xFF000000)
+                        .withOpacity(0.25), // Black with 25% opacity
+                    offset: Offset(0, 0), // Position x=0, y=0
+                    blurRadius: 4, // Blur effect for unselected state
+                    spreadRadius: 0, // No spread effect for unselected state
                   ),
                 ],
         ),
         child: SizedBox(
-          width: 160,
-          height: 160,
+          width: 160, // Box width
+          height: 160, // Box height
           child: Center(
             child: Column(
               mainAxisAlignment: MainAxisAlignment.center,
               children: [
                 Image.asset(
                   imagePath,
-                  width: 85,
+                  width: 85, // Adjust image size as needed
                   height: 85,
                 ),
                 const SizedBox(height: 10),
