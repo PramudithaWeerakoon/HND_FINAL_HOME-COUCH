@@ -11,21 +11,25 @@ import 'pages/mealoptions.dart';
 import 'pages/mealplan.dart';
 import 'pages/goals.dart';
 import 'pages/loading.dart';
+import 'pages/db_connection.dart'; 
 
+Future<void> main() async {
 
-void main() {
+  final db = DatabaseConnection();
+  await db.openConnection();
+  await db.closeConnection();
+
+  // Run the Flutter app
   runApp(const MyApp());
 }
 
 class MyApp extends StatelessWidget {
   const MyApp({super.key});
 
-  // This widget is the root of your application.
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
       initialRoute: '/loading',
-
       routes: {
         '/login': (context) => const LoginPage(),
         '/register': (context) => const RegisterPage(),
@@ -34,12 +38,11 @@ class MyApp extends StatelessWidget {
         '/home': (context) => const HomePage(),
         '/instruction': (context) => const InstructionPage(),
         '/settings': (context) => const SettingsPage(),
-        '/goals': (context) =>  FitnessHomePage(),
+        '/goals': (context) => FitnessHomePage(),
         '/q19': (context) => CustomizedPlanScreen(),
         '/q20': (context) => MealPlanScreen(),
         '/meals': (context) => DailyMealPlan(),
         '/loading': (context) => const LoadingScreen(),
-
       },
     );
   }
