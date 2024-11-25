@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-// Import the q2.dart page
+import 'db_connection.dart';
 
 class Q1Page extends StatefulWidget {
   const Q1Page({super.key});
@@ -10,6 +10,7 @@ class Q1Page extends StatefulWidget {
 
 class _Q1PageState extends State<Q1Page> {
   int selectedItemIndex = 0; // Start with the initial index for age 10
+  final DatabaseConnection _dbConnection = DatabaseConnection();
 
   @override
   Widget build(BuildContext context) {
@@ -145,9 +146,35 @@ class _Q1PageState extends State<Q1Page> {
           shape: RoundedRectangleBorder(
             borderRadius: BorderRadius.circular(100),
           ),
-          onPressed: () {
-            // Navigate using named route to q2 page
-            Navigator.pushNamed(context, '/question2');
+          onPressed: () async {
+            final age = 10 + selectedItemIndex; // Get the selected age
+            final email =
+                SessionManager.getUserEmail(); // Get the logged-in email
+
+            if (email != null) {
+              try {
+                // Save age to database
+                await _dbConnection.updateAge(age);
+                // Navigate to the next page
+                Navigator.pushNamed(context, '/question2');
+              } catch (e) {
+                // Handle database errors
+                ScaffoldMessenger.of(context).showSnackBar(
+                  SnackBar(
+                    content: Text('Error saving age: $e'),
+                    backgroundColor: Colors.red,
+                  ),
+                );
+              }
+            } else {
+              // Show error if no user is logged in
+              ScaffoldMessenger.of(context).showSnackBar(
+                const SnackBar(
+                  content: Text('No logged-in user found.'),
+                  backgroundColor: Colors.red,
+                ),
+              );
+            }
           },
           child: const Icon(Icons.arrow_forward, color: Colors.white),
         ),

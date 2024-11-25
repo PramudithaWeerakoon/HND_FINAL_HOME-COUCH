@@ -73,7 +73,7 @@ class _RegisterPageState extends State<RegisterPage> {
         );
 
         // Navigate to the next screen
-        Navigator.pushNamed(context, '/login');
+        Navigator.pushNamed(context, '/question1');
       } catch (e) {
         // Handle any errors (e.g., if the email is already in use)
         ScaffoldMessenger.of(context).showSnackBar(
