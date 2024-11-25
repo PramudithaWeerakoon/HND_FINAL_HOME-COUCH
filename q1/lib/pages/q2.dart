@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'db_connection.dart';
 import 'q3.dart';
 
 enum Gender { male, female }
@@ -11,40 +12,64 @@ class Q2Page extends StatefulWidget {
 }
 
 class _Q2PageState extends State<Q2Page> {
-  Gender? selectedGender; // Track the selected gender
+  Gender? selectedGender;
 
   void toggleGender(Gender gender) {
     setState(() {
-      // Toggle the selected gender
       if (selectedGender == gender) {
-        selectedGender = null; // Deselect if already selected
+        selectedGender = null;
       } else {
-        selectedGender = gender; // Select the new gender
+        selectedGender = gender;
       }
     });
   }
 
   void goBackToQ1() {
-    // Handle the action to go back to Q1
     Navigator.pop(context);
   }
 
-  void goToNextQuestion() {
-    // Handle the action for going to the next question
+  Future<void> updateGender(Gender gender) async {
+    final databaseConnection = DatabaseConnection();
+    try {
+      await databaseConnection.updateGender(
+        gender == Gender.male ? 'male' : 'female',
+      );
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text('Gender updated successfully.')),
+      );
+    } catch (e) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text('Failed to update gender.')),
+      );
+    }
+  }
+
+  void goToNextQuestion() async {
+    if (selectedGender == null) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text('Please select your gender.')),
+      );
+      return;
+    }
+
+    await updateGender(selectedGender!);
+
+    Navigator.push(
+      context,
+      MaterialPageRoute(builder: (context) => const WeightInputScreen()),
+    );
   }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: const Color(0xFFF2F6FF), // Light background color
+      backgroundColor: const Color(0xFFF2F6FF),
       body: SafeArea(
         child: Padding(
           padding: const EdgeInsets.all(16.0),
           child: Column(
-            mainAxisAlignment:
-                MainAxisAlignment.center, // Center everything vertically
-            crossAxisAlignment:
-                CrossAxisAlignment.center, // Center everything horizontally
+            mainAxisAlignment: MainAxisAlignment.center,
+            crossAxisAlignment: CrossAxisAlignment.center,
             children: [
               const SizedBox(height: 50),
               const Text(
@@ -56,19 +81,17 @@ class _Q2PageState extends State<Q2Page> {
                   color: Colors.black,
                 ),
               ),
-              const SizedBox(height: 60), // Space between title and question
+              const SizedBox(height: 60),
               const Text(
                 'What is your gender?',
                 textAlign: TextAlign.center,
                 style: TextStyle(
                   fontSize: 30,
-                  fontWeight: FontWeight.w600, // Bold the question
+                  fontWeight: FontWeight.w600,
                   color: Colors.black,
                 ),
               ),
-              const SizedBox(height: 40), // Space between question and buttons
-
-              // Gender buttons container
+              const SizedBox(height: 40),
               Column(
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [
@@ -76,36 +99,32 @@ class _Q2PageState extends State<Q2Page> {
                     imagePath: 'lib/assets/male.png',
                     label: 'Male',
                     isSelected: selectedGender == Gender.male,
-                    onPressed: () =>
-                        toggleGender(Gender.male), // Toggle male selection
+                    onPressed: () => toggleGender(Gender.male),
                   ),
-                  const SizedBox(height: 20), // Space between the buttons
+                  const SizedBox(height: 20),
                   GenderOptionButton(
                     imagePath: 'lib/assets/female.png',
                     label: 'Female',
                     isSelected: selectedGender == Gender.female,
-                    onPressed: () =>
-                        toggleGender(Gender.female), // Toggle female selection
+                    onPressed: () => toggleGender(Gender.female),
                   ),
                 ],
               ),
-              const Spacer(), // This spacer will push the 2/12 text to the bottom
+              const Spacer(),
               const Row(
-                mainAxisAlignment:
-                    MainAxisAlignment.center, // Center the "2/12" text
+                mainAxisAlignment: MainAxisAlignment.center,
                 children: [
                   Text(
                     "2/12",
                     style: TextStyle(
                       fontSize: 28,
-                      fontWeight: FontWeight.bold, // Make "2/12" bold
+                      fontWeight: FontWeight.bold,
                       color: Colors.black,
                     ),
                   ),
                 ],
               ),
-              const SizedBox(
-                  height: 20), // Add a small gap between the text and FAB
+              const SizedBox(height: 20),
             ],
           ),
         ),
@@ -114,10 +133,10 @@ class _Q2PageState extends State<Q2Page> {
       floatingActionButton: Stack(
         children: [
           Positioned(
-            left: 16, // Position the back button on the left
-            bottom: 32, // Adjust bottom position as needed
+            left: 16,
+            bottom: 32,
             child: FloatingActionButton(
-              heroTag: 'back_to_q1', // Unique tag for the left FAB
+              heroTag: 'back_to_q1',
               backgroundColor: const Color(0xFF21007E),
               shape: RoundedRectangleBorder(
                 borderRadius: BorderRadius.circular(100),
@@ -126,24 +145,17 @@ class _Q2PageState extends State<Q2Page> {
               child: const Icon(Icons.arrow_back, color: Colors.white),
             ),
           ),
-          if (selectedGender != null) // Only show if a gender is selected
+          if (selectedGender != null)
             Positioned(
-              right: 16, // Position the next button on the right
-              bottom: 32, // Adjust bottom position as needed
+              right: 16,
+              bottom: 32,
               child: FloatingActionButton(
-                heroTag: 'next_question', // Unique tag for the right FAB
+                heroTag: 'next_question',
                 backgroundColor: const Color(0xFF21007E),
                 shape: RoundedRectangleBorder(
                   borderRadius: BorderRadius.circular(100),
                 ),
-                onPressed: () {
-                  // Navigate to q2.dart when the button is pressed
-                  Navigator.push(
-                    context,
-                    MaterialPageRoute(
-                        builder: (context) => const WeightInputScreen()),
-                  );
-                },
+                onPressed: goToNextQuestion,
                 child: const Icon(Icons.arrow_forward, color: Colors.white),
               ),
             ),
@@ -154,9 +166,9 @@ class _Q2PageState extends State<Q2Page> {
 }
 
 class GenderOptionButton extends StatelessWidget {
-  final String imagePath; // New parameter for image path
+  final String imagePath;
   final String label;
-  final bool isSelected; // Parameter to track selection
+  final bool isSelected;
   final VoidCallback onPressed;
 
   const GenderOptionButton({
@@ -184,7 +196,7 @@ class GenderOptionButton extends StatelessWidget {
                   begin: Alignment.topCenter,
                   end: Alignment.bottomCenter,
                 ),
-          borderRadius: BorderRadius.circular(30), // Set curve to 30
+          borderRadius: BorderRadius.circular(30),
           border: isSelected
               ? Border.all(
                   color:
@@ -197,42 +209,35 @@ class GenderOptionButton extends StatelessWidget {
                     color: label == 'Male'
                         ? Color(0xFF68A4FF).withOpacity(0.4)
                         : Color(0xFFF263E9).withOpacity(0.4),
-                    offset: Offset(0, 0), // Position x=0, y=0
-                    blurRadius: 44, // Blur effect
-                    spreadRadius: 4, // Spread effect
+                    offset: Offset(0, 0),
+                    blurRadius: 44,
+                    spreadRadius: 4,
                   ),
                 ]
               : [
                   BoxShadow(
-                    color: Color(0xFF000000)
-                        .withOpacity(0.25), // Black with 25% opacity
-                    offset: Offset(0, 0), // Position x=0, y=0
-                    blurRadius: 4, // Blur effect for unselected state
-                    spreadRadius: 0, // No spread effect for unselected state
+                    color: Color(0xFF000000).withOpacity(0.25),
+                    offset: Offset(0, 0),
+                    blurRadius: 4,
+                    spreadRadius: 0,
                   ),
                 ],
         ),
-        child: SizedBox(
-          width: 160, // Box width
-          height: 160, // Box height
-          child: Center(
-            child: Column(
-              mainAxisAlignment: MainAxisAlignment.center,
-              children: [
-                Image.asset(
-                  imagePath,
-                  width: 85, // Adjust image size as needed
-                  height: 85,
-                ),
-                const SizedBox(height: 10),
-                Text(
-                  label,
-                  style: const TextStyle(
-                      fontSize: 18, fontWeight: FontWeight.bold),
-                ),
-              ],
+        padding: const EdgeInsets.symmetric(vertical: 15, horizontal: 30),
+        child: Row(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            Image.asset(imagePath, height: 60),
+            const SizedBox(width: 10),
+            Text(
+              label,
+              style: const TextStyle(
+                fontSize: 24,
+                fontWeight: FontWeight.w600,
+                color: Colors.black,
+              ),
             ),
-          ),
+          ],
         ),
       ),
     );

@@ -53,6 +53,8 @@ class DatabaseConnection {
     }
   }
 
+  
+
   // Method to insert a user into the database
   Future<void> insertUser(String name, String email, String password) async {
     final conn = await getConnection();
@@ -111,6 +113,24 @@ class DatabaseConnection {
     SessionManager.clearSession();
     print("User logged out successfully.");
     // Add any additional logout logic if required
+  }
+
+   // Method to update the user's gender based on the email
+  Future<void> updateGender(String gender) async {
+    final conn = await getConnection();
+    final email = SessionManager.getUserEmail();
+
+    if (email == null) {
+      throw Exception("No user is currently logged in.");
+    }
+
+    await conn.query(
+      'UPDATE users SET gender = @gender WHERE email = @email',
+      substitutionValues: {
+        'email': email,
+        'gender': gender,
+      },
+    );
   }
 }
 

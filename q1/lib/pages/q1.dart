@@ -148,8 +148,7 @@ class _Q1PageState extends State<Q1Page> {
           ),
           onPressed: () async {
             final age = 10 + selectedItemIndex; // Get the selected age
-            final email =
-                SessionManager.getUserEmail(); // Get the logged-in email
+            final email =SessionManager.getUserEmail(); // Get the logged-in email
 
             if (email != null) {
               try {
