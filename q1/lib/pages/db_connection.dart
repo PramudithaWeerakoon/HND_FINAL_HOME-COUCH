@@ -15,28 +15,43 @@ class DatabaseConnection {
     );
   }
 
-  // Open database connection
-  Future<void> openConnection() async {
-    try {
-      print('Attempting to connect to the database...');
+  Future<PostgreSQLConnection> getConnection() async {
+    if (_connection.isClosed) {
       await _connection.open();
-      print('Connected to the database successfully!');
-
-      // Example query
-      var result = await _connection.query('SELECT NOW()');
-      print('Current Database Time: ${result[0][0]}');
-    } catch (e) {
-      print('Failed to connect: $e');
     }
+    return _connection;
   }
 
-  // Close database connection
-  Future<void> closeConnection() async {
-    try {
-      await _connection.close();
-      print('Database connection closed.');
-    } catch (e) {
-      print('Failed to close the database: $e');
+  Future<void> insertUser(String name, String email, String password) async {
+    final conn = await getConnection();
+    await conn.query(
+      'INSERT INTO users (name, email, password) VALUES (@name, @email, @password)',
+      substitutionValues: {
+        'name': name,
+        'email': email,
+        'password':
+            password, // Make sure to hash the password before storing it
+      },
+    );
+  }
+
+  // Login method
+  Future<bool> loginUser(String email, String password) async {
+    final conn = await getConnection();
+    // Query to check if a user exists with the provided email and password
+    var result = await conn.query(
+      'SELECT * FROM users WHERE email = @email AND password = @password',
+      substitutionValues: {
+        'email': email,
+        'password': password, // In production, use hashed password comparison
+      },
+    );
+
+    // Check if a record is returned
+    if (result.isEmpty) {
+      return false; // Invalid credentials
+    } else {
+      return true; // Valid credentials
     }
   }
 }

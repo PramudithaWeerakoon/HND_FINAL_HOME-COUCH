@@ -16,8 +16,7 @@ import 'pages/db_connection.dart';
 Future<void> main() async {
 
   final db = DatabaseConnection();
-  await db.openConnection();
-  await db.closeConnection();
+  await db.getConnection();
 
   // Run the Flutter app
   runApp(const MyApp());

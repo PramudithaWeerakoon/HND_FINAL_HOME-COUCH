@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/gestures.dart';
+import 'db_connection.dart'; // Import the database connection
 
 class LoginPage extends StatefulWidget {
   const LoginPage({super.key});
@@ -13,6 +14,9 @@ class _LoginPageState extends State<LoginPage> {
   final usernameController = TextEditingController();
   final passwordController = TextEditingController();
   bool rememberMe = false;
+  bool isLoading = false; // Track loading state
+
+  final DatabaseConnection _databaseConnection = DatabaseConnection();
 
   @override
   void dispose() {
@@ -42,7 +46,33 @@ class _LoginPageState extends State<LoginPage> {
     return null;
   }
 
+  // Attempt login with database
+  void _handleLogin() async {
+    if (_formKey.currentState?.validate() ?? false) {
+      setState(() {
+        isLoading = true; // Show loading spinner
+      });
 
+      String email = usernameController.text;
+      String password = passwordController.text;
+
+      bool isLoggedIn = await _databaseConnection.loginUser(email, password);
+
+      setState(() {
+        isLoading = false; // Hide loading spinner
+      });
+
+      if (isLoggedIn) {
+        // Navigate to the home screen or authenticated area
+        Navigator.pushReplacementNamed(context, '/home');
+      } else {
+        // Show error message
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text('Invalid email or password')),
+        );
+      }
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -149,11 +179,7 @@ class _LoginPageState extends State<LoginPage> {
 
                     // Sign in button with form validation check
                     GestureDetector(
-                      onTap: () {
-                        if (_formKey.currentState?.validate() ?? false) {
-                           // Attempt login with database
-                        }
-                      },
+                      onTap: _handleLogin, // Call the login handler
                       child: Container(
                         padding: const EdgeInsets.all(12.0),
                         margin: const EdgeInsets.symmetric(horizontal: 35),
@@ -161,15 +187,19 @@ class _LoginPageState extends State<LoginPage> {
                           color: const Color(0xFF21007E),
                           borderRadius: BorderRadius.circular(50),
                         ),
-                        child: const Center(
-                          child: Text(
-                            'Sign in',
-                            style: TextStyle(
-                              color: Colors.white,
-                              fontSize: 20,
-                              fontWeight: FontWeight.bold,
-                            ),
-                          ),
+                        child: Center(
+                          child: isLoading
+                              ? const CircularProgressIndicator(
+                                  color: Colors.white,
+                                ) // Show loading spinner when logging in
+                              : const Text(
+                                  'Sign in',
+                                  style: TextStyle(
+                                    color: Colors.white,
+                                    fontSize: 20,
+                                    fontWeight: FontWeight.bold,
+                                  ),
+                                ),
                         ),
                       ),
                     ),
@@ -285,23 +315,24 @@ class _MyTextFieldState extends State<MyTextField> {
         validator: widget.validator,
         decoration: InputDecoration(
           enabledBorder: const OutlineInputBorder(
-            borderRadius: BorderRadius.all(Radius.circular(50.0)),
-            borderSide: BorderSide(color: Colors.grey),
+            borderSide: BorderSide(color: Colors.grey, width: 2.0),
           ),
           focusedBorder: const OutlineInputBorder(
-            borderRadius: BorderRadius.all(Radius.circular(50.0)),
-            borderSide: BorderSide(color: Colors.black, width: 2.0),
+            borderSide: BorderSide(color: Color(0xFF21007E), width: 2.0),
           ),
           hintText: widget.hintText,
-          contentPadding:
-              const EdgeInsets.symmetric(horizontal: 30.0, vertical: 12.0),
+          hintStyle: const TextStyle(
+            color: Color.fromARGB(255, 128, 127, 127),
+            fontSize: 18,
+            fontWeight: FontWeight.bold,
+          ),
           suffixIcon: widget.obscureText
               ? IconButton(
                   icon: Icon(
                     _isPasswordVisible
-                        ? Icons.visibility
-                        : Icons.visibility_off,
-                    color: Colors.grey,
+                        ? Icons.visibility_off
+                        : Icons.visibility,
+                    color: const Color(0xFF21007E),
                   ),
                   onPressed: () {
                     setState(() {
@@ -323,28 +354,10 @@ class AuthButton extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Container(
-      width: 65,
-      height: 65,
-      decoration: BoxDecoration(
-        color: Colors.white,
-        shape: BoxShape.circle,
-        boxShadow: [
-          BoxShadow(
-            color: Colors.grey.withOpacity(0.5),
-            spreadRadius: 1,
-            blurRadius: 8,
-            offset: const Offset(0, 3),
-          ),
-        ],
-      ),
-      child: Center(
-        child: Image.asset(
-          imagePath,
-          width: 29,
-          height: 29,
-        ),
-      ),
+    return CircleAvatar(
+      backgroundColor: Colors.white,
+      radius: 20,
+      child: Image.asset(imagePath),
     );
   }
 }
