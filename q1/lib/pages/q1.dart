@@ -17,8 +17,13 @@ class _Q1PageState extends State<Q1Page> {
     return Scaffold(
       backgroundColor: const Color(0xFFF2F6FF), // Light background color
       body: SafeArea(
-        child: Padding(
-          padding: const EdgeInsets.all(16.0),
+        child: SingleChildScrollView(
+          padding: EdgeInsets.only(
+            left: 16.0,
+            right: 16.0,
+            top: 16.0,
+            bottom: MediaQuery.of(context).viewInsets.bottom + 16.0,
+          ),
           child: Column(
             mainAxisAlignment:
                 MainAxisAlignment.center, // Center everything vertically
@@ -148,7 +153,7 @@ class _Q1PageState extends State<Q1Page> {
           ),
           onPressed: () async {
             final age = 10 + selectedItemIndex; // Get the selected age
-            final email =SessionManager.getUserEmail(); // Get the logged-in email
+            final email = SessionManager.getUserEmail(); // Get the logged-in email
 
             if (email != null) {
               try {
