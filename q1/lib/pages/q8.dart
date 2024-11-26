@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart'; // Import this for FilteringTextInputFormatter
 import 'q9.dart'; // Import the Q9 screen
+import 'db_connection.dart'; // Import the database connection
 
 class Q8Screen extends StatefulWidget {
   const Q8Screen({super.key});
@@ -29,46 +30,71 @@ class _Q8ScreenState extends State<Q8Screen> {
     super.dispose();
   }
 
+  // Method to handle saving neck circumference and navigating to Q9Screen
+  void saveAndNavigate() async {
+    double currentNeck = double.tryParse(_neckController.text) ?? 37.0;
+
+    // Convert neck circumference to inches if the unit is in cm
+    if (isCm) {
+      currentNeck = currentNeck / 2.54; // Convert cm to inches
+    }
+
+    // Save neck circumference to the database
+    final dbConnection = DatabaseConnection();
+    await dbConnection.saveNeckCircumferenceToDB(currentNeck);
+
+    // Navigate to the next screen (Q9Screen)
+    Navigator.push(
+      context,
+      MaterialPageRoute(
+        builder: (context) => const Q9Screen(), // Navigate to Q9Screen
+      ),
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
+    final screenWidth = MediaQuery.of(context).size.width;
+    final screenHeight = MediaQuery.of(context).size.height;
+
     return Scaffold(
       backgroundColor: const Color(0xFFF2F6FF),
       body: SafeArea(
         child: Padding(
-          padding: const EdgeInsets.all(16.0),
+          padding: EdgeInsets.all(screenWidth * 0.04),
           child: Column(
             mainAxisAlignment: MainAxisAlignment.center,
             crossAxisAlignment: CrossAxisAlignment.center,
             children: [
-              const SizedBox(height: 50),
-              const Text(
+              SizedBox(height: screenHeight * 0.05),
+              Text(
                 "Let's get to know \n you!",
                 textAlign: TextAlign.center,
                 style: TextStyle(
-                  fontSize: 40,
+                  fontSize: screenWidth * 0.1,
                   fontWeight: FontWeight.bold,
                   color: Colors.black,
                 ),
               ),
-              const SizedBox(height: 40),
-              const Text(
+              SizedBox(height: screenHeight * 0.04),
+              Text(
                 "What's the circumference of your neck?",
                 textAlign: TextAlign.center,
                 style: TextStyle(
-                  fontSize: 30,
+                  fontSize: screenWidth * 0.075,
                   fontWeight: FontWeight.w600,
                   color: Colors.black,
                 ),
               ),
-              const SizedBox(height: 80),
+              SizedBox(height: screenHeight * 0.08),
 
               // Display and allow user to input the neck circumference
               TextField(
                 controller: _neckController, // Use the controller
                 keyboardType: TextInputType.numberWithOptions(decimal: true), // Allow decimal input
                 textAlign: TextAlign.center,
-                style: const TextStyle(
-                  fontSize: 70,
+                style: TextStyle(
+                  fontSize: screenWidth * 0.175,
                   fontWeight: FontWeight.bold,
                   color: Colors.black,
                 ),
@@ -79,37 +105,37 @@ class _Q8ScreenState extends State<Q8Screen> {
                   border: InputBorder.none, // No border around input
                 ),
               ),
-              const SizedBox(height: 14),
+              SizedBox(height: screenHeight * 0.014),
 
               // Horizontal line
               Container(
                 height: 2, // Changed thickness to 2
-                width: 130,
+                width: screenWidth * 0.33,
                 color: Colors.black,
               ),
-              const SizedBox(height: 16),
+              SizedBox(height: screenHeight * 0.016),
 
               // Toggle between cm and inches
               Row(
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [
-                  _buildUnitButton("cm", isCm), // cm button
-                  const SizedBox(width: 10),
-                  _buildUnitButton("in", !isCm), // inch button
+                  _buildUnitButton("cm", isCm, screenWidth), // cm button
+                  SizedBox(width: screenWidth * 0.025),
+                  _buildUnitButton("in", !isCm, screenWidth), // inch button
                 ],
               ),
               const Spacer(),
 
               // Page Indicator
-              const Text(
+              Text(
                 "8/12",
                 style: TextStyle(
-                  fontSize: 28,
+                  fontSize: screenWidth * 0.07,
                   fontWeight: FontWeight.bold,
                   color: Colors.black,
                 ),
               ),
-              const SizedBox(height: 20),
+              SizedBox(height: screenHeight * 0.02),
             ],
           ),
         ),
@@ -118,8 +144,8 @@ class _Q8ScreenState extends State<Q8Screen> {
       floatingActionButton: Stack(
         children: [
           Positioned(
-            left: 16, // Position the back button on the left
-            bottom: 32, // Adjust bottom position as needed
+            left: screenWidth * 0.04, // Position the back button on the left
+            bottom: screenHeight * 0.04, // Adjust bottom position as needed
             child: FloatingActionButton(
               heroTag: 'back_to_q7', // Unique tag for the left FAB
               backgroundColor: const Color(0xFF21007E),
@@ -134,8 +160,8 @@ class _Q8ScreenState extends State<Q8Screen> {
             ),
           ),
           Positioned(
-            right: 16, // Position the next button on the right
-            bottom: 32, // Adjust bottom position as needed
+            right: screenWidth * 0.04, // Position the next button on the right
+            bottom: screenHeight * 0.04, // Adjust bottom position as needed
             child: FloatingActionButton(
               heroTag: 'next_to_q9', // Unique tag for the right FAB
               backgroundColor: const Color(0xFF21007E),
@@ -143,11 +169,7 @@ class _Q8ScreenState extends State<Q8Screen> {
                 borderRadius: BorderRadius.circular(100),
               ),
               onPressed: () {
-                // Handle next screen navigation (Q9)
-                Navigator.push(
-                  context,
-                  MaterialPageRoute(builder: (context) => const Q9Screen()),
-                );
+                saveAndNavigate(); // Call the method to save and navigate
               },
               child: const Icon(Icons.arrow_forward, color: Colors.white),
             ),
@@ -158,7 +180,7 @@ class _Q8ScreenState extends State<Q8Screen> {
   }
 
   // Helper method to create the cm/in buttons
-  Widget _buildUnitButton(String label, bool isActive) {
+  Widget _buildUnitButton(String label, bool isActive, double screenWidth) {
     return GestureDetector(
       onTap: () {
         setState(() {
@@ -169,7 +191,7 @@ class _Q8ScreenState extends State<Q8Screen> {
         });
       },
       child: Container(
-        padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 8),
+        padding: EdgeInsets.symmetric(horizontal: screenWidth * 0.05, vertical: screenWidth * 0.02),
         decoration: BoxDecoration(
           color: isActive ? const Color(0xFFEAB804) : Colors.grey[200],
           borderRadius: BorderRadius.circular(10),
@@ -177,7 +199,7 @@ class _Q8ScreenState extends State<Q8Screen> {
         child: Text(
           label,
           style: TextStyle(
-            fontSize: 20,
+            fontSize: screenWidth * 0.05,
             color: isActive ? Colors.white : Colors.black,
             fontWeight: FontWeight.bold,
           ),

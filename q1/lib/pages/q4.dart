@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'q5.dart';
+import 'db_connection.dart';
 
 class Q4Page extends StatefulWidget {
   const Q4Page({super.key});
@@ -31,6 +32,9 @@ class _Q4PageState extends State<Q4Page> {
 
   @override
   Widget build(BuildContext context) {
+    final screenWidth = MediaQuery.of(context).size.width;
+    final screenHeight = MediaQuery.of(context).size.height;
+
     return Scaffold(
       backgroundColor: const Color(0xFFF2F6FF), // Light background color
       body: SafeArea(
@@ -40,7 +44,7 @@ class _Q4PageState extends State<Q4Page> {
             mainAxisAlignment: MainAxisAlignment.center, // Center everything vertically
             crossAxisAlignment: CrossAxisAlignment.stretch, // Stretch to fill horizontally
             children: [
-              const SizedBox(height: 50),
+              SizedBox(height: screenHeight * 0.05),
               const Text(
                 "Let's get to know \n you!",
                 textAlign: TextAlign.center,
@@ -50,7 +54,7 @@ class _Q4PageState extends State<Q4Page> {
                   color: Colors.black,
                 ),
               ),
-              const SizedBox(height: 40), // Space between title and question
+              SizedBox(height: screenHeight * 0.04), // Space between title and question
               const Center( // Centering the question text
                 child: Text(
                   'What is your height?',
@@ -61,7 +65,7 @@ class _Q4PageState extends State<Q4Page> {
                   ),
                 ),
               ),
-              const SizedBox(height: 80), // Space between question and input field
+              SizedBox(height: screenHeight * 0.08), // Space between question and input field
               
               // Height Input with editable Text
               Center(
@@ -69,13 +73,13 @@ class _Q4PageState extends State<Q4Page> {
                   children: [
                     // Editable height input
                     SizedBox(
-                      width: 150, // Control the width for the input
+                      width: screenWidth * 0.4, // Control the width for the input
                       child: TextField(
                         controller: _heightController,
                         textAlign: TextAlign.center,
                         keyboardType: TextInputType.numberWithOptions(decimal: true), // Allow decimals
-                        style: const TextStyle(
-                          fontSize: 70,
+                        style: TextStyle(
+                          fontSize: screenWidth * 0.15,
                           fontWeight: FontWeight.bold,
                         ),
                         decoration: const InputDecoration(
@@ -87,9 +91,9 @@ class _Q4PageState extends State<Q4Page> {
                       ),
                     ),
                     // Smaller black line under the input
-                    const SizedBox(
-                      width: 130, // Set a smaller width for the black line
-                      child: Divider(
+                    SizedBox(
+                      width: screenWidth * 0.35, // Set a smaller width for the black line
+                      child: const Divider(
                         color: Colors.black,
                         thickness: 2, // Thickness of the black line
                       ),
@@ -98,7 +102,7 @@ class _Q4PageState extends State<Q4Page> {
                 ),
               ),
               
-              const SizedBox(height: 10), // Space between height and unit toggle
+              SizedBox(height: screenHeight * 0.01), // Space between height and unit toggle
 
               // Unit selection: Meters (M) or Feet (FT)
               Center(
@@ -120,7 +124,7 @@ class _Q4PageState extends State<Q4Page> {
                       ),
                       child: const Text('M'),
                     ),
-                    const SizedBox(width: 16.0),
+                    SizedBox(width: screenWidth * 0.04),
                     ElevatedButton(
                       onPressed: () {
                         setState(() {
@@ -152,7 +156,7 @@ class _Q4PageState extends State<Q4Page> {
                   ),
                 ),
               ),
-              const SizedBox(height: 20), // Small gap between text and FAB
+              SizedBox(height: screenHeight * 0.02), // Small gap between text and FAB
             ],
           ),
         ),
@@ -189,13 +193,36 @@ class _Q4PageState extends State<Q4Page> {
               shape: RoundedRectangleBorder(
                 borderRadius: BorderRadius.circular(100),
               ),
-              onPressed: () {
-                // Navigate to q5.dart when the button is pressed
-                Navigator.push(
-                  context,
-                  MaterialPageRoute(builder: (context) => const BodyTypeSelectionScreen()),
-                );
+             onPressed: () async {
+                try {
+                  // Ensure the current user is logged in
+                  final email = SessionManager.getUserEmail();
+                  if (email == null) {
+                    throw Exception("No user is currently logged in.");
+                  }
+
+                  // Parse the height input
+                  final String heightText = _heightController.text;
+                  final double height = double.parse(heightText);
+
+                  // Save the height to the database
+                  final dbConnection = DatabaseConnection();
+                  await dbConnection.updateHeight(
+                      height, !isMSelected); // Convert only if not in meters
+
+                  // Navigate to the next page
+                  Navigator.push(
+                    context,
+                    MaterialPageRoute(
+                        builder: (context) => const BodyTypeSelectionScreen()),
+                  );
+                } catch (e) {
+                  // Handle errors (e.g., show a toast or snackbar)
+                  print("Error saving height: $e");
+                }
               },
+
+
               child: const Icon(Icons.arrow_forward, color: Colors.white),
             ),
           ),

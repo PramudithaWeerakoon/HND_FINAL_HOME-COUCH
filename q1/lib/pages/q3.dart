@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'q4.dart';
+import 'db_connection.dart';
 
 class WeightInputScreen extends StatefulWidget {
   const WeightInputScreen({super.key});
@@ -31,6 +32,9 @@ class _WeightInputScreenState extends State<WeightInputScreen> {
 
   @override
   Widget build(BuildContext context) {
+    final screenWidth = MediaQuery.of(context).size.width;
+    final screenHeight = MediaQuery.of(context).size.height;
+
     return Scaffold(
       backgroundColor: const Color(0xFFF2F6FF), // Light background color
       body: SafeArea(
@@ -40,7 +44,7 @@ class _WeightInputScreenState extends State<WeightInputScreen> {
             mainAxisAlignment: MainAxisAlignment.center, // Center everything vertically
             crossAxisAlignment: CrossAxisAlignment.stretch, // Stretch to fill horizontally
             children: [
-              const SizedBox(height: 50),
+              SizedBox(height: screenHeight * 0.05),
               const Text(
                 "Let's get to know \n you!",
                 textAlign: TextAlign.center,
@@ -50,7 +54,7 @@ class _WeightInputScreenState extends State<WeightInputScreen> {
                   color: Colors.black,
                 ),
               ),
-              const SizedBox(height: 40), // Space between title and question
+              SizedBox(height: screenHeight * 0.04), // Space between title and question
               const Center( // Centering the question text
                 child: Text(
                   'What is your weight?',
@@ -61,7 +65,7 @@ class _WeightInputScreenState extends State<WeightInputScreen> {
                   ),
                 ),
               ),
-              const SizedBox(height: 80), // Space between question and input field
+              SizedBox(height: screenHeight * 0.08), // Space between question and input field
               
               // Weight Input with editable Text
               Center(
@@ -69,13 +73,13 @@ class _WeightInputScreenState extends State<WeightInputScreen> {
                   children: [
                     // Editable weight input
                     SizedBox(
-                      width: 150, // Control the width for the input
+                      width: screenWidth * 0.4, // Control the width for the input
                       child: TextField(
                         controller: _weightController,
                         textAlign: TextAlign.center,
                         keyboardType: TextInputType.numberWithOptions(decimal: true),
-                        style: const TextStyle(
-                          fontSize: 70,
+                        style: TextStyle(
+                          fontSize: screenWidth * 0.15,
                           fontWeight: FontWeight.bold,
                         ),
                         inputFormatters: [
@@ -87,9 +91,9 @@ class _WeightInputScreenState extends State<WeightInputScreen> {
                       ),
                     ),
                     // Smaller black line under the input
-                    const SizedBox(
-                      width: 130, // Set a smaller width for the black line
-                      child: Divider(
+                    SizedBox(
+                      width: screenWidth * 0.35, // Set a smaller width for the black line
+                      child: const Divider(
                         color: Colors.black,
                         thickness: 2, // Thickness of the black line
                       ),
@@ -98,7 +102,7 @@ class _WeightInputScreenState extends State<WeightInputScreen> {
                 ),
               ),
               
-              const SizedBox(height: 10), // Space between weight and unit toggle
+              SizedBox(height: screenHeight * 0.01), // Space between weight and unit toggle
 
               // Unit selection: KG or LB
               Center(
@@ -120,7 +124,7 @@ class _WeightInputScreenState extends State<WeightInputScreen> {
                       ),
                       child: const Text('KG'),
                     ),
-                    const SizedBox(width: 16.0),
+                    SizedBox(width: screenWidth * 0.04),
                     ElevatedButton(
                       onPressed: () {
                         setState(() {
@@ -152,7 +156,7 @@ class _WeightInputScreenState extends State<WeightInputScreen> {
                   ),
                 ),
               ),
-              const SizedBox(height: 20), // Small gap between text and FAB
+              SizedBox(height: screenHeight * 0.02), // Small gap between text and FAB
             ],
           ),
         ),
@@ -189,12 +193,44 @@ class _WeightInputScreenState extends State<WeightInputScreen> {
               shape: RoundedRectangleBorder(
                 borderRadius: BorderRadius.circular(100),
               ),
-              onPressed: () {
-                // Navigate to q4.dart when the button is pressed
-                Navigator.push(
-                  context,
-                  MaterialPageRoute(builder: (consds3text) => const Q4Page()),
-                );
+              onPressed: () async {
+                // Parse the input weight
+                final bodyWeight = double.tryParse(_weightController.text);
+
+                if (bodyWeight == null || bodyWeight <= 0) {
+                  ScaffoldMessenger.of(context).showSnackBar(
+                    const SnackBar(
+                      content: Text('Please enter a valid weight.'),
+                      backgroundColor: Colors.red,
+                    ),
+                  );
+                  return;
+                }
+
+                // Convert to kilograms if 'LB' is selected
+                final weightInKg =
+                    isKgSelected ? bodyWeight : bodyWeight * 0.453592;
+
+                try {
+                  // Update the weight in the database
+                  final db = DatabaseConnection();
+                  await db.updateBodyWeight(weightInKg);
+
+                  // Navigate to the next screen after a successful update
+                  Navigator.push(
+                    context,
+                    MaterialPageRoute(builder: (context) => const Q4Page()),
+                  );
+                } catch (e) {
+                  print("Error updating body weight: $e");
+                  ScaffoldMessenger.of(context).showSnackBar(
+                    const SnackBar(
+                      content: Text(
+                          'Failed to update body weight. Please try again.'),
+                      backgroundColor: Colors.red,
+                    ),
+                  );
+                }
               },
               child: const Icon(Icons.arrow_forward, color: Colors.white),
             ),

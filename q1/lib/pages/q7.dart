@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart'; // Import the services package for input formatters
 import 'q8.dart'; // Import Q8Screen
+import 'db_connection.dart'; // Import the DatabaseConnection class
 
 class Q7Screen extends StatefulWidget {
   const Q7Screen({super.key});
@@ -31,36 +32,39 @@ class _Q7ScreenState extends State<Q7Screen> {
 
   @override
   Widget build(BuildContext context) {
+    final screenWidth = MediaQuery.of(context).size.width;
+    final screenHeight = MediaQuery.of(context).size.height;
+
     return Scaffold(
       backgroundColor: const Color(0xFFF2F6FF),
       body: SafeArea(
         child: Padding(
-          padding: const EdgeInsets.all(16.0),
+          padding: EdgeInsets.all(screenWidth * 0.04),
           child: Column(
             mainAxisAlignment: MainAxisAlignment.center,
             crossAxisAlignment: CrossAxisAlignment.center,
             children: [
-              const SizedBox(height: 50),
-              const Text(
+              SizedBox(height: screenHeight * 0.05),
+              Text(
                 "Let's get to know \n you!",
                 textAlign: TextAlign.center,
                 style: TextStyle(
-                  fontSize: 40,
+                  fontSize: screenWidth * 0.1,
                   fontWeight: FontWeight.bold,
                   color: Colors.black,
                 ),
               ),
-              const SizedBox(height: 40),
-              const Text(
+              SizedBox(height: screenHeight * 0.04),
+              Text(
                 "What's the circumference of your waist?",
                 textAlign: TextAlign.center,
                 style: TextStyle(
-                  fontSize: 30,
+                  fontSize: screenWidth * 0.075,
                   fontWeight: FontWeight.w600,
                   color: Colors.black,
                 ),
               ),
-              const SizedBox(height: 80),
+              SizedBox(height: screenHeight * 0.08),
 
               // Editable waist input field
               TextField(
@@ -70,45 +74,45 @@ class _Q7ScreenState extends State<Q7Screen> {
                 inputFormatters: [
                   FilteringTextInputFormatter.allow(RegExp(r'^\d*\.?\d*')), // Allow numbers and one decimal
                 ],
-                style: const TextStyle(
-                  fontSize: 70,
+                style: TextStyle(
+                  fontSize: screenWidth * 0.15,
                   fontWeight: FontWeight.bold,
                 ),
                 decoration: const InputDecoration(
                   border: InputBorder.none, // No visible border
                 ),
               ),
-              const SizedBox(height: 14),
+              SizedBox(height: screenHeight * 0.014),
 
               // Horizontal line
               Container(
                 height: 2, // Thickness of the line
-                width: 130,
+                width: screenWidth * 0.35,
                 color: Colors.black,
               ),
-              const SizedBox(height: 16),
+              SizedBox(height: screenHeight * 0.016),
 
               // Toggle between cm and inches
               Row(
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [
-                  _buildUnitButton("cm", isCm), // cm button
-                  const SizedBox(width: 10),
-                  _buildUnitButton("in", !isCm), // inch button
+                  _buildUnitButton("cm", isCm, screenWidth), // cm button
+                  SizedBox(width: screenWidth * 0.025),
+                  _buildUnitButton("in", !isCm, screenWidth), // inch button
                 ],
               ),
               const Spacer(),
 
               // Page Indicator
-              const Text(
+              Text(
                 "7/12",
                 style: TextStyle(
-                  fontSize: 28,
+                  fontSize: screenWidth * 0.07,
                   fontWeight: FontWeight.bold,
                   color: Colors.black,
                 ),
               ),
-              const SizedBox(height: 20),
+              SizedBox(height: screenHeight * 0.02),
             ],
           ),
         ),
@@ -117,8 +121,8 @@ class _Q7ScreenState extends State<Q7Screen> {
       floatingActionButton: Stack(
         children: [
           Positioned(
-            left: 16, // Position the back button on the left
-            bottom: 32, // Adjust bottom position as needed
+            left: screenWidth * 0.04, // Position the back button on the left
+            bottom: screenHeight * 0.04, // Adjust bottom position as needed
             child: FloatingActionButton(
               heroTag: 'back_to_q6', // Unique tag for the left FAB
               backgroundColor: const Color(0xFF21007E),
@@ -133,23 +137,37 @@ class _Q7ScreenState extends State<Q7Screen> {
             ),
           ),
           Positioned(
-            right: 16, // Position the next button on the right
-            bottom: 32, // Adjust bottom position as needed
+            right: screenWidth * 0.04, // Position the next button on the right
+            bottom: screenHeight * 0.04, // Adjust bottom position as needed
             child: FloatingActionButton(
               heroTag: 'next_to_q8', // Unique tag for the right FAB
               backgroundColor: const Color(0xFF21007E),
               shape: RoundedRectangleBorder(
                 borderRadius: BorderRadius.circular(100),
               ),
-              onPressed: () {
-                // Navigate to Q8Screen
+              onPressed: () async {
+                double currentWaist =
+                    double.tryParse(_waistController.text) ?? 85.0;
+
+                // Convert waist circumference to inches if the unit is in cm
+                if (isCm) {
+                  currentWaist = currentWaist / 2.54; // Convert cm to inches
+                }
+
+                // Save waist circumference to the database
+                final dbConnection = DatabaseConnection();
+                await dbConnection.saveWaistCircumferenceToDB(currentWaist);
+
+                // Navigate to the next screen (Q8Screen)
                 Navigator.push(
                   context,
                   MaterialPageRoute(
-                    builder: (context) => const Q8Screen(), // Navigate to Q8Screen
+                    builder: (context) =>
+                        const Q8Screen(), // Navigate to Q8Screen
                   ),
                 );
               },
+
               child: const Icon(Icons.arrow_forward, color: Colors.white),
             ),
           ),
@@ -159,7 +177,7 @@ class _Q7ScreenState extends State<Q7Screen> {
   }
 
   // Helper method to create the cm/in buttons
-  Widget _buildUnitButton(String label, bool isActive) {
+  Widget _buildUnitButton(String label, bool isActive, double screenWidth) {
     return GestureDetector(
       onTap: () {
         setState(() {
@@ -172,7 +190,7 @@ class _Q7ScreenState extends State<Q7Screen> {
         });
       },
       child: Container(
-        padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 8),
+        padding: EdgeInsets.symmetric(horizontal: screenWidth * 0.05, vertical: screenWidth * 0.02),
         decoration: BoxDecoration(
           color: isActive ? const Color(0xFFEAB804) : Colors.grey[200],
           borderRadius: BorderRadius.circular(10),
@@ -180,7 +198,7 @@ class _Q7ScreenState extends State<Q7Screen> {
         child: Text(
           label,
           style: TextStyle(
-            fontSize: 20,
+            fontSize: screenWidth * 0.05,
             color: isActive ? Colors.white : Colors.black,
             fontWeight: FontWeight.bold,
           ),

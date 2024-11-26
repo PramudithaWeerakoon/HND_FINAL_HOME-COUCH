@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
-import 'q6.dart'; 
+import 'q6.dart';
+import 'db_connection.dart';
 
 class BodyTypeSelectionScreen extends StatefulWidget {
   const BodyTypeSelectionScreen({super.key});
@@ -19,6 +20,9 @@ class _BodyTypeSelectionScreenState extends State<BodyTypeSelectionScreen> {
 
   @override
   Widget build(BuildContext context) {
+    final screenWidth = MediaQuery.of(context).size.width;
+    final screenHeight = MediaQuery.of(context).size.height;
+
     return Scaffold(
       backgroundColor: const Color(0xFFF2F6FF), // Light background color
       body: SafeArea(
@@ -28,7 +32,7 @@ class _BodyTypeSelectionScreenState extends State<BodyTypeSelectionScreen> {
             mainAxisAlignment: MainAxisAlignment.center,
             crossAxisAlignment: CrossAxisAlignment.center, // Center horizontally
             children: [
-              const SizedBox(height: 50),
+              SizedBox(height: screenHeight * 0.05),
               const Text(
                 "Let's get to know \n you!",
                 textAlign: TextAlign.center,
@@ -38,7 +42,7 @@ class _BodyTypeSelectionScreenState extends State<BodyTypeSelectionScreen> {
                   color: Colors.black,
                 ),
               ),
-              const SizedBox(height: 90), // Space between title and question
+              SizedBox(height: screenHeight * 0.1), // Space between title and question
               const Text(
                 'How would you describe your body type?',
                 textAlign: TextAlign.center,
@@ -48,20 +52,20 @@ class _BodyTypeSelectionScreenState extends State<BodyTypeSelectionScreen> {
                   color: Colors.black,
                 ),
               ),
-              const SizedBox(height: 90), // Space between question and options
+              SizedBox(height: screenHeight * 0.1), // Space between question and options
 
               // Images with body type options
               Expanded(
                 child: Row(
                   mainAxisAlignment: MainAxisAlignment.spaceAround,
                   children: [
-                    _buildBodyTypeOption('Skinny', skinnyImagePath, 0), // Use skinny image path
-                    _buildBodyTypeOption('Skinny-Fat', skinnyFatImagePath, 1), // Use skinny-fat image path
-                    _buildBodyTypeOption('Heavy', heavyImagePath, 2), // Use heavy image path
+                    _buildBodyTypeOption('Skinny', skinnyImagePath, 0, screenWidth), // Use skinny image path
+                    _buildBodyTypeOption('Skinny-Fat', skinnyFatImagePath, 1, screenWidth), // Use skinny-fat image path
+                    _buildBodyTypeOption('Heavy', heavyImagePath, 2, screenWidth), // Use heavy image path
                   ],
                 ),
               ),
-              const SizedBox(height: 20), // Add space between body types and progress text
+              SizedBox(height: screenHeight * 0.02), // Add space between body types and progress text
               const Text(
                 "5/12",
                 style: TextStyle(
@@ -70,7 +74,7 @@ class _BodyTypeSelectionScreenState extends State<BodyTypeSelectionScreen> {
                   color: Colors.black,
                 ),
               ),
-              const SizedBox(height: 20), // Add a small gap between the text and FAB
+              SizedBox(height: screenHeight * 0.02), // Add a small gap between the text and FAB
             ],
           ),
         ),
@@ -101,18 +105,38 @@ class _BodyTypeSelectionScreenState extends State<BodyTypeSelectionScreen> {
               bottom: 32, // Adjust bottom position as needed
               child: FloatingActionButton(
                 heroTag: 'next_to_q6', // Unique tag for the right FAB
-                 backgroundColor: const Color(0xFF21007E),
+                backgroundColor: const Color(0xFF21007E),
                 shape: RoundedRectangleBorder(
                   borderRadius: BorderRadius.circular(100),
                 ),
-                onPressed: () {
-                  // Navigate to q7.dart when clicked
-                  Navigator.push(
-                    context,
-                    MaterialPageRoute(
-                      builder: (context) => const FitnessBackgroundSelectionScreen()
-                    ),
-                  );
+                onPressed: () async {
+                  try {
+                    // Map the selected index to the corresponding body type
+                    String bodyType = '';
+                    if (_selectedBodyType == 0) {
+                      bodyType = 'Skinny';
+                    } else if (_selectedBodyType == 1) {
+                      bodyType = 'Skinny-Fat';
+                    } else if (_selectedBodyType == 2) {
+                      bodyType = 'Heavy';
+                    }
+
+                    // Save the body type to the database
+                    final dbConnection = DatabaseConnection();
+                    await dbConnection.updateBodyType(bodyType);
+
+                    // Navigate to the next screen
+                    Navigator.push(
+                      context,
+                      MaterialPageRoute(
+                        builder: (context) =>
+                            const FitnessBackgroundSelectionScreen(),
+                      ),
+                    );
+                  } catch (e) {
+                    // Handle errors (e.g., show a snackbar or toast)
+                    print("Error saving body type: $e");
+                  }
                 },
                 child: const Icon(Icons.arrow_forward, color: Colors.white),
               ),
@@ -123,7 +147,7 @@ class _BodyTypeSelectionScreenState extends State<BodyTypeSelectionScreen> {
   }
 
   // Widget for building each body type option with an image and label
-  Widget _buildBodyTypeOption(String label, String imagePath, int index) {
+  Widget _buildBodyTypeOption(String label, String imagePath, int index, double screenWidth) {
     return GestureDetector(
       onTap: () {
         setState(() {
@@ -135,8 +159,8 @@ class _BodyTypeSelectionScreenState extends State<BodyTypeSelectionScreen> {
         children: [
           // Image box itself is selectable
           Container(
-            width: 125, // Fixed size for the image box (customizable)
-            height: 125,
+            width: screenWidth * 0.3, // Adjust size based on screen width
+            height: screenWidth * 0.3,
             decoration: BoxDecoration(
               color: _selectedBodyType == index
                   ? Colors.blueAccent.withOpacity(0.2)
@@ -151,8 +175,8 @@ class _BodyTypeSelectionScreenState extends State<BodyTypeSelectionScreen> {
             ),
             child: Image.asset(
               imagePath,
-              width: 125,
-              height: 125,
+              width: screenWidth * 0.3,
+              height: screenWidth * 0.3,
               fit: BoxFit.cover, // Ensures the image fits within the box
             ),
           ),

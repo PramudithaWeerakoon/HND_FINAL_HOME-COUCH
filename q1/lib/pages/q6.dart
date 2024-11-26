@@ -1,5 +1,6 @@
- import 'package:flutter/material.dart';
+import 'package:flutter/material.dart';
 import 'q7.dart'; // Import q7.dart
+import 'db_connection.dart'; // Import the DatabaseConnection class
 
 class FitnessBackgroundSelectionScreen extends StatefulWidget {
   const FitnessBackgroundSelectionScreen({super.key});
@@ -9,8 +10,10 @@ class FitnessBackgroundSelectionScreen extends StatefulWidget {
       _FitnessBackgroundSelectionScreen();
 }
 
-class _FitnessBackgroundSelectionScreen extends State<FitnessBackgroundSelectionScreen> {
+class _FitnessBackgroundSelectionScreen
+    extends State<FitnessBackgroundSelectionScreen> {
   int? _selectedFitnessLevel; // Nullable to track selected fitness background
+  final DatabaseConnection _dbConnection = DatabaseConnection();
 
   // Define image paths (You can change these if necessary)
   final String newbieImagePath = 'lib/assets/newbie.png';
@@ -19,6 +22,9 @@ class _FitnessBackgroundSelectionScreen extends State<FitnessBackgroundSelection
 
   @override
   Widget build(BuildContext context) {
+    final screenWidth = MediaQuery.of(context).size.width;
+    final screenHeight = MediaQuery.of(context).size.height;
+
     return Scaffold(
       backgroundColor: const Color(0xFFF2F6FF), // Light background color
       body: SafeArea(
@@ -26,9 +32,10 @@ class _FitnessBackgroundSelectionScreen extends State<FitnessBackgroundSelection
           padding: const EdgeInsets.all(16.0),
           child: Column(
             mainAxisAlignment: MainAxisAlignment.center,
-            crossAxisAlignment: CrossAxisAlignment.center, // Center horizontally
+            crossAxisAlignment:
+                CrossAxisAlignment.center, // Center horizontally
             children: [
-              const SizedBox(height: 50),
+              SizedBox(height: screenHeight * 0.05),
               const Text(
                 "Let's get to know \n you!",
                 textAlign: TextAlign.center,
@@ -38,7 +45,7 @@ class _FitnessBackgroundSelectionScreen extends State<FitnessBackgroundSelection
                   color: Colors.black,
                 ),
               ),
-              const SizedBox(height: 90), // Space between title and question
+              SizedBox(height: screenHeight * 0.1), // Space between title and question
               const Text(
                 'What is your fitness background?',
                 textAlign: TextAlign.center,
@@ -48,7 +55,7 @@ class _FitnessBackgroundSelectionScreen extends State<FitnessBackgroundSelection
                   color: Colors.black,
                 ),
               ),
-              const SizedBox(height: 90), // Space between question and options
+              SizedBox(height: screenHeight * 0.1), // Space between question and options
 
               // Images with fitness background options
               Expanded(
@@ -56,13 +63,13 @@ class _FitnessBackgroundSelectionScreen extends State<FitnessBackgroundSelection
                   mainAxisAlignment: MainAxisAlignment.spaceAround,
                   crossAxisAlignment: CrossAxisAlignment.start, // Align at top
                   children: [
-                    _buildFitnessLevelOption('Newbie', newbieImagePath, 0),
-                    _buildFitnessLevelOption('Competent', competentImagePath, 1),
-                    _buildFitnessLevelOption('Expert', expertImagePath, 2),
+                    _buildFitnessLevelOption('Newbie', newbieImagePath, 0, screenWidth),
+                    _buildFitnessLevelOption('Competent', competentImagePath, 1, screenWidth),
+                    _buildFitnessLevelOption('Expert', expertImagePath, 2, screenWidth),
                   ],
                 ),
               ),
-              const SizedBox(height: 20), // Add space between body types and progress text
+              SizedBox(height: screenHeight * 0.02), // Add space between body types and progress text
               const Text(
                 "6/12",
                 style: TextStyle(
@@ -71,7 +78,7 @@ class _FitnessBackgroundSelectionScreen extends State<FitnessBackgroundSelection
                   color: Colors.black,
                 ),
               ),
-              const SizedBox(height: 20), // Add a small gap between the text and FAB
+              SizedBox(height: screenHeight * 0.02), // Add a small gap between the text and FAB
             ],
           ),
         ),
@@ -105,14 +112,39 @@ class _FitnessBackgroundSelectionScreen extends State<FitnessBackgroundSelection
                 shape: RoundedRectangleBorder(
                   borderRadius: BorderRadius.circular(100),
                 ),
-                onPressed: () {
-                  // Navigate to q7.dart when clicked
-                  Navigator.push(
-                    context,
-                    MaterialPageRoute(
-                      builder: (context) => const Q7Screen(), // Navigate to Q7Screen
-                    ),
-                  );
+                onPressed: () async {
+                  // Update the selected fitness background
+                  String fitnessBackground;
+                  switch (_selectedFitnessLevel) {
+                    case 0:
+                      fitnessBackground = 'Newbie';
+                      break;
+                    case 1:
+                      fitnessBackground = 'Competent';
+                      break;
+                    case 2:
+                      fitnessBackground = 'Expert';
+                      break;
+                    default:
+                      fitnessBackground = '';
+                      break;
+                  }
+
+                  // Save the selected fitness background in the database
+                  try {
+                    await _dbConnection
+                        .updateFitnessBackground(fitnessBackground);
+                    // Navigate to q7.dart when clicked
+                    Navigator.push(
+                      context,
+                      MaterialPageRoute(
+                        builder: (context) =>
+                            const Q7Screen(), // Navigate to Q7Screen
+                      ),
+                    );
+                  } catch (e) {
+                    print('Error updating fitness background: $e');
+                  }
                 },
                 child: const Icon(Icons.arrow_forward, color: Colors.white),
               ),
@@ -123,9 +155,11 @@ class _FitnessBackgroundSelectionScreen extends State<FitnessBackgroundSelection
   }
 
   // Widget for building each fitness background option with an image and label
-  Widget _buildFitnessLevelOption(String label, String imagePath, int index) {
+  Widget _buildFitnessLevelOption(String label, String imagePath, int index, double screenWidth) {
     // Calculate size based on selection state
-    double boxSize = _selectedFitnessLevel == index ? 140 : (_selectedFitnessLevel == null ? 125 : 90);
+    double boxSize = _selectedFitnessLevel == index
+        ? screenWidth * 0.35
+        : (_selectedFitnessLevel == null ? screenWidth * 0.3 : screenWidth * 0.2);
 
     return GestureDetector(
       onTap: () {
