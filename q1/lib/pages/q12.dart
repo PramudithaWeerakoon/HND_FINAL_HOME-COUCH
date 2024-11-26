@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'q13.dart';
+import 'db_connection.dart';
 
 class Q12Screen extends StatefulWidget {
   const Q12Screen({super.key});
@@ -125,13 +126,19 @@ class Q12ScreenState extends State<Q12Screen> {
               shape: RoundedRectangleBorder(
                 borderRadius: BorderRadius.circular(100),
               ),
-              onPressed: selectedCondition.isNotEmpty ? () {
-                Navigator.push(
-                  context,
-                  MaterialPageRoute(builder: (context) => const Q13Screen()),
-                );
-                // Handle confirmation action
-              } : null, // Disable if no condition is selected
+              onPressed: selectedCondition.isNotEmpty
+                  ? () async {
+                      // Update the medical condition in the database
+                      DatabaseConnection db = DatabaseConnection();
+                      await db.updateMedicalCondition(selectedCondition);
+
+                      // Navigate to the next screen
+                      Navigator.push(
+                        context,
+                        MaterialPageRoute(
+                            builder: (context) => const Q13Screen()),
+                      );
+                    } : null, // Disable if no condition is selected
               child: const Icon(Icons.check, color: Colors.white),
             ),
           ),

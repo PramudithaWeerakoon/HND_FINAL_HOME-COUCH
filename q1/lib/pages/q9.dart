@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'q10.dart'; // Import q10.dart
+import 'db_connection.dart'; // Import the DatabaseConnection class
 
 class Q9Screen extends StatefulWidget {
   const Q9Screen({super.key});
@@ -9,7 +10,7 @@ class Q9Screen extends StatefulWidget {
 }
 
 class _Q9ScreenState extends State<Q9Screen> {
-  String selectedInjury = 'None'; // Default selected injury option
+  List<String> selectedInjuries = []; // Track multiple selections
 
   final List<String> injuryOptions = [
     'Minor Knee Injury',
@@ -58,12 +59,22 @@ class _Q9ScreenState extends State<Q9Screen> {
                   itemCount: injuryOptions.length,
                   itemBuilder: (context, index) {
                     final injury = injuryOptions[index];
-                    final bool isSelected = selectedInjury == injury;
+                    final bool isSelected = selectedInjuries.contains(injury);
 
                     return GestureDetector(
                       onTap: () {
                         setState(() {
-                          selectedInjury = injury;
+                          if (injury == 'None') {
+                            // If 'None' is selected, clear all selections
+                            selectedInjuries.clear();
+                          } else {
+                            // Toggle selection for other injuries
+                            if (isSelected) {
+                              selectedInjuries.remove(injury);
+                            } else {
+                              selectedInjuries.add(injury);
+                            }
+                          }
                         });
                       },
                       child: Container(
@@ -74,7 +85,7 @@ class _Q9ScreenState extends State<Q9Screen> {
                         ),
                         decoration: BoxDecoration(
                           color: isSelected
-                                ? const Color(0xFFB30000)
+                              ? const Color(0xFFB30000)
                               : Colors.grey[200],
                           borderRadius: BorderRadius.circular(50),
                         ),
@@ -96,7 +107,7 @@ class _Q9ScreenState extends State<Q9Screen> {
               // Page Indicator
               const Text(
                 "9/12",
-                 style: TextStyle(
+                style: TextStyle(
                   fontSize: 28,
                   fontWeight: FontWeight.bold,
                   color: Colors.black,
@@ -115,7 +126,7 @@ class _Q9ScreenState extends State<Q9Screen> {
             bottom: 32, // Adjust bottom position as needed
             child: FloatingActionButton(
               heroTag: 'back_to_q8', // Unique tag for the left FAB
-               backgroundColor: const Color(0xFF21007E),
+              backgroundColor: const Color(0xFF21007E),
               shape: RoundedRectangleBorder(
                 borderRadius: BorderRadius.circular(100),
               ),
@@ -131,16 +142,36 @@ class _Q9ScreenState extends State<Q9Screen> {
             bottom: 32, // Adjust bottom position as needed
             child: FloatingActionButton(
               heroTag: 'next_to_q10', // Unique tag for the right FAB
-               backgroundColor: const Color(0xFF21007E),
+              backgroundColor: const Color(0xFF21007E),
               shape: RoundedRectangleBorder(
                 borderRadius: BorderRadius.circular(100),
               ),
-              onPressed: () {
-                // Handle next screen navigation (Q10)
-                Navigator.push(
-                  context,
-                  MaterialPageRoute(builder: (context) => const Q10Screen()),
-                );
+              onPressed: () async {
+                // Check if 'None' is selected and save the data accordingly
+                String injuryData = selectedInjuries.isEmpty
+                    ? 'None'
+                    : selectedInjuries
+                        .join(', '); // Join multiple selected injuries
+
+                try {
+                  final db = DatabaseConnection();
+                  await db.updateInjuryData(
+                      injuryData); // Save injury data to the database
+                  // Navigate to the next screen after successful update
+                  Navigator.push(
+                    context,
+                    MaterialPageRoute(builder: (context) => const Q10Screen()),
+                  );
+                } catch (e) {
+                  print("Error updating injury data: $e");
+                  ScaffoldMessenger.of(context).showSnackBar(
+                    const SnackBar(
+                      content: Text(
+                          'Failed to update injury data. Please try again.'),
+                      backgroundColor: Colors.red,
+                    ),
+                  );
+                }
               },
               child: const Icon(Icons.arrow_forward, color: Colors.white),
             ),

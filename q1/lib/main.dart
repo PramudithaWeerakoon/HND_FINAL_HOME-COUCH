@@ -14,6 +14,7 @@ import 'pages/loading.dart';
 import 'pages/db_connection.dart'; 
 import 'pages/auth_provider.dart';
 
+
 Future<void> main() async {
   final db = DatabaseConnection();
   await db.getConnection();
@@ -46,6 +47,7 @@ class MyApp extends StatelessWidget {
         '/q20': (context) => const MealPlanScreen(),
         '/meals': (context) => const DailyMealPlan(),
         '/loading': (context) => const LoadingScreen(),
+     
       },
     );
   }

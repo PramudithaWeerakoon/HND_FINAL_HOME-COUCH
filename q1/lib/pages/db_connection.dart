@@ -1,4 +1,7 @@
 import 'package:postgres/postgres.dart';
+import 'dart:math';
+
+
 
 // SessionManager to manage the current user's session
 class SessionManager {
@@ -227,7 +230,158 @@ class DatabaseConnection {
   }
 
 
+  // Method to update the user's medical condition based on the email
+  Future<void> updateMedicalCondition(String medicalCondition) async {
+    final conn = await getConnection();
+    final email = SessionManager.getUserEmail();
 
+    if (email == null) {
+      throw Exception("No user is currently logged in.");
+    }
+
+    await conn.query(
+      'UPDATE users SET medical_conditions = @medicalCondition WHERE email = @email',
+      substitutionValues: {
+        'email': email,
+        'medicalCondition': medicalCondition,
+      },
+    );
+    print("Medical condition updated successfully for $email.");
+  }
+
+
+  
+
+
+  Future<void> updateInjuryData(String injuryData) async {
+    final conn = await getConnection();
+    final email = SessionManager.getUserEmail();
+
+    if (email == null) {
+      throw Exception("No user is currently logged in.");
+    }
+
+    // Convert the injuryData string to a valid PostgreSQL array literal
+    String formattedInjuryData =
+        injuryData == 'None' ? '{}' : '{${injuryData.replaceAll(', ', ',')}}';
+
+    await conn.query(
+      'UPDATE users SET injuries = @injuries WHERE email = @email',
+      substitutionValues: {
+        'email': email,
+        'injuries': formattedInjuryData,
+      },
+    );
+    print("Injury data updated successfully for $email.");
+  }
+
+
+
+
+   // Method to calculate BMI
+  double calculateBMI(double weight, double heightInMeters) {
+    return weight / (heightInMeters * heightInMeters);
+  }
+
+  // Method to calculate Body Fat Percentage (U.S. Navy method)
+  double calculateBodyFat(double waist, double neck, double height,
+      {String gender = "male"}) {
+    double bodyFat;
+    if (gender.toLowerCase() == "male") {
+      bodyFat = 86.010 * log(waist - neck) / log(10) -
+          70.041 * log(height) / log(10) +
+          36.76;
+    } else {
+      bodyFat = 163.205 * log(waist + 10 - neck) / log(10) -
+          97.684 * log(height) / log(10) -
+          78.387;
+    }
+    return bodyFat;
+  }
+
+  // Method to calculate Daily Caloric Intake using Mifflin-St Jeor equation
+  double calculateDailyCalories(double weight, double height, int age,
+      String gender, double activityLevel) {
+    double bmr;
+    if (gender.toLowerCase() == "male") {
+      bmr = 10 * weight + 6.25 * height - 5 * age + 5;
+    } else {
+      bmr = 10 * weight + 6.25 * height - 5 * age - 161;
+    }
+
+    // Activity level multiplier
+    double tdee = bmr * activityLevel;
+    return tdee;
+  }
+
+  // Method to save BMI, body fat percentage, and daily caloric intake to the database
+  Future<void> updateHealthData(
+      double bmi, double bodyFat, double dailyCalories) async {
+    final conn = await getConnection();
+    final email = SessionManager.getUserEmail();
+
+    if (email == null) {
+      throw Exception("No user is currently logged in.");
+    }
+
+    await conn.query(
+      'UPDATE users SET bmi = @bmi, body_fat_percentage = @bodyFat, daily_caloric_intake = @dailyCalories WHERE email = @email',
+      substitutionValues: {
+        'email': email,
+        'bmi': bmi,
+        'bodyFat': bodyFat,
+        'dailyCalories': dailyCalories,
+      },
+    );
+    print("Health data updated successfully for $email.");
+  }
+
+ Future<Map<String, dynamic>> fetchHealthData() async {
+    final conn = await getConnection();
+    final email = SessionManager.getUserEmail();
+
+    if (email == null) {
+      throw Exception("No user is currently logged in.");
+    }
+
+    var result = await conn.query(
+      'SELECT body_weight, body_height, waist_circumference, neck_circumference, age, gender FROM users WHERE email = @email',
+      substitutionValues: {'email': email},
+    );
+
+    if (result.isNotEmpty) {
+      var row = result.first;
+
+      double weight = row[0];
+      double heightInMeters = row[1];
+      double waistCircumference = row[2];
+      double neckCircumference = row[3];
+      int age = row[4];
+      String gender = row[5];
+
+      // Calculate BMI
+      double bmi = calculateBMI(weight, heightInMeters);
+
+      // Calculate body fat (assumed gender-specific)
+      double bodyFat = calculateBodyFat(
+          waistCircumference, neckCircumference, heightInMeters,
+          gender: gender);
+
+      // Calculate daily caloric intake (Assume a moderate activity level for this example)
+      double dailyCalories = calculateDailyCalories(
+          weight, heightInMeters * 100, age, gender, 1.55);
+
+      return {
+        'bmi': bmi,
+        'bodyFat': bodyFat,
+        'dailyCalories': dailyCalories,
+        'weight': weight,
+        'heightInMeters': heightInMeters,
+      };
+    } else {
+      throw Exception("User not found.");
+    }
+  }
 
 
   // Logout method
