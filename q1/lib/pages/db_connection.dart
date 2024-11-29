@@ -383,6 +383,29 @@ class DatabaseConnection {
     }
   }
 
+  // Method to get the user's name based on the current email
+  Future<String> getUserName() async {
+    final conn = await getConnection();
+    final email = SessionManager.getUserEmail();
+
+    if (email == null) {
+      throw Exception("No user is currently logged in.");
+    }
+
+    final result = await conn.query(
+      'SELECT name FROM users WHERE email = @email',
+      substitutionValues: {
+        'email': email,
+      },
+    );
+
+    if (result.isNotEmpty) {
+      return result.first[0] as String;
+    } else {
+      throw Exception("User not found.");
+    }
+  }
+
 
   // Logout method
   void logout() {

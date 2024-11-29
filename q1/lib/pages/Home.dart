@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:q1/components/menuBar/menuBar.dart'; // Adjust path if needed
 import 'workoutsummary.dart';
+import 'db_connection.dart';
 
 class HomePage extends StatefulWidget {
   const HomePage({super.key});
@@ -20,12 +21,44 @@ class _HomePageState extends State<HomePage> {
   final String situpsImage = 'lib/assets/sit-up.png';
 
   int _currentIndex = 0;
+  String userName = "User"; // Default value
+
+   @override
+  void initState() {
+    super.initState();
+    _fetchUserName();
+  }
+
+  String _getGreeting() {
+    final hour = DateTime.now().hour;
+    if (hour < 12) {
+      return "Good Morning 👋";
+    } else if (hour < 17) {
+      return "Good Afternoon 👋";
+    } else {
+      return "Good Evening 👋";
+    }
+  }
+
+
+  void _fetchUserName() async {
+    try {
+      DatabaseConnection db = DatabaseConnection();
+      final name = await db.getUserName();
+      setState(() {
+        userName = name;
+      });
+    } catch (e) {
+      print("Error fetching user name: $e");
+    }
+  }
 
   void _onTabSelected(int index) {
     setState(() {
       _currentIndex = index;
     });
   }
+  
 
   @override
   Widget build(BuildContext context) {
@@ -48,15 +81,16 @@ class _HomePageState extends State<HomePage> {
                 Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   
-                  children: const [
+                  children: [
                     Text(
-                      'Good Morning 👋',
-                      style:
-                          TextStyle(fontSize: 16)
+                      _getGreeting(),
+                      style: const TextStyle(fontSize: 16),
                     ),
-                    Text(
-                      'Pramudtha', // Replace with dynamic user name if needed
-                      style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
+
+                     Text(
+                      userName, // Dynamic user name
+                      style: const TextStyle(
+                          fontSize: 16, fontWeight: FontWeight.bold),
                     ),
                   ],
                 ),
