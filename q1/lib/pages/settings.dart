@@ -155,12 +155,12 @@ class _SettingsPageState extends State<SettingsPage> {
                 _buildSettingsOption(
                   context,
                   label: 'Privacy Policy',
-                  onTap: _handleLogout,
+                  onTap: () {},
                 ),
                 _buildSettingsOption(
                   context,
                   label: 'Log Out',
-                  onTap: () {},
+                  onTap: _handleLogout,
                 ),
               ],
             ),

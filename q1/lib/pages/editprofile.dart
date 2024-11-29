@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:q1/widgets/gradient_background.dart'; // Use your gradient background widget
+import 'db_connection.dart'; // Import your database connection file
 
 class ProfilePage extends StatelessWidget {
   const ProfilePage({super.key});
@@ -23,83 +24,118 @@ class ProfilePage extends StatelessWidget {
         ),
         body: Padding(
           padding: EdgeInsets.symmetric(horizontal: screenWidth * 0.05),
-          child: SingleChildScrollView(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.center,
-              children: [
-                const SizedBox(height: 16),
-                const Text(
-                  'Edit Profile',
-                  style: TextStyle(
-                    fontSize: 45,
-                    fontWeight: FontWeight.bold,
-                    color: Colors.black,
-                  ),
+          child: FutureBuilder<User>(
+            future: User.getUserData(), // Fetch user data from database
+            builder: (context, snapshot) {
+              if (snapshot.connectionState == ConnectionState.waiting) {
+                return const Center(child: CircularProgressIndicator());
+              } else if (snapshot.hasError) {
+                return Center(child: Text('Error: ${snapshot.error}'));
+              } else if (!snapshot.hasData) {
+                return const Center(child: Text('No data available.'));
+              }
+
+              User user = snapshot.data!;
+
+              return SingleChildScrollView(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.center,
+                  children: [
+                    const SizedBox(height: 16),
+                    const Text(
+                      'Edit Profile',
+                      style: TextStyle(
+                        fontSize: 45,
+                        fontWeight: FontWeight.bold,
+                        color: Colors.black,
+                      ),
+                    ),
+                    const SizedBox(height: 24),
+                    const Text(
+                      'Personal Information',
+                      style: TextStyle(
+                        fontSize: 24,
+                        fontWeight: FontWeight.w700,
+                        color: Color.fromARGB(255, 0, 0, 0),
+                      ),
+                    ),
+                    const SizedBox(height: 16),
+                    Container(
+                      padding: const EdgeInsets.all(16),
+                      decoration: BoxDecoration(
+                        color: Colors.white,
+                        borderRadius: BorderRadius.circular(15),
+                        boxShadow: [
+                          BoxShadow(
+                            color: Colors.black.withOpacity(0.25),
+                            blurRadius: 4,
+                            offset: const Offset(0, 4),
+                          ),
+                        ],
+                      ),
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          ProfileRow(
+                            label: 'Name',
+                            initialValue: user.name,
+                            maxWidth: screenWidth * 0.8,
+                          ),
+                          ProfileRow(
+                            label: 'Email',
+                            initialValue: user.email,
+                            maxWidth: screenWidth * 0.8,
+                          ),
+                          ProfileRow(
+                            label: 'Password',
+                            initialValue:
+                                '********', // You might want to use an actual field here for password change
+                            isPassword: true,
+                            maxWidth: screenWidth * 0.8,
+                          ),
+                          const SizedBox(height: 30),
+                          const Text(
+                            'Linked Accounts',
+                            style: TextStyle(
+                              fontSize: 16,
+                              fontWeight: FontWeight.w600,
+                              color: Color.fromARGB(255, 0, 0, 0),
+                            ),
+                          ),
+                          const SizedBox(height: 10),
+                          LinkedAccountRow(
+                              platform: 'Google', initialStatus: 'Un-Link'),
+                          LinkedAccountRow(
+                              platform: 'Meta', initialStatus: 'Link'),
+                          LinkedAccountRow(
+                              platform: 'Apple ID', initialStatus: 'Link'),
+                        ],
+                      ),
+                    ),
+                  ],
                 ),
-                const SizedBox(height: 24),
-                const Text(
-                  'Personal Information',
-                  style: TextStyle(
-                    fontSize: 24,
-                    fontWeight: FontWeight.w700,
-                    color: Color.fromARGB(255, 0, 0, 0),
-                  ),
-                ),
-                const SizedBox(height: 16),
-                Container(
-                  padding: const EdgeInsets.all(16),
-                  decoration: BoxDecoration(
-                    color: Colors.white,
-                    borderRadius: BorderRadius.circular(15),
-                    boxShadow: [
-                      BoxShadow(
-                        color: Colors.black.withOpacity(0.25),
-                        blurRadius: 4,
-                        offset: const Offset(0, 4),
-                      ),
-                    ],
-                  ),
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      ProfileRow(
-                        label: 'Name',
-                        initialValue: 'Pramuditha Weerakoon',
-                        maxWidth: screenWidth * 0.8,
-                      ),
-                      ProfileRow(
-                        label: 'Email',
-                        initialValue: 'pramud2002@gmail.com',
-                        maxWidth: screenWidth * 0.8,
-                      ),
-                      ProfileRow(
-                        label: 'Password',
-                        initialValue: '********',
-                        isPassword: true,
-                        maxWidth: screenWidth * 0.8,
-                      ),
-                      const SizedBox(height: 30),
-                      const Text(
-                        'Linked Accounts',
-                        style: TextStyle(
-                          fontSize: 16,
-                          fontWeight: FontWeight.w600,
-                          color: Color.fromARGB(255, 0, 0, 0),
-                        ),
-                      ),
-                      const SizedBox(height: 10),
-                      LinkedAccountRow(platform: 'Google', initialStatus: 'Un-Link'),
-                      LinkedAccountRow(platform: 'Meta', initialStatus: 'Link'),
-                      LinkedAccountRow(platform: 'Apple ID', initialStatus: 'Link'),
-                    ],
-                  ),
-                ),
-              ],
-            ),
+              );
+            },
           ),
         ),
       ),
     );
+  }
+}
+
+class User {
+  final String name;
+  final String email;
+
+  User({required this.name, required this.email});
+
+  // Add your database fetching logic here
+  static Future<User> getUserData() async {
+    // Simulating database fetch with a delay
+    await Future.delayed(const Duration(seconds: 2));
+
+    // Replace this with actual database fetch logic
+    return User(name: 'Pramuditha Weerakoon', email: 'pramud2002@gmail.com');
   }
 }
 
@@ -155,7 +191,9 @@ class _LinkedAccountRowState extends State<LinkedAccountRow> {
           TextButton(
             onPressed: _toggleLinkStatus,
             style: TextButton.styleFrom(
-              backgroundColor: linkStatus == 'Link' ? const Color(0xFF21007E) : const Color(0xFFB30000),
+              backgroundColor: linkStatus == 'Link'
+                  ? const Color(0xFF21007E)
+                  : const Color(0xFFB30000),
               foregroundColor: const Color(0xFFFFFFFF),
               padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
               shape: RoundedRectangleBorder(

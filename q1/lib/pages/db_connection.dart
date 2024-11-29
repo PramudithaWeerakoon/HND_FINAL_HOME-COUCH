@@ -430,7 +430,75 @@ class DatabaseConnection {
     }
   }
 
+   // New method to get user data (name, email, and password) of the current logged-in user
+  Future<Map<String, dynamic>?> getUserData() async {
+    final conn = await getConnection();
+    final email = SessionManager.getUserEmail();
 
+    if (email == null) {
+      throw Exception("No user is currently logged in.");
+    }
+
+    var result = await conn.query(
+      'SELECT name, email, password FROM users WHERE email = @email',
+      substitutionValues: {
+        'email': email,
+      },
+    );
+
+    if (result.isNotEmpty) {
+      return {
+        'name': result.first[0],
+        'email': result.first[1],
+        'password': result.first[2],
+      };
+    }
+
+    return null; // Return null if no user is found
+  }
+
+
+  // Method to update the user's name, email, and password based on the email
+  Future<void> updateUserInfo(
+      {String? name, String? email, String? password}) async {
+    final conn = await getConnection();
+    final currentEmail = SessionManager.getUserEmail();
+
+    if (currentEmail == null) {
+      throw Exception("No user is currently logged in.");
+    }
+
+    // Prepare SQL update query
+    String updateQuery = 'UPDATE users SET ';
+    Map<String, dynamic> substitutionValues = {};
+
+    if (name != null) {
+      updateQuery += 'name = @name, ';
+      substitutionValues['name'] = name;
+    }
+    if (email != null) {
+      updateQuery += 'email = @email, ';
+      substitutionValues['email'] = email;
+    }
+    if (password != null) {
+      updateQuery += 'password = @password, ';
+      substitutionValues['password'] = password;
+    }
+
+    // Remove the last comma and space
+    updateQuery = updateQuery.substring(0, updateQuery.length - 2);
+
+    // Add the condition to update by email
+    updateQuery += ' WHERE email = @currentEmail';
+    substitutionValues['currentEmail'] = currentEmail;
+
+    // Execute the update query
+    await conn.query(
+      updateQuery,
+      substitutionValues: substitutionValues,
+    );
+    print("User info updated successfully for $currentEmail.");
+  }
 
    // Method to update the user's gender based on the email
   Future<void> updateGender(String gender) async {
