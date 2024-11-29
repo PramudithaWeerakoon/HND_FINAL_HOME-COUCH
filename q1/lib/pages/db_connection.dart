@@ -406,13 +406,31 @@ class DatabaseConnection {
     }
   }
 
+  // Method to get the current user's email
+  Future<String> getUserEmail() async {
+    final email =
+        SessionManager.getUserEmail(); // Retrieve email from SessionManager
 
-  // Logout method
-  void logout() {
-    SessionManager.clearSession();
-    print("User logged out successfully.");
-    // Add any additional logout logic if required
+    if (email == null) {
+      throw Exception("No user is currently logged in.");
+    }
+
+    return email;
   }
+
+  Future<void> logout() async {
+    try {
+      // Clear session data (example: clear user email)
+      SessionManager
+          .clearSession(); // Implement this method in your session manager
+
+      print("User logged out successfully.");
+    } catch (e) {
+      print("Error during logout: $e");
+    }
+  }
+
+
 
    // Method to update the user's gender based on the email
   Future<void> updateGender(String gender) async {

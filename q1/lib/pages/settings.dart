@@ -3,6 +3,7 @@ import 'package:q1/widgets/gradient_background.dart'; // Make sure to adjust the
 import 'package:q1/components/menuBar/menuBar.dart'; // Import the BottomMenuBar
 import 'editprofile.dart'; // Import the EditProfilePage
 import 'payment.dart'; // Import the PaymentPage
+import 'db_connection.dart';
 
 class SettingsPage extends StatefulWidget {
   const SettingsPage({super.key});
@@ -14,9 +15,58 @@ class SettingsPage extends StatefulWidget {
 class _SettingsPageState extends State<SettingsPage> {
   bool _notificationsEnabled = false; // State to manage notifications toggle
   int _currentIndex = 4; // Default to Settings tab in the bottom menu
+  String userName = "User"; // Default value
+  String userEmail = "user@example.com"; // Default value
+
+  @override
+  void initState() {
+    super.initState();
+    _fetchUserName();
+    _fetchUserEmail();
+  }
+
+  void _fetchUserName() async {
+    try {
+      DatabaseConnection db = DatabaseConnection();
+      final name = await db.getUserName();
+      setState(() {
+        userName = name;
+      });
+    } catch (e) {
+      print("Error fetching user name: $e");
+    }
+  }
+
+  void _fetchUserEmail() async {
+    try {
+      DatabaseConnection db = DatabaseConnection();
+      final email = await db.getUserEmail(); // Use a separate method for email
+      setState(() {
+        userEmail = email;
+      });
+    } catch (e) {
+      print("Error fetching user email: $e");
+    }
+  }
+
+  Future<void> _handleLogout() async {
+    try {
+      DatabaseConnection db = DatabaseConnection();
+      await db.logout(); // Call the logout method to clear session
+      Navigator.pushReplacementNamed(
+          context, '/login'); // Redirect to the login page
+    } catch (e) {
+      print("Error during logout: $e");
+    }
+  }
+
+  
 
   @override
   Widget build(BuildContext context) {
+    final screenWidth = MediaQuery.of(context).size.width;
+    final screenHeight = MediaQuery.of(context).size.height;
+
     return GradientBackground(
       child: Scaffold(
         backgroundColor: Colors.transparent,
@@ -24,92 +74,96 @@ class _SettingsPageState extends State<SettingsPage> {
           backgroundColor: Colors.transparent,
           elevation: 0,
         ),
-        body: Padding(
-          padding: const EdgeInsets.symmetric(horizontal: 16.0),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              const SizedBox(height: 16),
-              const Center(
-                child: Text(
-                  'Settings',
-                  style: TextStyle(
-                    fontSize: 45,
-                    fontWeight: FontWeight.bold,
+        body: SingleChildScrollView(
+          child: Padding(
+            padding: EdgeInsets.symmetric(horizontal: screenWidth * 0.04),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                SizedBox(height: screenHeight * 0.02),
+                const Center(
+                  child: Text(
+                    'Settings',
+                    style: TextStyle(
+                      fontSize: 45,
+                      fontWeight: FontWeight.bold,
+                    ),
                   ),
                 ),
-              ),
-              const SizedBox(height: 24),
-              Row(
-                children: [
-                  CircleAvatar(
-                    radius: 40,
-                    backgroundImage: AssetImage('lib/assets/profileimage.jpg'), // Placeholder profile image
-                  ),
-                  const SizedBox(width: 16),
-                  Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: const [
-                      Text(
-                        'Pramuditha',
-                        style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold),
-                      ),
-                      Text(
-                        'user@pramuditha2002@gmail.com',
-                        style: TextStyle(color: Colors.black, fontSize: 18),
-                      ),
-                    ],
-                  ),
-                ],
-              ),
-              const SizedBox(height: 40),
-              _buildSettingsOption(
-                context,
-                label: 'Edit Profile',
-                onTap: () {
-                  Navigator.push(
-                    context,
-                    MaterialPageRoute(builder: (context) => ProfilePage()),
-                  );
-                },
-                iconPath: 'lib/assets/user.png',
-              ),
-              _buildSettingsOption(
-                context,
-                label: 'Payments & Subscription',
-                onTap: () {
-                  Navigator.push(
-                    context,
-                    MaterialPageRoute(builder: (context) => SubscriptionPage()),
-                  );
-                },
-                iconPath: 'lib/assets/p&s.png',
-              ),
-              _buildSettingsToggle(
-                label: 'Notifications',
-                value: _notificationsEnabled,
-                onChanged: (value) {
-                  setState(() {
-                    _notificationsEnabled = value;
-                  });
-                },
-              ),
-              _buildSettingsOption(
-                context,
-                label: 'Terms & Conditions',
-                onTap: () {},
-              ),
-              _buildSettingsOption(
-                context,
-                label: 'Privacy Policy',
-                onTap: () {},
-              ),
-              _buildSettingsOption(
-                context,
-                label: 'Log Out',
-                onTap: () {},
-              ),
-            ],
+                SizedBox(height: screenHeight * 0.03),
+                Row(
+                  children: [
+                    CircleAvatar(
+                      radius: screenWidth * 0.1,
+                      backgroundImage: AssetImage('lib/assets/profileimage.jpg'), // Placeholder profile image
+                    ),
+                    SizedBox(width: screenWidth * 0.04),
+                    Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children:[
+                        Text(
+                          userName, // Dynamic user name
+                          style: TextStyle(
+                              fontSize: 16, fontWeight: FontWeight.bold),
+                        ),
+                        Text(
+                          userEmail, // Display the fetched user email
+                          style: const TextStyle(
+                              color: Colors.black, fontSize: 18),
+                        ),
+                      ],
+                    ),
+                  ],
+                ),
+                SizedBox(height: screenHeight * 0.05),
+                _buildSettingsOption(
+                  context,
+                  label: 'Edit Profile',
+                  onTap: () {
+                    Navigator.push(
+                      context,
+                      MaterialPageRoute(builder: (context) => ProfilePage()),
+                    );
+                  },
+                  iconPath: 'lib/assets/user.png',
+                ),
+                _buildSettingsOption(
+                  context,
+                  label: 'Payments & Subscription',
+                  onTap: () {
+                    Navigator.push(
+                      context,
+                      MaterialPageRoute(builder: (context) => SubscriptionPage()),
+                    );
+                  },
+                  iconPath: 'lib/assets/p&s.png',
+                ),
+                _buildSettingsToggle(
+                  label: 'Notifications',
+                  value: _notificationsEnabled,
+                  onChanged: (value) {
+                    setState(() {
+                      _notificationsEnabled = value;
+                    });
+                  },
+                ),
+                _buildSettingsOption(
+                  context,
+                  label: 'Terms & Conditions',
+                  onTap: () {},
+                ),
+                _buildSettingsOption(
+                  context,
+                  label: 'Privacy Policy',
+                  onTap: _handleLogout,
+                ),
+                _buildSettingsOption(
+                  context,
+                  label: 'Log Out',
+                  onTap: () {},
+                ),
+              ],
+            ),
           ),
         ),
         bottomNavigationBar: BottomMenuBar(
@@ -131,8 +185,10 @@ class _SettingsPageState extends State<SettingsPage> {
     required VoidCallback onTap,
     String? iconPath,
   }) {
+    final screenWidth = MediaQuery.of(context).size.width;
+
     return Padding(
-      padding: const EdgeInsets.symmetric(vertical: 8.0, horizontal: 26),
+      padding: EdgeInsets.symmetric(vertical: screenWidth * 0.02, horizontal: screenWidth * 0.06),
       child: Container(
         decoration: BoxDecoration(
           color: Colors.white,
@@ -149,8 +205,8 @@ class _SettingsPageState extends State<SettingsPage> {
           leading: iconPath != null
               ? Image.asset(
                   iconPath,
-                  width: 35,
-                  height: 35,
+                  width: screenWidth * 0.08,
+                  height: screenWidth * 0.08,
                 )
               : null,
           title: Text(
@@ -171,8 +227,10 @@ class _SettingsPageState extends State<SettingsPage> {
     required bool value,
     required ValueChanged<bool> onChanged,
   }) {
+    final screenWidth = MediaQuery.of(context).size.width;
+
     return Padding(
-      padding: const EdgeInsets.symmetric(vertical: 10.0, horizontal: 26),
+      padding: EdgeInsets.symmetric(vertical: screenWidth * 0.02, horizontal: screenWidth * 0.06),
       child: Container(
         decoration: BoxDecoration(
           color: Colors.white,
