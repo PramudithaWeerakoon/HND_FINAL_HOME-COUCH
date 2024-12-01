@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/gestures.dart';
 import 'db_connection.dart'; // Make sure this import is correct
+import 'q1.dart';
 
 class RegisterPage extends StatefulWidget {
   const RegisterPage({super.key});
@@ -73,7 +74,8 @@ class _RegisterPageState extends State<RegisterPage> {
         );
 
         // Navigate to the next screen
-        Navigator.pushNamed(context, '/question1');
+        Navigator.push(context,
+            MaterialPageRoute(builder: (context) => const Q1Page()));
       } catch (e) {
         // Handle any errors (e.g., if the email is already in use)
         ScaffoldMessenger.of(context).showSnackBar(

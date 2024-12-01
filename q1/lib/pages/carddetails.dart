@@ -1,6 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
-import 'package:q1/widgets/gradient_background.dart'; // Make sure to adjust the path based on your folder structure
+import 'package:q1/widgets/gradient_background.dart';
+import 'DatabaseHelper.dart';
+import 'auth_provider.dart';
+import 'db_connection.dart';
 
 class CardDetailsPage extends StatefulWidget {
   const CardDetailsPage({super.key});
@@ -15,12 +18,37 @@ class _CardDetailsPageState extends State<CardDetailsPage> {
   final TextEditingController _cvvController = TextEditingController();
   final TextEditingController _postalCodeController = TextEditingController();
   String selectedCountry = 'United States';
+  String? currentEmail; // To store the current user's email
 
   final _formKey = GlobalKey<FormState>();
 
-  void _saveCardDetails() {
+  @override
+  void initState() {
+    super.initState();
+    currentEmail = SessionManager.getUserEmail();
+  }
+   void _saveCardDetails() async {
     if (_formKey.currentState!.validate()) {
-      Navigator.pop(context, _cardNumberController.text);
+      // Get the card details from the text controllers
+      final cardDetails = {
+        'card_number': _cardNumberController.text,
+        'card_holder_name':
+            'John Doe', // Replace with actual value or user input
+        'expiry_date': _expiryController.text,
+        'cvv': _cvvController.text,
+        'country': selectedCountry,
+        'postal_code': _postalCodeController.text,
+        'email': currentEmail, // Save the current user's email
+      };
+
+      // Insert the card details into the SQLite database
+      int id = await DatabaseHelper.insertCard(cardDetails);
+
+      // Optionally show a success message and pop the page
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text('Card saved with ID: $id')),
+      );
+      Navigator.pop(context);
     }
   }
 
@@ -44,6 +72,9 @@ class _CardDetailsPageState extends State<CardDetailsPage> {
 
   @override
   Widget build(BuildContext context) {
+    final screenWidth = MediaQuery.of(context).size.width;
+    final screenHeight = MediaQuery.of(context).size.height;
+
     return GradientBackground(
       child: Scaffold(
         backgroundColor: Colors.transparent,
@@ -55,7 +86,10 @@ class _CardDetailsPageState extends State<CardDetailsPage> {
           builder: (context, constraints) {
             return SingleChildScrollView(
               child: Padding(
-                padding: const EdgeInsets.all(20.0),
+                padding: EdgeInsets.symmetric(
+                  horizontal: screenWidth * 0.05,
+                  vertical: screenHeight * 0.02,
+                ),
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
@@ -69,7 +103,7 @@ class _CardDetailsPageState extends State<CardDetailsPage> {
                         ),
                       ),
                     ),
-                    const SizedBox(height: 40),
+                    SizedBox(height: screenHeight * 0.04),
                     const Center(
                       child: Text(
                         'Personal Information',
@@ -79,9 +113,9 @@ class _CardDetailsPageState extends State<CardDetailsPage> {
                         ),
                       ),
                     ),
-                    const SizedBox(height: 70),
+                    SizedBox(height: screenHeight * 0.07),
                     Container(
-                      padding: const EdgeInsets.all(25.0),
+                      padding: EdgeInsets.all(screenWidth * 0.05),
                       decoration: BoxDecoration(
                         color: Colors.white, // Replace with subscription page background color
                         borderRadius: BorderRadius.circular(10),
@@ -112,7 +146,7 @@ class _CardDetailsPageState extends State<CardDetailsPage> {
                                 return null;
                               },
                             ),
-                            const SizedBox(height: 16),
+                            SizedBox(height: screenHeight * 0.02),
                             Row(
                               children: [
                                 Expanded(
@@ -131,7 +165,7 @@ class _CardDetailsPageState extends State<CardDetailsPage> {
                                     },
                                   ),
                                 ),
-                                const SizedBox(width: 16),
+                                SizedBox(width: screenWidth * 0.04),
                                 Expanded(
                                   child: _buildLabeledTextField(
                                     label: 'CVC',
@@ -154,7 +188,7 @@ class _CardDetailsPageState extends State<CardDetailsPage> {
                                 ),
                               ],
                             ),
-                            const SizedBox(height: 16),
+                            SizedBox(height: screenHeight * 0.02),
                             Row(
                               children: [
                                 Expanded(
@@ -168,7 +202,7 @@ class _CardDetailsPageState extends State<CardDetailsPage> {
                                         value == null || value.isEmpty ? 'Country is required' : null,
                                   ),
                                 ),
-                                const SizedBox(width: 16),
+                                SizedBox(width: screenWidth * 0.04),
                                 Expanded(
                                   child: _buildLabeledTextField(
                                     label: 'Postal code',
@@ -187,14 +221,17 @@ class _CardDetailsPageState extends State<CardDetailsPage> {
                                 ),
                               ],
                             ),
-                            const SizedBox(height: 30),
+                            SizedBox(height: screenHeight * 0.03),
                             Center(
                               child: ElevatedButton(
                                 onPressed: _saveCardDetails,
                                 style: ElevatedButton.styleFrom(
                                   backgroundColor: const Color(0xFF21007E), // Button background color
                                   foregroundColor: Colors.white, // Button text color
-                                  padding: const EdgeInsets.symmetric(horizontal: 100, vertical: 15),
+                                  padding: EdgeInsets.symmetric(
+                                    horizontal: screenWidth * 0.2,
+                                    vertical: screenHeight * 0.02,
+                                  ),
                                   textStyle: const TextStyle(
                                     fontSize: 18,
                                     fontWeight: FontWeight.bold,

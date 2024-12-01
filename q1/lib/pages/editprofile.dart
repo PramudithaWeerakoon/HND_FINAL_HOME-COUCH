@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:q1/widgets/gradient_background.dart'; // Use your gradient background widget
-import 'db_connection.dart'; // Import your database connection file
+// Import your database connection file
 
 class ProfilePage extends StatelessWidget {
   const ProfilePage({super.key});

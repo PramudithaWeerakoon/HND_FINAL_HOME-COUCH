@@ -1,6 +1,10 @@
+import 'dart:math';
 import 'package:flutter/material.dart';
 import 'package:q1/widgets/gradient_background.dart'; // Adjust path if needed
 import 'carddetails.dart';
+import 'DatabaseHelper.dart';
+import 'auth_provider.dart';
+import 'db_connection.dart';
 
 class SubscriptionPage extends StatefulWidget {
   const SubscriptionPage({super.key});
@@ -10,10 +14,20 @@ class SubscriptionPage extends StatefulWidget {
 }
 
 class _SubscriptionPageState extends State<SubscriptionPage> {
+  final DatabaseConnection _dbConnection = DatabaseConnection();
   String selectedPlan = 'AI Coach PRO';
   String price = '\$9.99 / month';
   bool isReoccurring = true;
-  String cardNumber = '**** **** **** 289';
+  String cardNumber = 'No Payment Method Added';
+  String? currentEmail; // To store the current user's email
+
+  @override
+  void initState() {
+    super.initState();
+     currentEmail = SessionManager.getUserEmail();
+    _updateCardNumber('');
+    print('Current Email: $currentEmail');
+  }
 
   void _removeSubscription() {
     setState(() {
@@ -35,10 +49,26 @@ class _SubscriptionPageState extends State<SubscriptionPage> {
     });
   }
 
-  void _updateCardNumber(String newCardNumber) {
-    setState(() {
-      cardNumber = '**** **** **** ${newCardNumber.substring(newCardNumber.length - 4)}';
-    });
+  Future<void> _updateCardNumber(String newCardNumber) async {
+    if (currentEmail == null) {
+      print("No email available.");
+      return; // If no email is found, don't proceed further.
+    }
+    // Fetch card details using the email
+    final cardDetails = await DatabaseHelper.getNewestCardDetailsByEmail(currentEmail!);
+
+    print('Card Details: $cardDetails'); // Debug log
+
+    if (cardDetails != null && cardDetails['card_number'] != null) {
+      setState(() {
+        // Mask the card number except for the last 4 digits
+        cardNumber ='**** **** **** ${cardDetails['card_number']!.substring(cardDetails['card_number']!.length - 4)}';
+      });
+    } else {
+      setState(() {
+        cardNumber = 'No Payment Method Added';
+      });
+    }
   }
 
   @override
@@ -157,6 +187,7 @@ class _SubscriptionPageState extends State<SubscriptionPage> {
                       if (updatedCard != null) {
                         _updateCardNumber(updatedCard);
                       }
+
                     },
                     child: const Text('Change'),
                   ),

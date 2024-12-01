@@ -4,6 +4,9 @@ import 'package:q1/components/menuBar/menuBar.dart'; // Import the BottomMenuBar
 import 'editprofile.dart'; // Import the EditProfilePage
 import 'payment.dart'; // Import the PaymentPage
 import 'db_connection.dart';
+import 'tandc.dart'; // Import the TermsAndConditionsPage
+import 'policy.dart'; // Import the PrivacyPolicyPage
+
 
 class SettingsPage extends StatefulWidget {
   const SettingsPage({super.key});
@@ -80,6 +83,7 @@ class _SettingsPageState extends State<SettingsPage> {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
+                const SizedBox(height: 0),
                 SizedBox(height: screenHeight * 0.02),
                 const Center(
                   child: Text(
@@ -147,15 +151,31 @@ class _SettingsPageState extends State<SettingsPage> {
                     });
                   },
                 ),
+                
                 _buildSettingsOption(
                   context,
                   label: 'Terms & Conditions',
-                  onTap: () {},
+                  onTap: () {
+                    Navigator.push(
+                      context,
+                      MaterialPageRoute(
+                        builder: (context) => const TermsAndConditionsPage(),
+                      ),
+                    );
+                  },
                 ),
+
                 _buildSettingsOption(
                   context,
                   label: 'Privacy Policy',
-                  onTap: () {},
+                   onTap: () {
+                    Navigator.push(
+                      context,
+                      MaterialPageRoute(
+                        builder: (context) => const PrivacyPolicyPage(),
+                      ),
+                    );
+                  },
                 ),
                 _buildSettingsOption(
                   context,
@@ -178,6 +198,8 @@ class _SettingsPageState extends State<SettingsPage> {
       ),
     );
   }
+
+  
 
   Widget _buildSettingsOption(
     BuildContext context, {
