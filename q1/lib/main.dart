@@ -13,16 +13,16 @@ import 'pages/goals.dart';
 import 'pages/loading.dart';
 import 'pages/db_connection.dart'; 
 import 'pages/auth_provider.dart';
+import 'package:firebase_core/firebase_core.dart';
 
 
 Future<void> main() async {
+  WidgetsFlutterBinding.ensureInitialized(); // Initialize Firebase
+  await Firebase.initializeApp(); // Initialize Firebase
   final db = DatabaseConnection();
-  await db.getConnection();
-
+  await db.getConnection(); // Connect to the database
   final authProvider = AuthProvider(db); // Create an instance of AuthProvider
-
-  // Run the Flutter app
-  runApp(MyApp(authProvider: authProvider));
+  runApp(MyApp(authProvider: authProvider)); // Run the Flutter app
 }
 
 class MyApp extends StatelessWidget {

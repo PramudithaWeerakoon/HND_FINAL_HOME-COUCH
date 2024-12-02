@@ -2,5 +2,6 @@
     "cSpell.words": [
         "flutterlocalnotifications",
         "sqflite"
-    ]
+    ],
+    "java.configuration.updateBuildConfiguration": "automatic"
 }

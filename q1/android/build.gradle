@@ -1,3 +1,16 @@
+// The buildscript block should come first
+buildscript {
+    repositories {
+        google()
+        mavenCentral()
+    }
+    dependencies {
+        classpath 'com.android.tools.build:gradle:7.0.2'
+        classpath 'com.google.gms:google-services:4.3.15'  // Google Services plugin
+    }
+}
+
+// Configuration for all subprojects
 allprojects {
     repositories {
         google()
@@ -5,14 +18,14 @@ allprojects {
     }
 }
 
+// Define the build directories
 rootProject.buildDir = "../build"
 subprojects {
     project.buildDir = "${rootProject.buildDir}/${project.name}"
-}
-subprojects {
     project.evaluationDependsOn(":app")
 }
 
+// Remove this duplicate task, as it is already defined elsewhere:
 tasks.register("clean", Delete) {
     delete rootProject.buildDir
 }

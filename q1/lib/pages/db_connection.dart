@@ -1,8 +1,6 @@
 import 'package:postgres/postgres.dart';
 import 'dart:math';
 
-
-
 // SessionManager to manage the current user's session
 class SessionManager {
   static String? currentUserEmail;
@@ -421,9 +419,7 @@ class DatabaseConnection {
   Future<void> logout() async {
     try {
       // Clear session data (example: clear user email)
-      SessionManager
-          .clearSession(); // Implement this method in your session manager
-
+      SessionManager.clearSession(); // Implement this method in your session manager
       print("User logged out successfully.");
     } catch (e) {
       print("Error during logout: $e");

@@ -2,7 +2,6 @@ import 'package:flutter/material.dart';
 import 'package:q1/components/menuBar/menuBar.dart'; // Adjust path if needed
 import 'workoutsummary.dart';
 import 'db_connection.dart';
-import 'tandc.dart';
 
 class HomePage extends StatefulWidget {
   const HomePage({super.key});

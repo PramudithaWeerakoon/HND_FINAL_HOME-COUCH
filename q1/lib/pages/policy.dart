@@ -36,7 +36,7 @@ We collect information to provide better services to our users. The types of inf
 - Device Information
 - Location Data (if you opt-in)
 - Usage Data
-
+  
 2. How We Use Your Information:
 We use the information we collect to:
 - Provide and improve our services

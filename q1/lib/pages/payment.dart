@@ -1,9 +1,7 @@
-import 'dart:math';
 import 'package:flutter/material.dart';
 import 'package:q1/widgets/gradient_background.dart'; // Adjust path if needed
 import 'carddetails.dart';
 import 'DatabaseHelper.dart';
-import 'auth_provider.dart';
 import 'db_connection.dart';
 
 class SubscriptionPage extends StatefulWidget {

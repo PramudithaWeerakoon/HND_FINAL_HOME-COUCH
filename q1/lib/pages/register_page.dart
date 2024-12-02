@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/gestures.dart';
 import 'db_connection.dart'; // Make sure this import is correct
 import 'q1.dart';
+import 'auth_service.dart';
 
 class RegisterPage extends StatefulWidget {
   const RegisterPage({super.key});
@@ -84,7 +85,43 @@ class _RegisterPageState extends State<RegisterPage> {
       }
     }
   }
+  Future<void> _handleGoogleSignIn(BuildContext context) async {
+    final userDetails = await AuthProvider1.signInWithGoogle();
+    print(
+        'Google Sign-In Response: $userDetails'); // Debug print to inspect the response
 
+    if (userDetails != null) {
+      final String? email = userDetails['email'];
+      final String? name = userDetails['name'];
+
+      if (email != null && name != null) {
+        try {
+          // Save the user details to the database
+          //await _databaseConnection.insertUser(name, email, 'google_auth'); // Placeholder for password, if required
+
+          // Navigate to the next screen
+          Navigator.pushReplacementNamed(context, '/question1');
+        } catch (e) {
+          // Handle any database errors
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(content: Text('Failed to save user details: $e')),
+          );
+        }
+      } else {
+        // Handle case where user details are incomplete
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(content: Text('Incomplete user details received')),
+        );
+      }
+    } else {
+      // Handle case where Google Sign-In failed
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('Google Sign-In failed')),
+      );
+    }
+  }
+
+ 
 
   @override
   Widget build(BuildContext context) {
@@ -97,7 +134,7 @@ class _RegisterPageState extends State<RegisterPage> {
               key: _formKey,
               child: Column(
                 children: [
-                  const SizedBox(height: 50),
+                  const SizedBox(height: 20),
                   Image.asset(
                     'lib/assets/logo.png',
                     width: 300,
@@ -243,17 +280,30 @@ class _RegisterPageState extends State<RegisterPage> {
                   const SizedBox(height: 16),
 
                   // Third-party login buttons
-                  const Row(
+                    Row(
                     mainAxisAlignment: MainAxisAlignment.center,
                     children: [
-                      AuthButton(imagePath: 'lib/assets/google.png'),
-                      SizedBox(width: 20),
-                      AuthButton(imagePath: 'lib/assets/apple.png'),
-                      SizedBox(width: 20),
-                      AuthButton(imagePath: 'lib/assets/microsoft.png'),
+                      GestureDetector(
+                      onTap: () => _handleGoogleSignIn(context),
+                      child: const AuthButton(imagePath: 'lib/assets/google.png'),
+                      ),
+                      const SizedBox(width: 20),
+                      GestureDetector(
+                      onTap: () {
+                        // Handle Apple sign-in
+                      },
+                      child: const AuthButton(imagePath: 'lib/assets/apple.png'),
+                      ),
+                      const SizedBox(width: 20),
+                      GestureDetector(
+                      onTap: () {
+                        // Handle Microsoft sign-in
+                      },
+                      child: const AuthButton(imagePath: 'lib/assets/microsoft.png'),
+                      ),
                     ],
-                  ),
-                  const SizedBox(height: 50),
+                    ),
+                  const SizedBox(height: 20),
                   TextButton(
                     onPressed: null,
                     child: RichText(
