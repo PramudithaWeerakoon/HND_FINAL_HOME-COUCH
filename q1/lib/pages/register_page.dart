@@ -2,7 +2,9 @@ import 'package:flutter/material.dart';
 import 'package:flutter/gestures.dart';
 import 'db_connection.dart'; // Make sure this import is correct
 import 'q1.dart';
-import 'auth_service.dart';
+import 'package:firebase_auth/firebase_auth.dart';
+import 'package:google_sign_in/google_sign_in.dart';
+
 
 class RegisterPage extends StatefulWidget {
   const RegisterPage({super.key});
@@ -20,6 +22,19 @@ class _RegisterPageState extends State<RegisterPage> {
   bool rememberMe = false;
 
   final DatabaseConnection _databaseConnection = DatabaseConnection();
+  final FirebaseAuth _auth = FirebaseAuth.instance;
+
+  User? _user;
+  @override
+  void initState() {
+    super.initState();
+    _auth.authStateChanges().listen((event) {
+      setState(() {
+        _user = event;
+      });
+    });
+  }
+  
 
   @override
   void dispose() {
@@ -85,41 +100,61 @@ class _RegisterPageState extends State<RegisterPage> {
       }
     }
   }
-  Future<void> _handleGoogleSignIn(BuildContext context) async {
-    final userDetails = await AuthProvider1.signInWithGoogle();
-    print(
-        'Google Sign-In Response: $userDetails'); // Debug print to inspect the response
 
-    if (userDetails != null) {
-      final String? email = userDetails['email'];
-      final String? name = userDetails['name'];
+  String? loggedinAuthUserEmail;
+  String? loggedinAuthUserName;
 
-      if (email != null && name != null) {
-        try {
-          // Save the user details to the database
-          //await _databaseConnection.insertUser(name, email, 'google_auth'); // Placeholder for password, if required
+  Future<void> handleGooglein(BuildContext context) async {
+  try {
+    print('Starting Google sign-in...');
+    final GoogleSignIn googleSignIn = GoogleSignIn();
+    await googleSignIn.signOut();  // Ensure the user is signed out before signing in again
+    final GoogleSignInAccount? googleUser = await GoogleSignIn().signIn();
 
-          // Navigate to the next screen
-          Navigator.pushReplacementNamed(context, '/question1');
-        } catch (e) {
-          // Handle any database errors
-          ScaffoldMessenger.of(context).showSnackBar(
-            SnackBar(content: Text('Failed to save user details: $e')),
-          );
-        }
+    if (googleUser == null) {
+      print('User canceled the sign-in.');
+      return;
+    }
+
+    print('Google user signed in: ${googleUser.email}');
+    final GoogleSignInAuthentication googleAuth = await googleUser.authentication;
+
+    print('Access token: ${googleAuth.accessToken}');
+    print('ID token: ${googleAuth.idToken}');
+
+    final AuthCredential credential = GoogleAuthProvider.credential(
+      accessToken: googleAuth.accessToken,
+      idToken: googleAuth.idToken,
+    );
+
+    final UserCredential userCredential =
+        await FirebaseAuth.instance.signInWithCredential(credential);
+
+    final User? user = userCredential.user;
+
+    if (user != null) {
+      print('Firebase user logged in: ${user.email}');
+      loggedinAuthUserEmail = user.email!;
+      loggedinAuthUserName = user.displayName!;
+
+      // Check if it's a new user or an existing one
+      if (user.metadata.creationTime == user.metadata.lastSignInTime) {
+        // New user, navigate to the question page
+        Navigator.pushReplacementNamed(context, '/question1');
       } else {
-        // Handle case where user details are incomplete
-        ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text('Incomplete user details received')),
-        );
+        // Existing user, navigate to the home page
+        Navigator.pushReplacementNamed(context, '/home');
       }
     } else {
-      // Handle case where Google Sign-In failed
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Google Sign-In failed')),
-      );
+      print('Firebase user information not available.');
     }
+  } catch (error) {
+    print('Error during Google sign-in: $error');
   }
+}
+
+
+    
 
  
 
@@ -284,7 +319,9 @@ class _RegisterPageState extends State<RegisterPage> {
                     mainAxisAlignment: MainAxisAlignment.center,
                     children: [
                       GestureDetector(
-                      onTap: () => _handleGoogleSignIn(context),
+                      onTap: () {
+                        handleGooglein(context);
+                      },
                       child: const AuthButton(imagePath: 'lib/assets/google.png'),
                       ),
                       const SizedBox(width: 20),

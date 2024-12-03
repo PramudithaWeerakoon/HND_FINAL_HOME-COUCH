@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/gestures.dart';
 import 'db_connection.dart'; // Import the database connection
+import 'package:firebase_auth/firebase_auth.dart';
+import 'package:google_sign_in/google_sign_in.dart';
 
 class LoginPage extends StatefulWidget {
   const LoginPage({super.key});
@@ -17,6 +19,18 @@ class _LoginPageState extends State<LoginPage> {
   bool isLoading = false; // Track loading state
 
   final DatabaseConnection _databaseConnection = DatabaseConnection();
+  final FirebaseAuth _auth = FirebaseAuth.instance;
+
+  User? _user;
+  @override
+  void initState() {
+    super.initState();
+    _auth.authStateChanges().listen((event) {
+      setState(() {
+        _user = event;
+      });
+    });
+  }
 
   @override
   void dispose() {
@@ -71,6 +85,62 @@ class _LoginPageState extends State<LoginPage> {
           SnackBar(content: Text('Invalid email or password')),
         );
       }
+    }
+  }
+
+  String? loggedinAuthUserEmail;
+  String? loggedinAuthUserName;
+  Future<void> handleGooglein(BuildContext context) async {
+    try {
+      print('Starting Google sign-in...');
+
+      // Ensure the user is signed out of any existing Google account
+      final GoogleSignIn googleSignIn = GoogleSignIn();
+      await googleSignIn.signOut();
+
+      final GoogleSignInAccount? googleUser = await googleSignIn.signIn();
+
+      if (googleUser == null) {
+        print('User canceled the sign-in.');
+        return;
+      }
+
+      print('Google user signed in: ${googleUser.email}');
+      final GoogleSignInAuthentication googleAuth = await googleUser.authentication;
+
+      print('Access token: ${googleAuth.accessToken}');
+      print('ID token: ${googleAuth.idToken}');
+
+      final AuthCredential credential = GoogleAuthProvider.credential(
+        accessToken: googleAuth.accessToken,
+        idToken: googleAuth.idToken,
+      );
+
+      final UserCredential userCredential =
+          await FirebaseAuth.instance.signInWithCredential(credential);
+
+      final User? user = userCredential.user;
+
+      if (user != null) {
+        // Save user's email and name to variables
+        loggedinAuthUserEmail = user.email;
+        loggedinAuthUserName = user.displayName;
+
+        print('Firebase user logged in: Email = $loggedinAuthUserEmail, Name = $loggedinAuthUserName');
+
+        // Check if it's a new user (first-time login)
+        if (user.metadata.creationTime == user.metadata.lastSignInTime) {
+          // New user, navigate to the question page
+          Navigator.pushReplacementNamed(context, '/question1');
+        } else {
+          // Returning user, navigate to the home page
+          Navigator.pushReplacementNamed(context, '/home');
+        }
+      } else {
+        print('Firebase user information not available.');
+      }
+    } catch (error) {
+      print('Error during Google sign-in: $error');
     }
   }
 
@@ -232,15 +302,30 @@ class _LoginPageState extends State<LoginPage> {
                       ),
                     ),
                     const SizedBox(height: 16),
-                    const Row(
-                      mainAxisAlignment: MainAxisAlignment.center,
-                      children: [
-                        AuthButton(imagePath: 'lib/assets/google.png'),
-                        SizedBox(width: 20),
-                        AuthButton(imagePath: 'lib/assets/apple.png'),
-                        SizedBox(width: 20),
-                        AuthButton(imagePath: 'lib/assets/microsoft.png'),
-                      ],
+                    Row(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: [
+                      GestureDetector(
+                      onTap: () {
+                        handleGooglein(context);
+                      },
+                      child: const AuthButton(imagePath: 'lib/assets/google.png'),
+                      ),
+                      const SizedBox(width: 20),
+                      GestureDetector(
+                      onTap: () {
+                        // Handle Apple sign-in
+                      },
+                      child: const AuthButton(imagePath: 'lib/assets/apple.png'),
+                      ),
+                      const SizedBox(width: 20),
+                      GestureDetector(
+                      onTap: () {
+                        // Handle Microsoft sign-in
+                      },
+                      child: const AuthButton(imagePath: 'lib/assets/microsoft.png'),
+                      ),
+                    ],
                     ),
                     const SizedBox(height: 170),
                     TextButton(

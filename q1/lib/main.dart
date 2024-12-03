@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:q1/firebase_options.dart';
 import 'package:q1/pages/q1.dart';
 import 'package:q1/pages/q2.dart';
 import 'package:q1/pages/Home.dart';
@@ -18,13 +19,22 @@ import 'pages/analysis.dart';
 
 
 Future<void> main() async {
-  WidgetsFlutterBinding.ensureInitialized(); // Initialize Firebase
-  await Firebase.initializeApp(); // Initialize Firebase
+  WidgetsFlutterBinding.ensureInitialized();
+  try {
+    await Firebase.initializeApp(
+      options: DefaultFirebaseOptions.currentPlatform,
+    );
+    print('Firebase initialized successfully.');
+  } catch (e) {
+    print('Error initializing Firebase: $e');
+  }
+
   final db = DatabaseConnection();
   await db.getConnection(); // Connect to the database
   final authProvider = AuthProvider(db); // Create an instance of AuthProvider
-  runApp(MyApp(authProvider: authProvider)); // Run the Flutter app
+  runApp(MyApp(authProvider: authProvider));
 }
+
 
 class MyApp extends StatelessWidget {
   final AuthProvider authProvider;

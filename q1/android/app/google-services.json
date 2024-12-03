@@ -1,26 +1,43 @@
 {
   "project_info": {
-    "project_number": "277287963265",
-    "project_id": "home-fe544",
-    "storage_bucket": "home-fe544.firebasestorage.app"
+    "project_number": "220837006517",
+    "project_id": "coachathome-34ed3",
+    "storage_bucket": "coachathome-34ed3.firebasestorage.app"
   },
   "client": [
     {
       "client_info": {
-        "mobilesdk_app_id": "1:277287963265:android:690dd28be0f070aa6a1b80",
+        "mobilesdk_app_id": "1:220837006517:android:04df2aeacf16c2a6d482fc",
         "android_client_info": {
           "package_name": "com.example.q1"
         }
       },
-      "oauth_client": [],
+      "oauth_client": [
+        {
+          "client_id": "220837006517-sh9mf2lkgt2quv0vulcv0unrk1l5019s.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
       "api_key": [
         {
-          "current_key": "AIzaSyBbIfyMhgn1Glf-bBCQzW7nYJQv-nF-Mns"
+          "current_key": "AIzaSyAk5SGIWemccFq9Cr7LBqIyxr6O5FgbzX0"
         }
       ],
       "services": {
         "appinvite_service": {
-          "other_platform_oauth_client": []
+          "other_platform_oauth_client": [
+            {
+              "client_id": "220837006517-sh9mf2lkgt2quv0vulcv0unrk1l5019s.apps.googleusercontent.com",
+              "client_type": 3
+            },
+            {
+              "client_id": "220837006517-kogm8qlki5rqornhcriaglevt31n2uct.apps.googleusercontent.com",
+              "client_type": 2,
+              "ios_info": {
+                "bundle_id": "com.example.q1"
+              }
+            }
+          ]
         }
       }
     }

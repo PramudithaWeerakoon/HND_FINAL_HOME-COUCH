@@ -6,6 +6,8 @@ import 'payment.dart'; // Import the PaymentPage
 import 'db_connection.dart';
 import 'tandc.dart'; // Import the TermsAndConditionsPage
 import 'policy.dart'; // Import the PrivacyPolicyPage
+import 'package:firebase_auth/firebase_auth.dart';
+import 'package:google_sign_in/google_sign_in.dart';
 
 
 class SettingsPage extends StatefulWidget {
@@ -53,15 +55,31 @@ class _SettingsPageState extends State<SettingsPage> {
   }
 
   Future<void> _handleLogout() async {
-    try {
-      DatabaseConnection db = DatabaseConnection();
-      await db.logout(); // Call the logout method to clear session
-      Navigator.pushReplacementNamed(
-          context, '/login'); // Redirect to the login page
-    } catch (e) {
-      print("Error during logout: $e");
+  try {
+    // Sign out from your app's database session
+    DatabaseConnection db = DatabaseConnection();
+    await db.logout(); // Clear the session
+
+    // Sign out from Google if logged in via Google
+    final GoogleSignIn googleSignIn = GoogleSignIn();
+    if (await googleSignIn.isSignedIn()) {
+      await googleSignIn.signOut();
+      print("User signed out from Google.");
     }
+
+    // Sign out from Firebase
+    await FirebaseAuth.instance.signOut();
+
+    // Add a small delay before navigating to login
+    Future.delayed(Duration(seconds: 1), () {
+      Navigator.of(context).pushReplacementNamed('/login');
+    });
+  } catch (e) {
+    print("Error during logout: $e");
   }
+}
+
+
 
   
 
