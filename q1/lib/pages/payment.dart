@@ -264,7 +264,8 @@ class _SubscriptionPageState extends State<SubscriptionPage> {
   }
 
   Widget _buildPlanCard(String title, String price, String description, bool isSelected, String imagePath, double screenWidth) {
-    final cardWidth = screenWidth * 0.43;
+    final screenWidth = MediaQuery.of(context).size.width;
+    final cardWidth = screenWidth * 0.40;
     return GestureDetector(
       onTap: () => _selectPlan(title),
       child: Container(
@@ -302,16 +303,16 @@ class _SubscriptionPageState extends State<SubscriptionPage> {
                   children: [
                     Text(
                       title,
-                      style: const TextStyle(
-                        fontSize: 18,
+                      style: TextStyle(
+                        fontSize: screenWidth * 0.032,
                         fontWeight: FontWeight.bold,
                         color: Colors.black,
                       ),
                     ),
                     Text(
                       price,
-                      style: const TextStyle(
-                        fontSize: 14,
+                      style: TextStyle(
+                        fontSize: screenWidth * 0.035,
                         color: Color(0xFF626060),
                       ),
                     ),
@@ -323,9 +324,9 @@ class _SubscriptionPageState extends State<SubscriptionPage> {
             Text(
               description,
               textAlign: TextAlign.center,
-              style: const TextStyle(
-                fontSize: 10,
-                color: Color.fromARGB(255, 0, 0, 0),
+              style: TextStyle(
+                fontSize: screenWidth * 0.02,
+                color: const Color.fromARGB(255, 0, 0, 0),
               ),
             ),
           ],

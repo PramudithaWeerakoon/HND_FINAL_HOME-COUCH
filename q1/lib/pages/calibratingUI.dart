@@ -1,5 +1,6 @@
 import 'dart:async';
 import 'package:flutter/material.dart';
+import 'instructionPage.dart';
 
 class CalibrationScreen extends StatefulWidget {
   const CalibrationScreen({super.key});
@@ -25,7 +26,7 @@ class _CalibrationScreenState extends State<CalibrationScreen> with SingleTicker
     Timer(const Duration(seconds: 4), () {
       Navigator.pushReplacement(
         context,
-        MaterialPageRoute(builder: (context) => const NextPage()), // Replace with your next screen
+        MaterialPageRoute(builder: (context) => const InstructionPage()),  // Replace with your next screen
       );
     });
   }

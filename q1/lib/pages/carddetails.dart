@@ -135,6 +135,23 @@ class _CardDetailsPageState extends State<CardDetailsPage> {
                               label: 'Card number',
                               controller: _cardNumberController,
                               keyboardType: TextInputType.number,
+                              inputFormatters: [
+                                FilteringTextInputFormatter.digitsOnly,
+                                LengthLimitingTextInputFormatter(16),
+                                TextInputFormatter.withFunction((oldValue, newValue) {
+                                  final text = newValue.text.replaceAll(' ', '');
+                                  final newText = text.replaceAllMapped(
+                                    RegExp(r'.{1,4}'),
+                                    (match) => '${match.group(0)} ',
+                                  );
+                                  return newValue.copyWith(
+                                    text: newText.trimRight(),
+                                    selection: TextSelection.collapsed(
+                                      offset: newText.trimRight().length,
+                                    ),
+                                  );
+                                }),
+                              ],
                               placeholder: '1234 1234 1234 1234',
                               validator: (value) {
                                 if (value == null || value.isEmpty) {
@@ -153,6 +170,24 @@ class _CardDetailsPageState extends State<CardDetailsPage> {
                                     label: 'Expiry (MM / YY)',
                                     controller: _expiryController,
                                     keyboardType: TextInputType.number,
+                                     inputFormatters: [
+                                      FilteringTextInputFormatter.digitsOnly,
+                                      LengthLimitingTextInputFormatter(5),
+                                      TextInputFormatter.withFunction((oldValue, newValue) {
+                                        final text = newValue.text.replaceAll('/', '');
+                                        final newText = text.replaceAllMapped(
+                                          RegExp(r'^[0-9]{0,2}'),
+                                          (match) =>
+                                              '${match.group(0)}${match.start < 2 && text.length > 2 ? '/' : ''}',
+                                        );
+                                        return newValue.copyWith(
+                                          text: newText,
+                                          selection: TextSelection.collapsed(
+                                            offset: newText.length,
+                                          ),
+                                        );
+                                      }),
+                                    ],
                                     placeholder: 'MM / YY',
                                     validator: (value) {
                                       if (value == null || value.isEmpty) {
