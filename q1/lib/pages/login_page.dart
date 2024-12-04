@@ -90,23 +90,21 @@ class _LoginPageState extends State<LoginPage> {
 
   String? loggedinAuthUserEmail;
   String? loggedinAuthUserName;
-  Future<void> handleGooglein(BuildContext context) async {
+ Future<void> handleGoogleLogin(BuildContext context) async {
     try {
-      print('Starting Google sign-in...');
-
-      // Ensure the user is signed out of any existing Google account
+      print('Starting Google login...');
       final GoogleSignIn googleSignIn = GoogleSignIn();
-      await googleSignIn.signOut();
-
+      await googleSignIn.signOut(); // Ensure a fresh sign-in
       final GoogleSignInAccount? googleUser = await googleSignIn.signIn();
 
       if (googleUser == null) {
-        print('User canceled the sign-in.');
+        print('User canceled the login.');
         return;
       }
 
-      print('Google user signed in: ${googleUser.email}');
-      final GoogleSignInAuthentication googleAuth = await googleUser.authentication;
+      print('Google user logged in: ${googleUser.email}');
+      final GoogleSignInAuthentication googleAuth =
+          await googleUser.authentication;
 
       print('Access token: ${googleAuth.accessToken}');
       print('ID token: ${googleAuth.idToken}');
@@ -122,27 +120,38 @@ class _LoginPageState extends State<LoginPage> {
       final User? user = userCredential.user;
 
       if (user != null) {
-        // Save user's email and name to variables
-        loggedinAuthUserEmail = user.email;
-        loggedinAuthUserName = user.displayName;
+        print('Firebase user logged in: ${user.email}');
+        loggedinAuthUserEmail = user.email!;
+        loggedinAuthUserName = user.displayName!;
 
-        print('Firebase user logged in: Email = $loggedinAuthUserEmail, Name = $loggedinAuthUserName');
+        // Call the database method to handle login
+        final userExists =
+            await _databaseConnection.loginUsergoogle(loggedinAuthUserEmail!);
 
-        // Check if it's a new user (first-time login)
-        if (user.metadata.creationTime == user.metadata.lastSignInTime) {
-          // New user, navigate to the question page
-          Navigator.pushReplacementNamed(context, '/question1');
-        } else {
-          // Returning user, navigate to the home page
+        if (userExists) {
+          print('Login successful. Saving session.');
+          SessionManager.setUserEmail(
+              loggedinAuthUserEmail!); // Save email to session
+          // Navigate to the home screen
           Navigator.pushReplacementNamed(context, '/home');
+        } else {
+          print('User does not exist. Please register first.');
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(
+              content: Text(
+                  'The email ${loggedinAuthUserEmail!} is not registered. Please sign up first.'),
+            ),
+          );
+          return; // Do not navigate further
         }
       } else {
         print('Firebase user information not available.');
       }
     } catch (error) {
-      print('Error during Google sign-in: $error');
+      print('Error during Google login: $error');
     }
   }
+
 
   @override
   Widget build(BuildContext context) {
@@ -307,7 +316,7 @@ class _LoginPageState extends State<LoginPage> {
                     children: [
                       GestureDetector(
                       onTap: () {
-                        handleGooglein(context);
+                        handleGoogleLogin(context);
                       },
                       child: const AuthButton(imagePath: 'lib/assets/google.png'),
                       ),

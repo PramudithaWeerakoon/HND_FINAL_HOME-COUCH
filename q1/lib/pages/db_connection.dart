@@ -72,6 +72,85 @@ class DatabaseConnection {
     SessionManager.setUserEmail(email);
   }
 
+  Future<bool> loginUsergoogle(String email) async {
+    final conn = await getConnection(); // Get the database connection
+
+    // Check if the user exists in the database
+    final result = await conn.query(
+      "SELECT COUNT(*) FROM users WHERE email = @email",
+      substitutionValues: {
+        'email': email, // Pass email as substitution value
+      },
+    );
+
+    // If count > 0, the user exists
+    return result.isNotEmpty && result.first[0] > 0;
+    // Save the email to SessionManager
+    SessionManager.setUserEmail(email);
+  }
+
+
+  Future<bool> userExists(String email) async {
+    final conn = await getConnection();
+    var result = await conn.query(
+      'SELECT COUNT(*) FROM users WHERE email = @email',
+      substitutionValues: {
+        'email': email,
+      },
+    );
+    return result.first[0] > 0;
+    // Save the email to SessionManager
+  }
+
+   Future<void> insertOrUpdateAuthProvider(
+    String authType,
+    String userEmail,
+    String? accessToken,
+    String? refreshToken,
+    String? authUrl,
+    String tokenExpiry,
+  ) async {
+    final conn = await getConnection();
+
+    // Set refreshToken to the current time if it's null
+    if (refreshToken == null) {
+      refreshToken = DateTime.now()
+          .toIso8601String(); // Setting the refreshToken to the current time
+    }
+
+    try {
+      await conn.query(
+        '''
+      INSERT INTO AuthProvider (
+        AP_Type, AP_UserID, AP_AccessToken, AP_RefreshToken, AP_URL, AP_TokenExpiry, AP_CreatedAt, AP_UpdatedAt
+      ) VALUES (
+        @authType, @userEmail, @accessToken, @refreshToken, @authUrl, @tokenExpiry, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP
+      )
+      ON CONFLICT (AP_UserID, AP_Type) 
+      DO UPDATE SET 
+        AP_AccessToken = EXCLUDED.AP_AccessToken,
+        AP_RefreshToken = EXCLUDED.AP_RefreshToken,
+        AP_URL = EXCLUDED.AP_URL,
+        AP_TokenExpiry = EXCLUDED.AP_TokenExpiry,
+        AP_UpdatedAt = CURRENT_TIMESTAMP;
+      ''',
+        substitutionValues: {
+          'authType': authType,
+          'userEmail': userEmail,
+          'accessToken': accessToken,
+          'refreshToken': refreshToken,
+          'authUrl': authUrl,
+          'tokenExpiry': tokenExpiry,
+        },
+      );
+      print("AuthProvider details inserted/updated successfully.");
+    } catch (e) {
+      print("Error inserting/updating AuthProvider: $e");
+      rethrow;
+    }
+  }
+
+
   // Method to update the user's age based on the email
   Future<void> updateAge(int age) async {
     final conn = await getConnection();
@@ -89,6 +168,7 @@ class DatabaseConnection {
       },
     );
   }
+  
 
   // Login method
   Future<bool> loginUser(String email, String password) async {

@@ -104,59 +104,88 @@ class _RegisterPageState extends State<RegisterPage> {
   String? loggedinAuthUserEmail;
   String? loggedinAuthUserName;
 
-  Future<void> handleGooglein(BuildContext context) async {
-  try {
-    print('Starting Google sign-in...');
-    final GoogleSignIn googleSignIn = GoogleSignIn();
-    await googleSignIn.signOut();  // Ensure the user is signed out before signing in again
-    final GoogleSignInAccount? googleUser = await GoogleSignIn().signIn();
+ Future<void> handleGooglein(BuildContext context) async {
+    try {
+      print('Starting Google sign-in...');
+      final GoogleSignIn googleSignIn = GoogleSignIn();
+      await googleSignIn
+          .signOut(); // Ensure the user is signed out before signing in again
+      final GoogleSignInAccount? googleUser = await googleSignIn.signIn();
 
-    if (googleUser == null) {
-      print('User canceled the sign-in.');
-      return;
-    }
-
-    print('Google user signed in: ${googleUser.email}');
-    final GoogleSignInAuthentication googleAuth = await googleUser.authentication;
-
-    print('Access token: ${googleAuth.accessToken}');
-    print('ID token: ${googleAuth.idToken}');
-
-    final AuthCredential credential = GoogleAuthProvider.credential(
-      accessToken: googleAuth.accessToken,
-      idToken: googleAuth.idToken,
-    );
-
-    final UserCredential userCredential =
-        await FirebaseAuth.instance.signInWithCredential(credential);
-
-    final User? user = userCredential.user;
-
-    if (user != null) {
-      print('Firebase user logged in: ${user.email}');
-      loggedinAuthUserEmail = user.email!;
-      loggedinAuthUserName = user.displayName!;
-
-      // Check if it's a new user or an existing one
-      if (user.metadata.creationTime == user.metadata.lastSignInTime) {
-        // New user, navigate to the question page
-        Navigator.pushReplacementNamed(context, '/question1');
-      } else {
-        // Existing user, navigate to the home page
-        Navigator.pushReplacementNamed(context, '/home');
+      if (googleUser == null) {
+        print('User canceled the sign-in.');
+        return;
       }
-    } else {
-      print('Firebase user information not available.');
+
+      print('Google user signed in: ${googleUser.email}');
+      final GoogleSignInAuthentication googleAuth =
+          await googleUser.authentication;
+
+      print('Access token: ${googleAuth.accessToken}');
+      print('ID token: ${googleAuth.idToken}');
+
+      final AuthCredential credential = GoogleAuthProvider.credential(
+        accessToken: googleAuth.accessToken,
+        idToken: googleAuth.idToken,
+      );
+
+      final UserCredential userCredential =
+          await FirebaseAuth.instance.signInWithCredential(credential);
+
+      final User? user = userCredential.user;
+
+      if (user != null) {
+        print('Firebase user logged in: ${user.email}');
+        loggedinAuthUserEmail = user.email!;
+        loggedinAuthUserName = user.displayName!;
+
+        // Check if the user already exists in the database
+        final userExists =
+            await _databaseConnection.userExists(loggedinAuthUserEmail!);
+
+        if (userExists) {
+          // Email already exists; show a message to the user
+          print('Email is already registered. Please log in.');
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(
+              content: Text(
+                  'The email ${loggedinAuthUserEmail!} is already registered. Please log in.'),
+            ),
+          );
+          return; // Do not proceed further
+        } else {
+          // Insert new user into the database
+          await _databaseConnection.insertUser(
+            loggedinAuthUserName!,
+            loggedinAuthUserEmail!,
+            'GoogleUser', // Use a placeholder for password
+          );
+          print('New user added to the database.');
+        }
+
+        // Insert or update AuthProvider details in the database
+        await _databaseConnection.insertOrUpdateAuthProvider(
+          'Google', // Authentication provider type
+          loggedinAuthUserEmail!,
+          googleAuth.accessToken,
+          googleAuth.idToken,
+          'https://oauth2.googleapis.com/token', // Example URL
+          DateTime.now()
+              .add(Duration(hours: 1))
+              .toIso8601String(), // Example expiry
+        );
+
+        // Navigate to the first question screen for new users
+        if (user.metadata.creationTime == user.metadata.lastSignInTime) {
+          Navigator.pushReplacementNamed(context, '/question1');
+        }
+      } else {
+        print('Firebase user information not available.');
+      }
+    } catch (error) {
+      print('Error during Google sign-in: $error');
     }
-  } catch (error) {
-    print('Error during Google sign-in: $error');
   }
-}
-
-
-    
-
- 
 
   @override
   Widget build(BuildContext context) {
