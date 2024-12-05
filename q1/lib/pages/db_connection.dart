@@ -89,20 +89,50 @@ class DatabaseConnection {
     SessionManager.setUserEmail(email);
   }
 
+   // Check if a user exists in the database by email
+  Future<bool> isUserExistsgoogle(String email) async {
+    const query = "SELECT COUNT(*) FROM users WHERE email = @Email";
+    final result = await _connection.query(query, substitutionValues: {
+      'Email': email,
+    });
 
-  Future<bool> userExists(String email) async {
-    final conn = await getConnection();
-    var result = await conn.query(
-      'SELECT COUNT(*) FROM users WHERE email = @email',
-      substitutionValues: {
-        'email': email,
-      },
-    );
-    return result.first[0] > 0;
-    // Save the email to SessionManager
+    final count = result.first[0];
+    return count > 0;
   }
 
-   Future<void> insertOrUpdateAuthProvider(
+  // Execute a raw query
+  Future<List<Map<String, dynamic>>> executeRawQuery(
+      String query, List<dynamic> parameters) async {
+    final result =
+        await _connection.mappedResultsQuery(query, substitutionValues: {
+      for (var i = 0; i < parameters.length; i++) 'p$i': parameters[i],
+    });
+
+    return result;
+  }
+
+
+  Future<bool> userExists(String email) async {
+  final conn = await getConnection();
+  try {
+    final result = await conn.query(
+      '''
+      SELECT COUNT(*) FROM Users WHERE email = @userEmail
+      ''',
+      substitutionValues: {'userEmail': email},
+    );
+
+    return result.isNotEmpty && result.first[0] > 0; // Check if count > 0
+  } catch (e) {
+    print("Error checking if user exists: $e");
+    return false; // In case of an error, assume user does not exist
+  }
+  SessionManager.setUserEmail(email);
+}
+
+
+   // Insert or update AuthProvider details
+  Future<void> insertOrUpdateAuthProvider(
     String authType,
     String userEmail,
     String? accessToken,
@@ -113,27 +143,24 @@ class DatabaseConnection {
     final conn = await getConnection();
 
     // Set refreshToken to the current time if it's null
-    if (refreshToken == null) {
-      refreshToken = DateTime.now()
-          .toIso8601String(); // Setting the refreshToken to the current time
-    }
+    refreshToken ??= DateTime.now().toIso8601String(); // Use the current time
 
     try {
       await conn.query(
         '''
-      INSERT INTO AuthProvider (
-        AP_Type, AP_UserID, AP_AccessToken, AP_RefreshToken, AP_URL, AP_TokenExpiry, AP_CreatedAt, AP_UpdatedAt
-      ) VALUES (
-        @authType, @userEmail, @accessToken, @refreshToken, @authUrl, @tokenExpiry, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP
-      )
-      ON CONFLICT (AP_UserID, AP_Type) 
-      DO UPDATE SET 
-        AP_AccessToken = EXCLUDED.AP_AccessToken,
-        AP_RefreshToken = EXCLUDED.AP_RefreshToken,
-        AP_URL = EXCLUDED.AP_URL,
-        AP_TokenExpiry = EXCLUDED.AP_TokenExpiry,
-        AP_UpdatedAt = CURRENT_TIMESTAMP;
-      ''',
+        INSERT INTO AuthProvider (
+          AP_Type, AP_UserID, AP_AccessToken, AP_RefreshToken, AP_URL, AP_TokenExpiry, AP_CreatedAt, AP_UpdatedAt
+        ) VALUES (
+          @authType, @userEmail, @accessToken, @refreshToken, @authUrl, @tokenExpiry, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP
+        )
+        ON CONFLICT (AP_UserID, AP_Type) 
+        DO UPDATE SET 
+          AP_AccessToken = EXCLUDED.AP_AccessToken,
+          AP_RefreshToken = EXCLUDED.AP_RefreshToken,
+          AP_URL = EXCLUDED.AP_URL,
+          AP_TokenExpiry = EXCLUDED.AP_TokenExpiry,
+          AP_UpdatedAt = CURRENT_TIMESTAMP;
+        ''',
         substitutionValues: {
           'authType': authType,
           'userEmail': userEmail,

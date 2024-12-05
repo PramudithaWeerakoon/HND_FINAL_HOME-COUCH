@@ -106,18 +106,17 @@ class _RegisterPageState extends State<RegisterPage> {
 
  Future<void> handleGooglein(BuildContext context) async {
     try {
-      print('Starting Google sign-in...');
+      print('Starting Google login...');
       final GoogleSignIn googleSignIn = GoogleSignIn();
-      await googleSignIn
-          .signOut(); // Ensure the user is signed out before signing in again
+      await googleSignIn.signOut(); // Ensure a fresh sign-in
       final GoogleSignInAccount? googleUser = await googleSignIn.signIn();
 
       if (googleUser == null) {
-        print('User canceled the sign-in.');
+        print('User canceled the login.');
         return;
       }
 
-      print('Google user signed in: ${googleUser.email}');
+      print('Google user logged in: ${googleUser.email}');
       final GoogleSignInAuthentication googleAuth =
           await googleUser.authentication;
 
@@ -139,53 +138,48 @@ class _RegisterPageState extends State<RegisterPage> {
         loggedinAuthUserEmail = user.email!;
         loggedinAuthUserName = user.displayName!;
 
-        // Check if the user already exists in the database
-        final userExists =
-            await _databaseConnection.userExists(loggedinAuthUserEmail!);
+        // Set user email in session
+        if (loggedinAuthUserEmail != null) {
+          SessionManager.setUserEmail(loggedinAuthUserEmail!);
+        }
 
-        if (userExists) {
-          // Email already exists; show a message to the user
-          print('Email is already registered. Please log in.');
+        // Insert or update authentication provider details
+        final tokenExpiry = DateTime.now()
+            .add(Duration(hours: 1))
+            .toIso8601String(); // Example token expiry
+        final databaseConnection = DatabaseConnection();
+        await databaseConnection.insertOrUpdateAuthProvider(
+          'Google', // authType
+          loggedinAuthUserEmail!,
+          googleAuth.accessToken,
+          googleAuth.idToken, // Assuming ID token is the refresh token
+          null, // authUrl (not applicable for Google in this context)
+          tokenExpiry,
+        );
+        // Check user existence in the database
+        final isUserExists =
+            await databaseConnection.isUserExistsgoogle(loggedinAuthUserEmail!);
+
+        if (isUserExists) {
+          print('Email already registered. Please log in.');
           ScaffoldMessenger.of(context).showSnackBar(
             SnackBar(
               content: Text(
                   'The email ${loggedinAuthUserEmail!} is already registered. Please log in.'),
             ),
           );
-          return; // Do not proceed further
         } else {
-          // Insert new user into the database
-          await _databaseConnection.insertUser(
-            loggedinAuthUserName!,
-            loggedinAuthUserEmail!,
-            'GoogleUser', // Use a placeholder for password
-          );
-          print('New user added to the database.');
-        }
-
-        // Insert or update AuthProvider details in the database
-        await _databaseConnection.insertOrUpdateAuthProvider(
-          'Google', // Authentication provider type
-          loggedinAuthUserEmail!,
-          googleAuth.accessToken,
-          googleAuth.idToken,
-          'https://oauth2.googleapis.com/token', // Example URL
-          DateTime.now()
-              .add(Duration(hours: 1))
-              .toIso8601String(), // Example expiry
-        );
-
-        // Navigate to the first question screen for new users
-        if (user.metadata.creationTime == user.metadata.lastSignInTime) {
+          print('Email not registered. Navigating to Question 1.');
           Navigator.pushReplacementNamed(context, '/question1');
         }
       } else {
         print('Firebase user information not available.');
       }
     } catch (error) {
-      print('Error during Google sign-in: $error');
+      print('Error during Google login: $error');
     }
   }
+
 
   @override
   Widget build(BuildContext context) {

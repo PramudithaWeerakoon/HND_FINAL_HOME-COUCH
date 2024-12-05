@@ -124,14 +124,29 @@ class _LoginPageState extends State<LoginPage> {
         loggedinAuthUserEmail = user.email!;
         loggedinAuthUserName = user.displayName!;
 
-        // Call the database method to handle login
-        final userExists =
-            await _databaseConnection.loginUsergoogle(loggedinAuthUserEmail!);
+        // Set user email in session
+        if (loggedinAuthUserEmail != null) {
+          SessionManager.setUserEmail(loggedinAuthUserEmail!);
+        }
 
-        if (userExists) {
-          print('Login successful. Saving session.');
-          SessionManager.setUserEmail(
-              loggedinAuthUserEmail!); // Save email to session
+        // Insert or update authentication provider details
+        final tokenExpiry = DateTime.now()
+            .add(Duration(hours: 1))
+            .toIso8601String(); // Example token expiry
+        final databaseConnection = DatabaseConnection();
+        await databaseConnection.insertOrUpdateAuthProvider(
+          'Google', // authType
+          loggedinAuthUserEmail!,
+          googleAuth.accessToken,
+          googleAuth.idToken, // Assuming ID token is the refresh token
+          null, // authUrl (not applicable for Google in this context)
+          tokenExpiry,
+        );
+
+        // Check if the user exists in the database
+        if (await databaseConnection.userExists(loggedinAuthUserEmail!)) {
+          print('Login successful. Navigating to the home screen.');
+
           // Navigate to the home screen
           Navigator.pushReplacementNamed(context, '/home');
         } else {
