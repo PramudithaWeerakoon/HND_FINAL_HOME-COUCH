@@ -1,4 +1,5 @@
 import 'package:postgres/postgres.dart';
+import 'package:intl/intl.dart';
 import 'dart:math';
 
 // SessionManager to manage the current user's session
@@ -28,11 +29,11 @@ class DatabaseConnection {
   // Constructor to initialize the connection
   DatabaseConnection() {
     _connection = PostgreSQLConnection(
-      'ep-square-sun-a1o79qbw.ap-southeast-1.aws.neon.tech', // Host
+      'ep-damp-glitter-a1pn9kcw.ap-southeast-1.aws.neon.tech', // Host
       5432, // Port
       'neondb', // Database name
       username: 'neondb_owner', // Username
-      password: 'HftxPEXu6Q5T', // Password
+      password: 'pigA2fI1kHCP', // Password
       useSSL: true, // Use SSL as required
     );
   }
@@ -42,6 +43,7 @@ class DatabaseConnection {
     try {
       if (_connection.isClosed) {
         await _connection.open();
+        print("Database connected to HomercouchFinal");
       }
       return _connection;
     } catch (e) {
@@ -60,7 +62,7 @@ class DatabaseConnection {
   Future<void> insertUser(String name, String email, String password) async {
     final conn = await getConnection();
     await conn.query(
-      'INSERT INTO users (name, email, password) VALUES (@name, @email, @password)',
+      'INSERT INTO users (username, useremail, userpassword) VALUES (@name, @email, @password)',
       substitutionValues: {
         'name': name,
         'email': email,
@@ -77,7 +79,7 @@ class DatabaseConnection {
 
     // Check if the user exists in the database
     final result = await conn.query(
-      "SELECT COUNT(*) FROM users WHERE email = @email",
+      "SELECT COUNT(*) FROM users WHERE useremail = @email",
       substitutionValues: {
         'email': email, // Pass email as substitution value
       },
@@ -91,7 +93,7 @@ class DatabaseConnection {
 
    // Check if a user exists in the database by email
   Future<bool> isUserExistsgoogle(String email) async {
-    const query = "SELECT COUNT(*) FROM users WHERE email = @Email";
+    const query = "SELECT COUNT(*) FROM users WHERE useremail = @Email";
     final result = await _connection.query(query, substitutionValues: {
       'Email': email,
     });
@@ -117,7 +119,7 @@ class DatabaseConnection {
   try {
     final result = await conn.query(
       '''
-      SELECT COUNT(*) FROM Users WHERE email = @userEmail
+      SELECT COUNT(*) FROM users WHERE useremail = @userEmail
       ''',
       substitutionValues: {'userEmail': email},
     );
@@ -131,7 +133,7 @@ class DatabaseConnection {
 }
 
 
-   // Insert or update AuthProvider details
+ // Insert or update AuthProvider details
   Future<void> insertOrUpdateAuthProvider(
     String authType,
     String userEmail,
@@ -148,19 +150,19 @@ class DatabaseConnection {
     try {
       await conn.query(
         '''
-        INSERT INTO AuthProvider (
-          AP_Type, AP_UserID, AP_AccessToken, AP_RefreshToken, AP_URL, AP_TokenExpiry, AP_CreatedAt, AP_UpdatedAt
-        ) VALUES (
-          @authType, @userEmail, @accessToken, @refreshToken, @authUrl, @tokenExpiry, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP
-        )
-        ON CONFLICT (AP_UserID, AP_Type) 
-        DO UPDATE SET 
-          AP_AccessToken = EXCLUDED.AP_AccessToken,
-          AP_RefreshToken = EXCLUDED.AP_RefreshToken,
-          AP_URL = EXCLUDED.AP_URL,
-          AP_TokenExpiry = EXCLUDED.AP_TokenExpiry,
-          AP_UpdatedAt = CURRENT_TIMESTAMP;
-        ''',
+      INSERT INTO AuthProvider (
+        AP_Type, AP_UserID, AP_AccessToken, AP_RefreshToken, AP_URL, AP_TokenExpiry, AP_CreatedAt, AP_UpdatedAt
+      ) VALUES (
+        @authType, @userEmail, @accessToken, @refreshToken, @authUrl, @tokenExpiry, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP
+      )
+      ON CONFLICT (AP_UserID, AP_Type) 
+      DO UPDATE SET 
+        AP_AccessToken = EXCLUDED.AP_AccessToken,
+        AP_RefreshToken = EXCLUDED.AP_RefreshToken,
+        AP_URL = EXCLUDED.AP_URL,
+        AP_TokenExpiry = EXCLUDED.AP_TokenExpiry,
+        AP_UpdatedAt = CURRENT_TIMESTAMP;
+      ''',
         substitutionValues: {
           'authType': authType,
           'userEmail': userEmail,
@@ -178,6 +180,7 @@ class DatabaseConnection {
   }
 
 
+
   // Method to update the user's age based on the email
   Future<void> updateAge(int age) async {
     final conn = await getConnection();
@@ -188,7 +191,7 @@ class DatabaseConnection {
     }
 
     await conn.query(
-      'UPDATE users SET age = @age WHERE email = @email',
+      'UPDATE fitnessprofile SET fp_age = @age WHERE fp_userid = @email',
       substitutionValues: {
         'email': email,
         'age': age,
@@ -201,7 +204,7 @@ class DatabaseConnection {
   Future<bool> loginUser(String email, String password) async {
     final conn = await getConnection();
     var result = await conn.query(
-      'SELECT * FROM users WHERE email = @email AND password = @password',
+      'SELECT * FROM Users WHERE userEmail = @email AND  userPassword = @password',
       substitutionValues: {
         'email': email,
         'password': password, // Use hashed password comparison in production
@@ -225,17 +228,24 @@ class DatabaseConnection {
       throw Exception("No user is currently logged in.");
     }
 
+    // Get the current timestamp
+    final currentTimestamp = DateTime.now().toIso8601String();
+
     await conn.query(
-      'UPDATE users SET body_weight = @body_weight WHERE email = @email',
+      '''
+    INSERT INTO WeightHistory (WH_RecordedAt, WH_Weight, WH_UserID)
+    VALUES (@recorded_at, @body_weight, @user_email)
+    ''',
       substitutionValues: {
-        'email': email,
+        'recorded_at': currentTimestamp,
+        'user_email': email,
         'body_weight': bodyWeight,
       },
     );
-    print("Body weight updated successfully for $email.");
+    print("Body weight updated successfully for $email at $currentTimestamp.");
   }
 
-  // Method to update the user's height based on the email
+  // Method to update the user's height and maintain history
   Future<void> updateHeight(double height, bool isFeetSelected) async {
     final conn = await getConnection();
     final email = SessionManager.getUserEmail();
@@ -247,16 +257,24 @@ class DatabaseConnection {
     // Convert height to meters only if it's in feet
     double heightInMeters = isFeetSelected ? height * 0.3048 : height;
 
+    // Get the current timestamp
+    final currentTimestamp = DateTime.now().toIso8601String();
+
     await conn.query(
-      'UPDATE users SET body_height = @height WHERE email = @email',
+      '''
+    INSERT INTO HeightHistory (HH_RecordedAt, HH_Height, HH_UserID)
+    VALUES (@recorded_at, @height, @user_email)
+    ''',
       substitutionValues: {
-        'email': email,
+        'recorded_at': currentTimestamp,
+        'user_email': email,
         'height': heightInMeters
             .toStringAsFixed(2), // Store height up to 2 decimal places
       },
     );
     print("Height updated successfully for $email.");
   }
+
 
    // Method to update the user's body type based on the email
   Future<void> updateBodyType(String bodyType) async {
@@ -268,7 +286,7 @@ class DatabaseConnection {
     }
 
     await conn.query(
-      'UPDATE users SET body_type = @bodyType WHERE email = @userEmail',
+      'UPDATE FitnessProfile SET fp_bodyType = @bodyType WHERE FP_UserID = @userEmail',
       substitutionValues: {
         'bodyType': bodyType,
         'userEmail': email,
@@ -287,7 +305,7 @@ class DatabaseConnection {
     }
 
     await conn.query(
-      'UPDATE users SET fitness_background = @fitnessBackground WHERE email = @email',
+      'UPDATE FitnessProfile SET FP_FitnessBackground = @fitnessBackground WHERE FP_UserID = @email',
       substitutionValues: {
         'email': email,
         'fitnessBackground': fitnessBackground,
@@ -306,7 +324,7 @@ class DatabaseConnection {
     }
 
     await conn.query(
-      'UPDATE users SET waist_circumference = @waistCircumference WHERE email = @email',
+      'UPDATE FitnessProfile SET FP_WaistCircumference = @waistCircumference WHERE FP_UserID = @email',
       substitutionValues: {
         'email': email,
         'waistCircumference': waistCircumference,
@@ -325,7 +343,7 @@ class DatabaseConnection {
     }
 
     await conn.query(
-      'UPDATE users SET neck_circumference = @neckCircumference WHERE email = @email',
+      'UPDATE FitnessProfile SET FP_NeckCircumference = @neckCircumference WHERE FP_UserID = @email',
       substitutionValues: {
         'email': email,
         'neckCircumference': neckCircumference,
