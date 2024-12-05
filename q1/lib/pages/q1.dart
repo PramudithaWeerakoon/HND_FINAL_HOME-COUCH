@@ -154,7 +154,7 @@ class _Q1PageState extends State<Q1Page> {
             if (email != null) {
               try {
                 // Save age to database
-                await _dbConnection.updateAge(age);
+                await _dbConnection.upsertAge(age);
                 // Navigate to the next page
                 Navigator.pushNamed(context, '/question2');
               } catch (e) {

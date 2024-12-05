@@ -180,25 +180,40 @@ class DatabaseConnection {
   }
 
 
-
-  // Method to update the user's age based on the email
-  Future<void> updateAge(int age) async {
+Future<void> upsertAge(int age) async {
     final conn = await getConnection();
-    final email = SessionManager.getUserEmail();
 
-    if (email == null) {
-      throw Exception("No user is currently logged in.");
+    try {
+      final email = SessionManager.getUserEmail();
+
+      if (email == null) {
+        throw Exception("No user is currently logged in.");
+      }
+
+      final result = await conn.query(
+        '''
+      INSERT INTO fitnessprofile (fp_userid, fp_age)
+      VALUES (@email, @age)
+      ON CONFLICT (fp_userid)
+      DO UPDATE SET fp_age = EXCLUDED.fp_age
+      ''',
+        substitutionValues: {
+          'email': email,
+          'age': age,
+        },
+      );
+
+      if (result.affectedRowCount == 0) {
+        throw Exception("Failed to insert or update the record.");
+      }
+    } on PostgreSQLException catch (e) {
+      throw Exception("Database error occurred: ${e.message}");
+    } on Exception catch (e) {
+      throw Exception("An error occurred: ${e.toString()}");
     }
-
-    await conn.query(
-      'UPDATE fitnessprofile SET fp_age = @age WHERE fp_userid = @email',
-      substitutionValues: {
-        'email': email,
-        'age': age,
-      },
-    );
   }
-  
+
+
 
   // Login method
   Future<bool> loginUser(String email, String password) async {
@@ -228,21 +243,21 @@ class DatabaseConnection {
       throw Exception("No user is currently logged in.");
     }
 
-    // Get the current timestamp
-    final currentTimestamp = DateTime.now().toIso8601String();
-
+  
     await conn.query(
       '''
-    INSERT INTO WeightHistory (WH_RecordedAt, WH_Weight, WH_UserID)
-    VALUES (@recorded_at, @body_weight, @user_email)
-    ''',
-      substitutionValues: {
-        'recorded_at': currentTimestamp,
-        'user_email': email,
-        'body_weight': bodyWeight,
-      },
-    );
-    print("Body weight updated successfully for $email at $currentTimestamp.");
+      INSERT INTO FitnessProfile (FP_CurrentWeight, FP_UserID)
+      VALUES (@body_weight, @user_email)
+      ON CONFLICT (FP_UserID) DO UPDATE 
+      SET FP_CurrentWeight = EXCLUDED.FP_CurrentWeight
+      ''',
+    substitutionValues: {
+    'user_email': email,
+    'body_weight': bodyWeight,
+    },
+  );
+
+    print("Body weight updated successfully for $email.");
   }
 
   // Method to update the user's height and maintain history
@@ -257,27 +272,25 @@ class DatabaseConnection {
     // Convert height to meters only if it's in feet
     double heightInMeters = isFeetSelected ? height * 0.3048 : height;
 
-    // Get the current timestamp
-    final currentTimestamp = DateTime.now().toIso8601String();
+    
 
     await conn.query(
-      '''
-    INSERT INTO HeightHistory (HH_RecordedAt, HH_Height, HH_UserID)
-    VALUES (@recorded_at, @height, @user_email)
-    ''',
+    '''
+      INSERT INTO FitnessProfile (FP_CurrentHeight, FP_UserID)
+      VALUES (@height, @user_email)
+      ON CONFLICT (FP_UserID) DO UPDATE 
+      SET FP_CurrentHeight = EXCLUDED.FP_CurrentHeight
+      ''',
       substitutionValues: {
-        'recorded_at': currentTimestamp,
         'user_email': email,
-        'height': heightInMeters
-            .toStringAsFixed(2), // Store height up to 2 decimal places
+        'height': heightInMeters.toStringAsFixed(2), // Store height up to 2 decimal places
       },
     );
     print("Height updated successfully for $email.");
   }
 
 
-   // Method to update the user's body type based on the email
-  Future<void> updateBodyType(String bodyType) async {
+   Future<void> upsertBodyType(String bodyType) async {
     final conn = await getConnection();
     final email = SessionManager.getUserEmail();
 
@@ -286,14 +299,20 @@ class DatabaseConnection {
     }
 
     await conn.query(
-      'UPDATE FitnessProfile SET fp_bodyType = @bodyType WHERE FP_UserID = @userEmail',
+      '''
+    INSERT INTO FitnessProfile (FP_UserID, fp_bodyType)
+    VALUES (@userEmail, @bodyType)
+    ON CONFLICT (FP_UserID)
+    DO UPDATE SET fp_bodyType = EXCLUDED.fp_bodyType
+    ''',
       substitutionValues: {
         'bodyType': bodyType,
         'userEmail': email,
       },
     );
-    print("Body type updated successfully for $email.");
+    print("Body type inserted or updated successfully for $email.");
   }
+
 
    // Method to update the user's fitness background based on the email
   Future<void> updateFitnessBackground(String fitnessBackground) async {
@@ -363,7 +382,7 @@ class DatabaseConnection {
     }
 
     await conn.query(
-      'UPDATE users SET medical_conditions = @medicalCondition WHERE email = @email',
+      'UPDATE FitnessProfile SET FP_MedicalConditions = @medicalCondition WHERE FP_UserID = @email',
       substitutionValues: {
         'email': email,
         'medicalCondition': medicalCondition,
@@ -389,7 +408,7 @@ class DatabaseConnection {
         injuryData == 'None' ? '{}' : '{${injuryData.replaceAll(', ', ',')}}';
 
     await conn.query(
-      'UPDATE users SET injuries = @injuries WHERE email = @email',
+      'UPDATE FitnessProfile SET FP_Injuries = @injuries WHERE FP_UserID = @email',
       substitutionValues: {
         'email': email,
         'injuries': formattedInjuryData,
@@ -437,9 +456,7 @@ class DatabaseConnection {
     return tdee;
   }
 
-  // Method to save BMI, body fat percentage, and daily caloric intake to the database
-  Future<void> updateHealthData(
-      double bmi, double bodyFat, double dailyCalories) async {
+  Future<Map<String, dynamic>> fetchAndUpsertHealthData() async {
     final conn = await getConnection();
     final email = SessionManager.getUserEmail();
 
@@ -447,53 +464,52 @@ class DatabaseConnection {
       throw Exception("No user is currently logged in.");
     }
 
-    await conn.query(
-      'UPDATE users SET bmi = @bmi, body_fat_percentage = @bodyFat, daily_caloric_intake = @dailyCalories WHERE email = @email',
-      substitutionValues: {
-        'email': email,
-        'bmi': bmi,
-        'bodyFat': bodyFat,
-        'dailyCalories': dailyCalories,
-      },
-    );
-    print("Health data updated successfully for $email.");
-  }
-
- Future<Map<String, dynamic>> fetchHealthData() async {
-    final conn = await getConnection();
-    final email = SessionManager.getUserEmail();
-
-    if (email == null) {
-      throw Exception("No user is currently logged in.");
-    }
-
+    // Fetch health data
     var result = await conn.query(
-      'SELECT body_weight, body_height, waist_circumference, neck_circumference, age, gender FROM users WHERE email = @email',
+      'SELECT fp_currentweight, fp_currentheight, fp_waistcircumference, fp_neckcircumference, fp_age, fp_gender FROM fitnessprofile WHERE FP_UserID = @email',
       substitutionValues: {'email': email},
     );
 
     if (result.isNotEmpty) {
       var row = result.first;
 
-      double weight = row[0];
-      double heightInMeters = row[1];
-      double waistCircumference = row[2];
-      double neckCircumference = row[3];
-      int age = row[4];
-      String gender = row[5];
+      // Explicitly parse the database values to double or int
+      double weight = double.tryParse(row[0].toString()) ?? 0.0;
+      double heightInMeters = double.tryParse(row[1].toString()) ?? 0.0;
+      double waistCircumference = double.tryParse(row[2].toString()) ?? 0.0;
+      double neckCircumference = double.tryParse(row[3].toString()) ?? 0.0;
+      int age = int.tryParse(row[4].toString()) ?? 0;
+      String gender = row[5].toString();
 
-      // Calculate BMI
+      // Calculate BMI, body fat, and daily calories
       double bmi = calculateBMI(weight, heightInMeters);
-
-      // Calculate body fat (assumed gender-specific)
       double bodyFat = calculateBodyFat(
           waistCircumference, neckCircumference, heightInMeters,
           gender: gender);
-
-      // Calculate daily caloric intake (Assume a moderate activity level for this example)
       double dailyCalories = calculateDailyCalories(
           weight, heightInMeters * 100, age, gender, 1.55);
 
+      // Upsert health data (insert or update)
+      await conn.query(
+        '''
+      INSERT INTO FitnessGoal (FG_UserID, fg_StartBMI, FG_BodyFatPresentage, FG_DailyCalories)
+      VALUES (@email, @bmi, @bodyFat, @dailyCalories)
+      ON CONFLICT (FG_UserID) 
+      DO UPDATE SET 
+        fg_StartBMI = @bmi, 
+        FG_BodyFatPresentage = @bodyFat, 
+        FG_DailyCalories = @dailyCalories
+      ''',
+        substitutionValues: {
+          'email': email,
+          'bmi': bmi,
+          'bodyFat': bodyFat,
+          'dailyCalories': dailyCalories,
+        },
+      );
+      print("Health data inserted or updated successfully for $email.");
+
+      // Return the health data as a Map
       return {
         'bmi': bmi,
         'bodyFat': bodyFat,
@@ -506,6 +522,7 @@ class DatabaseConnection {
     }
   }
 
+
   // Method to get the user's name based on the current email
   Future<String> getUserName() async {
     final conn = await getConnection();
@@ -516,7 +533,7 @@ class DatabaseConnection {
     }
 
     final result = await conn.query(
-      'SELECT name FROM users WHERE email = @email',
+      'SELECT username FROM Users WHERE userEmail = @email',
       substitutionValues: {
         'email': email,
       },
@@ -561,7 +578,7 @@ class DatabaseConnection {
     }
 
     var result = await conn.query(
-      'SELECT name, email, password FROM users WHERE email = @email',
+      'SELECT username, userEmail, userPassword FROM Users WHERE userEmail = @email',
       substitutionValues: {
         'email': email,
       },
@@ -631,7 +648,7 @@ class DatabaseConnection {
     }
 
     await conn.query(
-      'UPDATE users SET gender = @gender WHERE email = @email',
+      'UPDATE FitnessProfile SET FP_Gender = @gender WHERE FP_UserID = @email',
       substitutionValues: {
         'email': email,
         'gender': gender,

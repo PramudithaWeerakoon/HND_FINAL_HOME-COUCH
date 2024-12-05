@@ -29,7 +29,8 @@ class Q13Screen extends StatelessWidget {
 
             // FutureBuilder to fetch and display health data
             FutureBuilder<Map<String, dynamic>>(
-              future: dbConnection.fetchHealthData(),
+              future: dbConnection.fetchAndUpsertHealthData(),
+
               builder: (context, snapshot) {
                 if (snapshot.connectionState == ConnectionState.waiting) {
                   return const CircularProgressIndicator(); // Loading indicator
@@ -69,6 +70,7 @@ class Q13Screen extends StatelessWidget {
                     MaterialPageRoute(
                       builder: (context) =>
                           FitnessGoalSelectionScreen(), // Navigate to Q15Screen
+                          
                     ),
                   );
                 },

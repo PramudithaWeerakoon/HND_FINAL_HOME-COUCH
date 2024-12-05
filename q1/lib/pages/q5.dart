@@ -123,7 +123,7 @@ class _BodyTypeSelectionScreenState extends State<BodyTypeSelectionScreen> {
 
                     // Save the body type to the database
                     final dbConnection = DatabaseConnection();
-                    await dbConnection.updateBodyType(bodyType);
+                    await dbConnection.upsertBodyType(bodyType);
 
                     // Navigate to the next screen
                     Navigator.push(
