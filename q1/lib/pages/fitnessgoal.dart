@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'q15.dart'; // Import q15.dart
+import 'db_connection.dart'; // Import db_connection.dart
 
 class FitnessGoalSelectionScreen extends StatefulWidget {
   const FitnessGoalSelectionScreen({super.key});
@@ -78,15 +79,33 @@ class _FitnessGoalSelectionScreen extends State<FitnessGoalSelectionScreen> {
                 shape: RoundedRectangleBorder(
                   borderRadius: BorderRadius.circular(100),
                 ),
-                onPressed: () {
-                  // Navigate to q15.dart when clicked
-                  Navigator.push(
-                    context,
-                    MaterialPageRoute(
-                      builder: (context) => const Q15Screen(), // Navigate to Q15Screen
-                    ),
-                  );
+                onPressed: () async {
+                  final goalMapping = {
+                    0: 'Lose Weight',
+                    1: 'Build Muscle & Lose Weight',
+                    2: 'Build Muscle',
+                  };
+
+                  if (_selectedGoal != null) {
+                    final selectedGoal = goalMapping[_selectedGoal];
+                    final db = DatabaseConnection();
+
+                    try {
+                      await db.saveFitnessGoal(
+                          selectedGoal!); // Save goal to the database
+                      Navigator.push(
+                        context,
+                        MaterialPageRoute(
+                          builder: (context) =>
+                              const Q15Screen(), // Navigate to Q15Screen
+                        ),
+                      );
+                    } catch (e) {
+                      print("Error saving goal: $e");
+                    }
+                  }
                 },
+
                 child: const Icon(Icons.arrow_forward, color: Colors.white),
               ),
             ),

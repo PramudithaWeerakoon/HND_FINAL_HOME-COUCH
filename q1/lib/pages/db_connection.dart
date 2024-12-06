@@ -178,8 +178,7 @@ class DatabaseConnection {
       rethrow;
     }
   }
-
-
+  
 Future<void> upsertAge(int age) async {
     final conn = await getConnection();
 
@@ -213,7 +212,23 @@ Future<void> upsertAge(int age) async {
     }
   }
 
+  // Method to update the user's gender based on the email
+  Future<void> updateGender(String gender) async {
+    final conn = await getConnection();
+    final email = SessionManager.getUserEmail();
 
+    if (email == null) {
+      throw Exception("No user is currently logged in.");
+    }
+
+    await conn.query(
+      'UPDATE FitnessProfile SET FP_Gender = @gender WHERE FP_UserID = @email',
+      substitutionValues: {
+        'email': email,
+        'gender': gender,
+      },
+    );
+  }
 
   // Login method
   Future<bool> loginUser(String email, String password) async {
@@ -638,23 +653,98 @@ Future<void> upsertAge(int age) async {
     print("User info updated successfully for $currentEmail.");
   }
 
-   // Method to update the user's gender based on the email
-  Future<void> updateGender(String gender) async {
+   // Method to save the fitness goal for the currently logged-in user
+  Future<void> saveFitnessGoal(String goal) async {
     final conn = await getConnection();
     final email = SessionManager.getUserEmail();
 
+    if (email != null) {
+      await conn.query(
+        'UPDATE fitnessgoal SET fg_Fitness_Goal = @goal WHERE fg_userid = @email',
+        substitutionValues: {
+          'goal': goal,
+          'email': email,
+        },
+      );
+      print("Fitness goal saved for user $email: $goal");
+    } else {
+      print("No user logged in.");
+    }
+  }
+
+   // Method to save the selected muscle groups for the currently logged-in user
+  Future<void> saveSelectedMuscleGroups(List<String> selectedGroups) async {
+    final conn = await getConnection();
+    final email = SessionManager.getUserEmail();
+
+    if (email != null) {
+      // You can save the selected muscle groups as a comma-separated string or in a new table
+      String selectedGroupsString = selectedGroups.join(',');
+
+      await conn.query(
+        'UPDATE fitnessgoal SET FG_FocusMuscle_GroupName = @selectedGroups WHERE fg_userid = @email',
+        substitutionValues: {
+          'selectedGroups': selectedGroupsString,
+          'email': email,
+        },
+      );
+      print(
+          "Selected muscle groups saved for user $email: $selectedGroupsString");
+    } else {
+      print("No user logged in.");
+    }
+  }
+
+   // Method to save the fitness goal (number of workout days)
+  Future<void> saveFitnessGoaldays(int workoutDays) async {
+    final email = SessionManager.getUserEmail(); // Get the current user's email
     if (email == null) {
-      throw Exception("No user is currently logged in.");
+      print("No user is currently logged in");
+      return;
     }
 
+    final conn = await getConnection();
     await conn.query(
-      'UPDATE FitnessProfile SET FP_Gender = @gender WHERE FP_UserID = @email',
+      """
+    INSERT INTO fitnessgoal (fg_userid, FG_WorkoutDaysPerWeek) 
+    VALUES (@userEmail, @workoutDays)
+    ON CONFLICT (fg_userid) 
+    DO UPDATE SET FG_WorkoutDaysPerWeek = EXCLUDED.FG_WorkoutDaysPerWeek
+    """,
+      substitutionValues: {'userEmail': email, 'workoutDays': workoutDays},
+    );
+
+    print("Fitness goal saved: $workoutDays days per week");
+  }
+
+
+   Future<void> saveTargetWeightToDatabase(double targetWeightInKg) async {
+    final conn = await getConnection(); // Get the database connection
+
+    // Get the current user's email from the SessionManager
+    String? currentUserEmail = SessionManager.getUserEmail();
+
+    if (currentUserEmail == null) {
+      throw Exception('No user is logged in');
+    }
+
+    final result = await conn.query(
+      '''
+    INSERT INTO fitnessgoal (fg_userid, fg_targetweight)
+    VALUES (@userEmail, @targetWeight)
+    ON CONFLICT (fg_userid)
+    DO UPDATE SET fg_targetweight = EXCLUDED.fg_targetweight
+    ''',
       substitutionValues: {
-        'email': email,
-        'gender': gender,
+        'targetWeight': targetWeightInKg,
+        'userEmail': currentUserEmail,
       },
     );
+
+    print("Target weight saved successfully for $currentUserEmail.");
   }
 }
+
+
 
 

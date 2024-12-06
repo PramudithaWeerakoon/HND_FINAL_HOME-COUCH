@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'q16.dart'; // Import q16.dart
+import 'db_connection.dart'; // Import db_connection.dart
 
 class Q15Screen extends StatefulWidget {
   const Q15Screen({super.key});
@@ -9,14 +10,17 @@ class Q15Screen extends StatefulWidget {
 }
 
 class _Q15ScreenState extends State<Q15Screen> {
-  // List to hold the selected muscle group indices
-  final List<int> _selectedGroups = [];
+  // List to hold the selected muscle group names
+  final List<String> _selectedGroups = [];
 
   // Define image paths for each muscle group (update paths as necessary)
   final String chestImagePath = 'lib/assets/Skinny.png';
   final String shouldersImagePath = 'lib/assets/Skinny.png';
   final String absImagePath = 'lib/assets/Skinny.png';
   final String bicepImagePath = 'lib/assets/Skinny-Fat.png';
+
+  // Map index to muscle group names
+  final List<String> muscleGroups = ['Chest', 'Shoulders', 'Abs', 'Bicep'];
 
   @override
   Widget build(BuildContext context) {
@@ -51,7 +55,8 @@ class _Q15ScreenState extends State<Q15Screen> {
                       color: Colors.black,
                     ),
                   ),
-                  const SizedBox(height: 40), // Space between question and options
+                  const SizedBox(
+                      height: 40), // Space between question and options
 
                   // Images with muscle group options
                   Expanded(
@@ -61,7 +66,8 @@ class _Q15ScreenState extends State<Q15Screen> {
                       crossAxisSpacing: 20,
                       children: [
                         _buildMuscleGroupOption('Chest', chestImagePath, 0),
-                        _buildMuscleGroupOption('Shoulders', shouldersImagePath, 1),
+                        _buildMuscleGroupOption(
+                            'Shoulders', shouldersImagePath, 1),
                         _buildMuscleGroupOption('Abs', absImagePath, 2),
                         _buildMuscleGroupOption('Bicep', bicepImagePath, 3),
                       ],
@@ -81,7 +87,7 @@ class _Q15ScreenState extends State<Q15Screen> {
               backgroundColor: const Color(0xFF21007E),
               shape: RoundedRectangleBorder(
                 borderRadius: BorderRadius.circular(100),
-              ), 
+              ),
               onPressed: () {
                 Navigator.pop(context); // Navigate back when pressed
               },
@@ -99,14 +105,24 @@ class _Q15ScreenState extends State<Q15Screen> {
                 shape: RoundedRectangleBorder(
                   borderRadius: BorderRadius.circular(100),
                 ),
-                onPressed: () {
-                  // Navigate to Q16 when pressed
-                  Navigator.push(
-                    context,
-                    MaterialPageRoute(
-                      builder: (context) => Q16Screen(), // Navigate to Q16Screen
-                    ),
-                  );
+                onPressed: () async {
+                  if (_selectedGroups.isNotEmpty) {
+                    final db = DatabaseConnection();
+
+                    try {
+                      await db.saveSelectedMuscleGroups(
+                          _selectedGroups); // Save selected muscle groups
+                      Navigator.push(
+                        context,
+                        MaterialPageRoute(
+                          builder: (context) =>
+                              Q16Screen(), // Navigate to Q16Screen
+                        ),
+                      );
+                    } catch (e) {
+                      print("Error saving selected muscle groups: $e");
+                    }
+                  }
                 },
                 child: const Icon(Icons.arrow_forward, color: Colors.white),
               ),
@@ -124,10 +140,12 @@ class _Q15ScreenState extends State<Q15Screen> {
     return GestureDetector(
       onTap: () {
         setState(() {
-          if (_selectedGroups.contains(index)) {
-            _selectedGroups.remove(index); // Remove if already selected
+          if (_selectedGroups.contains(muscleGroups[index])) {
+            _selectedGroups
+                .remove(muscleGroups[index]); // Remove if already selected
           } else {
-            _selectedGroups.add(index); // Add to selection if not selected
+            _selectedGroups
+                .add(muscleGroups[index]); // Add to selection if not selected
           }
         });
       },
@@ -138,12 +156,13 @@ class _Q15ScreenState extends State<Q15Screen> {
             width: boxWidth,
             height: boxHeight,
             decoration: BoxDecoration(
-              color: _selectedGroups.contains(index)
+              color: _selectedGroups.contains(muscleGroups[index])
                   ? const Color.fromARGB(255, 255, 255, 255).withOpacity(0.2)
-                  : const Color.fromARGB(255, 255, 255, 255), // Placeholder color
+                  : const Color.fromARGB(
+                      255, 255, 255, 255), // Placeholder color
               borderRadius: BorderRadius.circular(30),
               border: Border.all(
-                color: _selectedGroups.contains(index)
+                color: _selectedGroups.contains(muscleGroups[index])
                     ? const Color.fromARGB(255, 0, 0, 0)
                     : Colors.transparent,
                 width: 2.0, // Highlight selected box
@@ -159,7 +178,7 @@ class _Q15ScreenState extends State<Q15Screen> {
                   fit: BoxFit.cover,
                 ),
                 // Checkmark in the top-right corner when selected
-                if (_selectedGroups.contains(index))
+                if (_selectedGroups.contains(muscleGroups[index]))
                   const Positioned(
                     top: 5,
                     right: 7,
@@ -179,7 +198,7 @@ class _Q15ScreenState extends State<Q15Screen> {
             style: TextStyle(
               fontSize: 20,
               fontWeight: FontWeight.bold,
-              color: _selectedGroups.contains(index)
+              color: _selectedGroups.contains(muscleGroups[index])
                   ? const Color.fromARGB(255, 0, 0, 0)
                   : Colors.black,
             ),

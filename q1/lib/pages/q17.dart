@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'q18.dart'; // Import Q18Screen
+import 'db_connection.dart';
 
 class Q17Screen extends StatefulWidget {
   const Q17Screen({super.key});
@@ -204,7 +205,17 @@ class _Q17ScreenState extends State<Q17Screen> {
               shape: RoundedRectangleBorder(
                 borderRadius: BorderRadius.circular(100),
               ),
-              onPressed: () {
+              onPressed: () async {
+                double targetWeightInKg = double.parse(
+                    _weightController.text); // Get the target weight from input
+
+                if (!hasNoTargetWeight) {
+                  // Save the target weight to the database
+                  DatabaseConnection db = DatabaseConnection();
+                  await db.saveTargetWeightToDatabase(targetWeightInKg);
+                }
+
+                // Navigate to the next screen
                 Navigator.push(
                   context,
                   MaterialPageRoute(
@@ -212,6 +223,7 @@ class _Q17ScreenState extends State<Q17Screen> {
                   ),
                 );
               },
+
               child: const Icon(Icons.arrow_forward, color: Colors.white),
             ),
           ),

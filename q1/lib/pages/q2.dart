@@ -34,9 +34,6 @@ class _Q2PageState extends State<Q2Page> {
       await databaseConnection.updateGender(
         gender == Gender.male ? 'male' : 'female',
       );
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('Gender updated successfully.')),
-      );
     } catch (e) {
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(content: Text('Failed to update gender.')),
@@ -223,7 +220,7 @@ class GenderOptionButton extends StatelessWidget {
                   ),
                 ],
         ),
-        padding: const EdgeInsets.symmetric(vertical: 15, horizontal: 30),
+        padding: const EdgeInsets.symmetric(vertical: 15, horizontal:20),
         child: Row(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [

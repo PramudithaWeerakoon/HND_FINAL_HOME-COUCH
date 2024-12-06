@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/gestures.dart';
-import 'db_connection.dart'; // Make sure this import is correct
+import 'db_connection.dart'; 
 import 'q1.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:google_sign_in/google_sign_in.dart';
@@ -83,12 +83,7 @@ class _RegisterPageState extends State<RegisterPage> {
       try {
         // Insert the user into the database
         await _databaseConnection.insertUser(name, email, password);
-
-        // Show success message and navigate to the next screen
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('Registration successful!')),
-        );
-
+        
         // Navigate to the next screen
         Navigator.push(context,
             MaterialPageRoute(builder: (context) => const Q1Page()));

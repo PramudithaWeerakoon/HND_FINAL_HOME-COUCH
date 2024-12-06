@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'q17.dart';
+import 'db_connection.dart';
 
 class Q16Screen extends StatefulWidget {
   const Q16Screen({super.key});
@@ -48,11 +49,11 @@ class _Q16ScreenState extends State<Q16Screen> {
                   Column(
                     mainAxisAlignment: MainAxisAlignment.center,
                     children: [
-                      _buildOption("2 Days / Week", 0),
+                      _buildOption("2 Days / Week", 2),
                       const SizedBox(height: 25),
-                      _buildOption("4 Days / Week", 1),
+                      _buildOption("4 Days / Week", 4),
                       const SizedBox(height: 25),
-                      _buildOption("5 Days / Week", 2),
+                      _buildOption("5 Days / Week", 5),
                     ],
                   ),
                 ],
@@ -86,14 +87,22 @@ class _Q16ScreenState extends State<Q16Screen> {
                 shape: RoundedRectangleBorder(
                   borderRadius: BorderRadius.circular(100),
                 ),
-                onPressed: () {
-                  Navigator.push(
-                    context,
-                    MaterialPageRoute(
-                      builder: (context) => const Q17Screen(), // Navigate to Q17
-                    ),
-                  );
+                // Inside the onPressed callback for the "Next" button
+                onPressed: () async {
+                  if (_selectedOption != null) {
+                    // Call the saveFitnessGoal method to store the selected number of workout days
+                    await DatabaseConnection()
+                        .saveFitnessGoaldays(_selectedOption!);
+
+                    // Navigate to Q17Screen after saving the fitness goal
+                    Navigator.push(
+                      context,
+                      MaterialPageRoute(
+                          builder: (context) => const Q17Screen()),
+                    );
+                  }
                 },
+
                 child: const Icon(Icons.arrow_forward, color: Colors.white),
               ),
             ),
