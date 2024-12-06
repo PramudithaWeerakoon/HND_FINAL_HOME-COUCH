@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
-import 'q11.dart'; // Import q11.dart
+import 'q11.dart'; // Import Q11
+import 'q12.dart'; // Import Q12
 
 class Q10Screen extends StatefulWidget {
   const Q10Screen({super.key});
@@ -9,8 +10,8 @@ class Q10Screen extends StatefulWidget {
 }
 
 class _Q10ScreenState extends State<Q10Screen> {
-  List<String> equipment = ['Dumbbell', 'Barbell', 'Kettlebell', 'Fitness Bench', 'Skipping Rope'];
-  String selectedEquipment = '';
+  List<String> equipment = ['Dumbbell', 'Barbell', 'Kettlebell', 'Fitness Bench', 'Skipping Rope', 'No Equipment'];
+  Set<String> selectedEquipment = {}; // Use a Set for multiple selections
 
   @override
   Widget build(BuildContext context) {
@@ -46,9 +47,8 @@ class _Q10ScreenState extends State<Q10Screen> {
               const SizedBox(height: 40),
 
               // Displaying equipment options
-              Center(
+              Expanded(
                 child: GridView.builder(
-                  shrinkWrap: true,
                   gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
                     crossAxisCount: 3,
                     mainAxisSpacing: 16.0,
@@ -58,19 +58,29 @@ class _Q10ScreenState extends State<Q10Screen> {
                   itemCount: equipment.length,
                   itemBuilder: (context, index) {
                     String currentItem = equipment[index];
-                    bool isSelected = selectedEquipment == currentItem; // Check if the item is selected
+                    bool isSelected = selectedEquipment.contains(currentItem);
 
                     return GestureDetector(
                       onTap: () {
                         setState(() {
-                          if (isSelected) {
-                            selectedEquipment = ''; // Unselect if already selected
+                          if (currentItem == 'No Equipment') {
+                            // Clear all selected equipment and select "No Equipment"
+                            selectedEquipment.clear();
+                            selectedEquipment.add(currentItem);
                           } else {
-                            selectedEquipment = currentItem; // Select the current item
+                            if (selectedEquipment.contains('No Equipment')) {
+                              // Remove "No Equipment" if any other item is selected
+                              selectedEquipment.remove('No Equipment');
+                            }
+                            if (isSelected) {
+                              selectedEquipment.remove(currentItem); // Unselect if already selected
+                            } else {
+                              selectedEquipment.add(currentItem); // Select the current item
+                            }
                           }
                         });
                       },
-                      child: Stack( // Use Stack to position the tick icon
+                      child: Stack(
                         children: [
                           Container(
                             decoration: BoxDecoration(
@@ -85,20 +95,26 @@ class _Q10ScreenState extends State<Q10Screen> {
                               child: Column(
                                 mainAxisAlignment: MainAxisAlignment.center,
                                 children: [
-                                  // Placeholder for blank image
                                   Container(
                                     width: 80,
                                     height: 80,
-                                    color: Colors.grey[200], // Grey placeholder
-                                    child: const Icon(
-                                      Icons.image_not_supported_outlined,
-                                      size: 50,
-                                      color: Colors.grey,
-                                    ),
+                                    color: Colors.grey[200],
+                                    child: currentItem == 'No Equipment'
+                                        ? const Icon(
+                                            Icons.close,
+                                            size: 50,
+                                            color: Colors.red,
+                                          )
+                                        : const Icon(
+                                            Icons.image_not_supported_outlined,
+                                            size: 50,
+                                            color: Colors.grey,
+                                          ),
                                   ),
                                   const SizedBox(height: 10),
                                   Text(
                                     currentItem,
+                                    textAlign: TextAlign.center,
                                     style: const TextStyle(
                                       fontSize: 16,
                                       fontWeight: FontWeight.w600,
@@ -109,8 +125,7 @@ class _Q10ScreenState extends State<Q10Screen> {
                               ),
                             ),
                           ),
-                          // Add tick icon if selected
-                          if (isSelected) // Show tick icon only if selected
+                          if (isSelected)
                             const Positioned(
                               top: 8,
                               right: 8,
@@ -146,37 +161,37 @@ class _Q10ScreenState extends State<Q10Screen> {
       floatingActionButton: Stack(
         children: [
           Positioned(
-            left: 16, // Position the back button on the left
-            bottom: 32, // Adjust bottom position as needed
+            left: 16,
+            bottom: 32,
             child: FloatingActionButton(
-              heroTag: 'back_to_q9', // Unique tag for the left FAB
+              heroTag: 'back_to_q9',
               backgroundColor: const Color(0xFF21007E),
-              shape: RoundedRectangleBorder(
-                borderRadius: BorderRadius.circular(100),
-              ),
               onPressed: () {
-                // Handle going back to the previous question (Q9)
                 Navigator.pop(context);
               },
               child: const Icon(Icons.arrow_back, color: Colors.white),
             ),
           ),
           Positioned(
-            right: 16, // Position the next button on the right
-            bottom: 32, // Adjust bottom position as needed
-
-            // Using Visibility to show/hide the next button based on whether an item is selected
+            right: 16,
+            bottom: 32,
             child: Visibility(
-              visible: selectedEquipment.isNotEmpty, // Show only if an item is selected
+              visible: selectedEquipment.isNotEmpty,
               child: FloatingActionButton(
-                heroTag: 'next_to_q11', // Unique tag for the right FAB
+                heroTag: 'next_to_next',
                 backgroundColor: const Color(0xFF21007E),
-                shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(100),
-                ),
                 onPressed: () {
-                  // Handle moving to the next question (Q11)
-                   Navigator.push(context, MaterialPageRoute(builder: (context) => const DumbbellSelectionScreen()));
+                  if (selectedEquipment.contains('No Equipment')) {
+                    Navigator.push(
+                      context,
+                      MaterialPageRoute(builder: (context) => const Q12Screen()),
+                    );
+                  } else {
+                    Navigator.push(
+                      context,
+                      MaterialPageRoute(builder: (context) => const DumbbellSelectionScreen()),
+                    );
+                  }
                 },
                 child: const Icon(Icons.arrow_forward, color: Colors.white),
               ),
