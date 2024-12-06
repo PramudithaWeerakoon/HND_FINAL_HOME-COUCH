@@ -181,18 +181,20 @@ class _Q10ScreenState extends State<Q10Screen> {
                 heroTag: 'next_to_next',
                 backgroundColor: const Color(0xFF21007E),
                 onPressed: () {
-                  if (selectedEquipment.contains('No Equipment')) {
-                    Navigator.push(
-                      context,
-                      MaterialPageRoute(builder: (context) => const Q12Screen()),
-                    );
-                  } else {
-                    Navigator.push(
-                      context,
-                      MaterialPageRoute(builder: (context) => const DumbbellSelectionScreen()),
-                    );
-                  }
-                },
+                if (selectedEquipment.contains('No Equipment')) {
+                  Navigator.push(
+                    context,
+                    MaterialPageRoute(builder: (context) => const Q12Screen()), // Skip to Q12 if no equipment is selected
+                  );
+                } else {
+                  Navigator.push(
+                    context,
+                    MaterialPageRoute(
+                      builder: (context) => DumbbellSelectionScreen(selectedEquipment: selectedEquipment),
+                    ),
+                  );
+                }
+              },
                 child: const Icon(Icons.arrow_forward, color: Colors.white),
               ),
             ),
