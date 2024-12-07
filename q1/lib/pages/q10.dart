@@ -181,20 +181,28 @@ class _Q10ScreenState extends State<Q10Screen> {
                 heroTag: 'next_to_next',
                 backgroundColor: const Color(0xFF21007E),
                 onPressed: () {
-                if (selectedEquipment.contains('No Equipment')) {
-                  Navigator.push(
-                    context,
-                    MaterialPageRoute(builder: (context) => const Q12Screen()), // Skip to Q12 if no equipment is selected
-                  );
-                } else {
-                  Navigator.push(
-                    context,
-                    MaterialPageRoute(
-                      builder: (context) => DumbbellSelectionScreen(selectedEquipment: selectedEquipment),
-                    ),
-                  );
-                }
-              },
+                      if (selectedEquipment.contains('No Equipment')) {
+                        // Navigate to Q12 directly
+                        Navigator.push(
+                          context,
+                          MaterialPageRoute(builder: (context) => const Q12Screen()),
+                        );
+                      } else if (selectedEquipment.any((item) => item == 'Dumbbell' || item == 'Barbell' || item == 'Kettlebell')) {
+                        // Navigate to DumbbellSelectionScreen with selected equipment
+                        Navigator.push(
+                          context,
+                          MaterialPageRoute(
+                            builder: (context) => DumbbellSelectionScreen(selectedEquipment: selectedEquipment),
+                          ),
+                        );
+                      } else {
+                        // For other general equipment, proceed to Q12
+                        Navigator.push(
+                          context,
+                          MaterialPageRoute(builder: (context) => const Q12Screen()),
+                        );
+                      }
+                    },
                 child: const Icon(Icons.arrow_forward, color: Colors.white),
               ),
             ),

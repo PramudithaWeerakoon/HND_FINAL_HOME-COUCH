@@ -743,8 +743,162 @@ Future<void> upsertAge(int age) async {
 
     print("Target weight saved successfully for $currentUserEmail.");
   }
+
+  
+
+   /// Fetch the ID of predefined equipment by name and type
+  Future<int> fetchPredefinedEquipmentID(String equipmentName, String equipmentType) async {
+    final conn = await getConnection();
+
+    try {
+      final result = await conn.query(
+        '''
+        SELECT EquipmentID 
+        FROM Equipment 
+        WHERE EquipmentName = @equipmentName AND EquipmentType = @equipmentType
+        ''',
+        substitutionValues: {
+          'equipmentName': equipmentName,
+          'equipmentType': equipmentType,
+        },
+      );
+
+      if (result.isNotEmpty) {
+        return result.first[0] as int;
+      } else {
+        throw Exception("Equipment not found: $equipmentName, $equipmentType");
+      }
+    } catch (e) {
+      print("Error fetching equipment ID: $e");
+      rethrow;
+    }
+  }
+
+  /// Bulk insert fixed weights for a user and equipment
+  Future<void> bulkInsertFixedWeights(
+    String userID,
+    List<double> weights,
+    int equipmentID,
+    int count,
+  ) async {
+    final conn = await getConnection();
+
+    try {
+      for (double weight in weights) {
+        await conn.query(
+          '''
+          INSERT INTO UserEquipmentFixed (EquipmentID, UserID, UEF_Weight, UEF_Count)
+          VALUES (@equipmentID, @userID, @weight, @count)
+          ON CONFLICT DO NOTHING
+          ''',
+          substitutionValues: {
+            'equipmentID': equipmentID,
+            'userID': userID,
+            'weight': weight,
+            'count': count,
+          },
+        );
+      }
+      print("Fixed weights inserted successfully for $userID.");
+    } catch (e) {
+      print("Error inserting fixed weights: $e");
+      rethrow;
+    }
+  }
+
+  /// Insert adjustable equipment data
+  Future<int> insertUserEquipmentAdjustable(
+    int equipmentID,
+    String userID,
+    double weightMin,
+    double weightMax,
+    int pairs,
+  ) async {
+    final conn = await getConnection();
+
+    try {
+      final result = await conn.query(
+        '''
+        INSERT INTO UserEquipmentAdjustable (EquipmentID, UserID, UEA_WeightMin, UEA_WeightMax, UEA_Pairs)
+        VALUES (@equipmentID, @userID, @weightMin, @weightMax, @pairs)
+        RETURNING UEA_ID
+        ''',
+        substitutionValues: {
+          'equipmentID': equipmentID,
+          'userID': userID,
+          'weightMin': weightMin,
+          'weightMax': weightMax,
+          'pairs': pairs,
+        },
+      );
+
+      if (result.isNotEmpty) {
+        return result.first[0] as int;
+      } else {
+        throw Exception("Failed to insert adjustable equipment for $userID.");
+      }
+    } catch (e) {
+      print("Error inserting adjustable equipment: $e");
+      rethrow;
+    }
+  }
+
+  /// Bulk insert plates for adjustable equipment
+  Future<void> bulkInsertAdjustablePlates(int adjustableID, Map<double, int> plates) async {
+    final conn = await getConnection();
+
+    try {
+      for (var entry in plates.entries) {
+        double plateWeight = entry.key;
+        int plateCount = entry.value;
+
+        await conn.query(
+          '''
+          INSERT INTO UserEquipmentPlates (UEA_ID, PlateWeight, PlateCount)
+          VALUES (@adjustableID, @plateWeight, @plateCount)
+          ON CONFLICT DO NOTHING
+          ''',
+          substitutionValues: {
+            'adjustableID': adjustableID,
+            'plateWeight': plateWeight,
+            'plateCount': plateCount,
+          },
+        );
+      }
+      print("Plates inserted successfully for adjustable equipment ID $adjustableID.");
+    } catch (e) {
+      print("Error inserting plates: $e");
+      rethrow;
+    }
+  }
+ Future<void> insertOtherEquipmentFixed(String userID, int equipmentID, double weight, int count) async {
+  final db = await getConnection();
+
+  try {
+    // Use a default weight (e.g., 0.0) if the equipment doesn't have a meaningful weight
+    final validWeight = weight > 0.0 ? weight : 0.0;
+
+    await db.query(
+      '''
+      INSERT INTO UserEquipmentFixed (EquipmentID, UserID, UEF_Weight, UEF_Count)
+      VALUES (@equipmentID, @userID, @weight, @count)
+      ON CONFLICT (EquipmentID, UserID, UEF_Weight)
+      DO UPDATE SET UEF_Count = UserEquipmentFixed.UEF_Count + EXCLUDED.UEF_Count
+      ''',
+      substitutionValues: {
+        'equipmentID': equipmentID,
+        'userID': userID,
+        'weight': validWeight,
+        'count': count,
+      },
+    );
+
+    print("Equipment with ID $equipmentID inserted/updated successfully for user $userID.");
+  } catch (e) {
+    print("Error inserting equipment: $e");
+    rethrow;
+  }
 }
 
 
-
-
+}
