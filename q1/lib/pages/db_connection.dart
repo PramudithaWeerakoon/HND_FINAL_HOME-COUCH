@@ -927,6 +927,7 @@ Future<void> insertFitnessGoal(String userID, DateTime startDate, DateTime targe
     print("Error inserting fitness goal: $e");
   }
 }
+//for q10, method to insert general equipment only.
 Future<void> insertMultipleOtherEquipmentFixed(Set<String> selectedEquipment) async {
   final db = await getConnection();
 
