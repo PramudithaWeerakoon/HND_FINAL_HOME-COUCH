@@ -1,6 +1,8 @@
 import 'package:postgres/postgres.dart';
 import 'package:intl/intl.dart';
 import 'dart:math';
+import 'dart:convert';
+
 
 // SessionManager to manage the current user's session
 class SessionManager {
@@ -973,5 +975,97 @@ Future<void> insertMultipleOtherEquipmentFixed(Set<String> selectedEquipment) as
     rethrow;
   }
 }
+
+Future<Map<String, dynamic>> fetchUserFitnessDetails() async {
+    final email = SessionManager.getUserEmail();
+    if (email == null) {
+      throw Exception("No user email found in session.");
+    }
+
+    final conn = await getConnection();
+
+    try {
+      final query = '''
+    SELECT 
+        u.useremail,
+        u.username,
+        fp.fp_currentweight AS weight,
+        fp.fp_currentheight AS height,
+        fp.fp_gender AS gender,
+        fp.fp_waistcircumference AS waist_circumference,
+        fp.fp_neckcircumference AS neck_circumference,
+        fp.fp_fitnessbackground AS fitness_background,
+        fp.fp_injuries AS injuries,
+        fp.fp_medicalconditions AS medical_conditions,
+        fg.fg_fitness_goal AS goal,
+        fg.fg_targetweight AS target_weight,
+        fg.fg_targetdate AS target_date,
+        fg.fg_startdate AS start_date,
+        fg.fg_enddate AS end_date,
+        fg.fg_workoutperiod AS workout_period,
+        fg.fg_startbmi AS start_bmi,
+        fg.fg_workoutdaysperweek AS workout_days_per_week
+    FROM 
+        users u
+    JOIN 
+        fitnessprofile fp ON u.useremail = fp.fp_userid
+    JOIN 
+        fitnessgoal fg ON u.useremail = fg.fg_userid
+    WHERE 
+        u.useremail = @userEmail;
+    ''';
+
+      final result =
+          await conn.query(query, substitutionValues: {'userEmail': email});
+
+      if (result.isNotEmpty) {
+        final row = result.first;
+
+        // Convert nullable date fields to String or null if necessary
+        final targetDate = row[12] != null ? row[12].toString() : null;
+        final startDate = row[13] != null ? row[13].toString() : null;
+        final endDate = row[14] != null ? row[14].toString() : null;
+
+        // Build JSON object
+        final jsonResult = {
+          "user_info": {
+            "email": row[0],
+            "username": row[1],
+          },
+          "fitness_details": {
+            "current_weight": row[2],
+            "current_height": row[3],
+            "gender": row[4],
+            "waist_circumference": row[5],
+            "neck_circumference": row[6],
+            "fitness_background": row[7],
+            "injuries": row[8],
+            "medical_conditions": row[9],
+            "goal": {
+              "fitness_goal": row[10],
+              "target_weight": row[11],
+              "target_date": targetDate,
+              "start_date": startDate,
+              "end_date": endDate,
+              "workout_period": row[15],
+              "start_bmi": row[16],
+              "workout_days_per_week": row[17]
+            }
+          }
+        };
+
+        // Convert to JSON string and print in the terminal
+        String jsonString = jsonEncode(jsonResult);
+        print("Fetched JSON Data: $jsonString");
+
+        return jsonResult;
+      } else {
+        throw Exception("No data found for email: $email");
+      }
+    } catch (e) {
+      print("Error fetching user fitness details: $e");
+      rethrow;
+    }
+  }
 
 }

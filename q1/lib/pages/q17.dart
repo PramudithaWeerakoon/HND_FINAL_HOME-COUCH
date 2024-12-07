@@ -213,6 +213,7 @@ class _Q17ScreenState extends State<Q17Screen> {
                   // Save the target weight to the database
                   DatabaseConnection db = DatabaseConnection();
                   await db.saveTargetWeightToDatabase(targetWeightInKg);
+                  await db.fetchUserFitnessDetails();
                 }
 
                 // Navigate to the next screen
