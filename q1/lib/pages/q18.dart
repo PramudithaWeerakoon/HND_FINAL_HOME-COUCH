@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 import 'package:q1/widgets/gradient_background.dart';
 import 'q19.dart';
+import 'package:q1/pages/db_connection.dart';
 
 class SelectDate extends StatefulWidget {
   const SelectDate({super.key});
@@ -119,12 +120,34 @@ class _FitnessGoalPageState extends State<SelectDate> {
                 shape: RoundedRectangleBorder(
                   borderRadius: BorderRadius.circular(100),
                 ),
-                onPressed: () {
-                  Navigator.push(
-                    context,
-                    MaterialPageRoute(builder: (context) => CustomizedPlanScreen()),
-                  );
-                },
+                onPressed: () async {
+            // Ensure userID is retrieved from the session or auth context
+            final String userID = SessionManager.getUserEmail() ?? '';
+            if (userID.isEmpty) {
+              print("Error: No user ID found.");
+              return;
+            }
+
+            final DateTime startDate = DateTime.now(); // Today's date
+            final DateTime targetDate = selectedDate!; // User-selected date
+
+            final db = DatabaseConnection(); // Initialize your database connection
+
+            try {
+              await db.insertFitnessGoal(userID, startDate, targetDate);
+              print("Fitness goal saved successfully.");
+
+              // Navigate to the next screen
+              Navigator.push(
+                context,
+                MaterialPageRoute(
+                  builder: (context) => const CustomizedPlanScreen(),
+                ),
+              );
+            } catch (e) {
+              print("Error saving fitness goal: $e");
+            }
+          },
                 child: const Icon(Icons.arrow_forward, color: Colors.white),
               ),
             ),

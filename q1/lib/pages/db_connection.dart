@@ -899,6 +899,34 @@ Future<void> upsertAge(int age) async {
     rethrow;
   }
 }
+// Method to insert target date for fitness goal
+Future<void> insertFitnessGoal(String userID, DateTime startDate, DateTime targetDate) async {
+  final conn = await getConnection();
+  try {
+    final durationInMonths = (targetDate.year - startDate.year) * 12 +
+        (targetDate.month - startDate.month);
+    await conn.query(
+      '''
+      INSERT INTO FitnessGoal (FG_UserID, FG_StartDate, FG_TargetDate, FG_DurationInMonths)
+      VALUES (@userID, @startDate, @targetDate, @duration)
+      ON CONFLICT (FG_UserID)
+      DO UPDATE SET 
+        FG_StartDate = EXCLUDED.FG_StartDate, 
+        FG_TargetDate = EXCLUDED.FG_TargetDate, 
+        FG_DurationInMonths = EXCLUDED.FG_DurationInMonths;
+      ''',
+      substitutionValues: {
+        'userID': userID,
+        'startDate': DateFormat('yyyy-MM-dd').format(startDate),
+        'targetDate': DateFormat('yyyy-MM-dd').format(targetDate),
+        'duration': durationInMonths,
+      },
+    );
+    print("Fitness goal inserted/updated successfully.");
+  } catch (e) {
+    print("Error inserting fitness goal: $e");
+  }
+}
 
 
 }
