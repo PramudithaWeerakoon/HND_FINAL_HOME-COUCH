@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:q1/pages/db_connection.dart';
 import 'q11.dart'; // Import Q11
 import 'q12.dart'; // Import Q12
 
@@ -12,6 +13,7 @@ class Q10Screen extends StatefulWidget {
 class _Q10ScreenState extends State<Q10Screen> {
   List<String> equipment = ['Dumbbell', 'Barbell', 'Kettlebell', 'Fitness Bench', 'Skipping Rope', 'No Equipment'];
   Set<String> selectedEquipment = {}; // Use a Set for multiple selections
+  bool isLoading = false; // For showing progress
 
   @override
   Widget build(BuildContext context) {
@@ -180,30 +182,52 @@ class _Q10ScreenState extends State<Q10Screen> {
               child: FloatingActionButton(
                 heroTag: 'next_to_next',
                 backgroundColor: const Color(0xFF21007E),
-                onPressed: () {
-                      if (selectedEquipment.contains('No Equipment')) {
-                        // Navigate to Q12 directly
-                        Navigator.push(
-                          context,
-                          MaterialPageRoute(builder: (context) => const Q12Screen()),
-                        );
-                      } else if (selectedEquipment.any((item) => item == 'Dumbbell' || item == 'Barbell' || item == 'Kettlebell')) {
-                        // Navigate to DumbbellSelectionScreen with selected equipment
-                        Navigator.push(
-                          context,
-                          MaterialPageRoute(
-                            builder: (context) => DumbbellSelectionScreen(selectedEquipment: selectedEquipment),
-                          ),
-                        );
-                      } else {
-                        // For other general equipment, proceed to Q12
-                        Navigator.push(
-                          context,
-                          MaterialPageRoute(builder: (context) => const Q12Screen()),
-                        );
-                      }
-                    },
-                child: const Icon(Icons.arrow_forward, color: Colors.white),
+                onPressed: () async {
+                  if (isLoading) return;
+                  setState(() {
+                    isLoading = true;
+                  });
+                  try {
+                    if (selectedEquipment.isEmpty) {
+                      print("No equipment selected.");
+                      return;
+                    }
+
+                    final db = DatabaseConnection();
+
+                    if (selectedEquipment.contains('No Equipment')) {
+                      Navigator.push(
+                        context,
+                        MaterialPageRoute(builder: (context) => const Q12Screen()),
+                      );
+                    } else if (selectedEquipment.any((item) => item == 'Dumbbell' || item == 'Barbell' || item == 'Kettlebell')) {
+                      Navigator.push(
+                        context,
+                        MaterialPageRoute(
+                          builder: (context) => DumbbellSelectionScreen(selectedEquipment: selectedEquipment),
+                        ),
+                      );
+                    } else {
+                      // Save general equipment to the database
+                      await db.insertMultipleOtherEquipmentFixed(selectedEquipment);
+
+                      // Navigate to Q12
+                      Navigator.push(
+                        context,
+                        MaterialPageRoute(builder: (context) => const Q12Screen()),
+                      );
+                    }
+                  } catch (e) {
+                    print("Error: $e");
+                  } finally {
+                    setState(() {
+                      isLoading = false;
+                    });
+                  }
+                },
+                child: isLoading
+                    ? const CircularProgressIndicator(color: Colors.white)
+                    : const Icon(Icons.arrow_forward, color: Colors.white),
               ),
             ),
           ),

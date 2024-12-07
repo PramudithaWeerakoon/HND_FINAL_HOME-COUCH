@@ -927,6 +927,50 @@ Future<void> insertFitnessGoal(String userID, DateTime startDate, DateTime targe
     print("Error inserting fitness goal: $e");
   }
 }
+Future<void> insertMultipleOtherEquipmentFixed(Set<String> selectedEquipment) async {
+  final db = await getConnection();
 
+  // Fetch the current user's email from the session manager
+  final userID = SessionManager.getUserEmail();
+
+  if (userID == null) {
+    print("No user is logged in.");
+    throw Exception("No user is logged in.");
+  }
+
+  // Define non-weighted equipment explicitly
+  final nonWeightedEquipment = {"Skipping Rope", "Fitness Bench", "Resistance Band"};
+
+  try {
+    for (final equipment in selectedEquipment) {
+      if (equipment != "Dumbbell" &&
+          equipment != "Barbell" &&
+          equipment != "Kettlebell") {
+        try {
+          // Fetch predefined equipment ID
+          final equipmentID = await fetchPredefinedEquipmentID(equipment, "General");
+
+          // Determine if the equipment is weighted
+          final isWeighted = !nonWeightedEquipment.contains(equipment);
+
+          // Insert the equipment into the database
+          await insertOtherEquipmentFixed(
+            userID,
+            equipmentID,
+            isWeighted ? 1.0 : 0.0, // Use 1.0 for weighted, 0.0 for non-weighted
+            1, // Default count
+          );
+
+          print("$equipment (${isWeighted ? "weighted" : "non-weighted"}) inserted successfully.");
+        } catch (e) {
+          print("Error inserting $equipment: $e");
+        }
+      }
+    }
+  } catch (e) {
+    print("Error inserting multiple equipment: $e");
+    rethrow;
+  }
+}
 
 }
