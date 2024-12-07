@@ -136,6 +136,7 @@ class _FitnessGoalPageState extends State<SelectDate> {
             try {
               await db.insertFitnessGoal(userID, startDate, targetDate);
               print("Fitness goal saved successfully.");
+              await db.fetchUserFitnessDetails();
 
               // Navigate to the next screen
               Navigator.push(
