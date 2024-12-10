@@ -332,21 +332,7 @@ class _LoginPageState extends State<LoginPage> {
                       GestureDetector(
                       onTap: () {
                         handleGoogleLogin(context);
-                      },
-                      child: const AuthButton(imagePath: 'lib/assets/google.png'),
-                      ),
-                      const SizedBox(width: 20),
-                      GestureDetector(
-                      onTap: () {
-                        // Handle Apple sign-in
-                      },
-                      child: const AuthButton(imagePath: 'lib/assets/apple.png'),
-                      ),
-                      const SizedBox(width: 20),
-                      GestureDetector(
-                      onTap: () {
-                        // Handle Microsoft sign-in
-                      },
+                      },  
                       child: const AuthButton(imagePath: 'lib/assets/microsoft.png'),
                       ),
                     ],

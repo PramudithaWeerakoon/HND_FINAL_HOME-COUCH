@@ -1,22 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:fl_chart/fl_chart.dart';
+import 'db_connection.dart'; // Import your database connection
 import 'package:q1/components/menuBar/menuBar.dart';
-
-void main() {
-  runApp(MyApp());
-}
-
-class MyApp extends StatelessWidget {
-  const MyApp({super.key});
-
-  @override
-  Widget build(BuildContext context) {
-    return MaterialApp(
-      home: DailyMealPlan(),
-      debugShowCheckedModeBanner: false,
-    );
-  }
-}
+import 'auth_provider.dart';
 
 class DailyMealPlan extends StatefulWidget {
   const DailyMealPlan({super.key});
@@ -27,6 +13,25 @@ class DailyMealPlan extends StatefulWidget {
 
 class _DailyMealPlanState extends State<DailyMealPlan> {
   int _currentIndex = 1;
+  Map<String, dynamic> _mealPlanData = {};
+
+  @override
+  void initState() {
+    super.initState();
+    _fetchMealPlanData();
+  }
+
+  Future<void> _fetchMealPlanData() async {
+    final userEmail = SessionManager.getUserEmail();
+    print('User email: $userEmail');
+    if (userEmail != null) {
+      final db = DatabaseConnection();
+      final data = await db.getMealPlanData(userEmail);
+      setState(() {
+        _mealPlanData = data;
+      });
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -49,13 +54,15 @@ class _DailyMealPlanState extends State<DailyMealPlan> {
                     ),
                   ),
                   SizedBox(height: 20),
-                  PieChartWidget(),
+                  PieChartWidget(data: _mealPlanData),
                   SizedBox(height: 20),
                   Text(
-                    '240g Carbs | 100g Fiber & Fats | 140g Protein',
+                    _mealPlanData.isNotEmpty
+                        ? '${_mealPlanData['carbs']}g Carbs | ${_mealPlanData['fat']}g Fat | ${_mealPlanData['fiber']}g Fiber | ${_mealPlanData['protein']}g Protein'
+                        : 'Loading...',
                     style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
                   ),
-                  SizedBox(height: 20),
+                  // Add MealCard widgets for different meals
                   MealCard(
                     mealType: 'Breakfast',
                     calories: '400 - 450 cal',
@@ -86,6 +93,16 @@ class _DailyMealPlanState extends State<DailyMealPlan> {
                       print('Dinner card tapped');
                     },
                   ),
+                  MealCard(
+                    mealType: 'Mean',
+                    calories: '450 - 500 cal',
+                    details: '80 carbs | 12 Fat | 8 Fiber | 47 Protein',
+                    icon: Icons.rice_bowl, // Use a relevant icon for Mean card
+                    onTap: () {
+                      // Handle tap for Mean card
+                      print('Mean card tapped');
+                    },
+                  ),
                 ],
               ),
             ),
@@ -105,52 +122,66 @@ class _DailyMealPlanState extends State<DailyMealPlan> {
 }
 
 class PieChartWidget extends StatelessWidget {
-  const PieChartWidget({super.key});
+  final Map<String, dynamic> data;
+
+  const PieChartWidget({super.key, required this.data});
 
   @override
   Widget build(BuildContext context) {
+    if (data.isEmpty) {
+      return Center(child: CircularProgressIndicator());
+    }
+
+    double parseDouble(dynamic value) {
+      if (value is double) return value;
+      if (value is int) return value.toDouble();
+      return double.tryParse(value.toString()) ?? 0.0;
+    }
+
     return LayoutBuilder(
       builder: (context, constraints) {
         return SizedBox(
-          height: constraints.maxWidth * 0.6, // Adjust height based on width
+          height: constraints.maxWidth * 0.6,
           child: Padding(
             padding: const EdgeInsets.all(8.0),
             child: PieChart(
               PieChartData(
                 sections: [
                   PieChartSectionData(
-                    value: 40,
-                    color: Color(0xFFE40202),
-                    title: 'Carbohydrate',
-                    radius: constraints.maxWidth * 0.3, // Adjust radius
-                    titleStyle: TextStyle(fontSize: 14, color: Colors.white),
-                    borderSide: BorderSide(
-                        color: Colors.black,
-                        width: 2), // Black border for each slice
+                    value: parseDouble(data['carbs']),
+                    color: const Color(0xFFE40202),
+                    title: 'Carbs',
+                    radius: constraints.maxWidth * 0.3,
+                    titleStyle:
+                        const TextStyle(fontSize: 14, color: Colors.white),
+                    borderSide: const BorderSide(color: Colors.black, width: 2),
                   ),
                   PieChartSectionData(
-                    value: 30,
-                    color: Color(0xFF21007E),
+                    value: parseDouble(data['protein']),
+                    color: const Color(0xFF21007E),
                     title: 'Protein',
                     radius: constraints.maxWidth * 0.3,
-                    titleStyle: TextStyle(fontSize: 14, color: Colors.white),
-                    borderSide: BorderSide(color: Colors.black, width: 2),
+                    titleStyle:
+                        const TextStyle(fontSize: 14, color: Colors.white),
+                    borderSide: const BorderSide(color: Colors.black, width: 2),
                   ),
                   PieChartSectionData(
-                    value: 20,
-                    color: Color(0xFFEAB804),
+                    value: parseDouble(data['fat']),
+                    color: const Color(0xFFEAB804),
                     title: 'Fat',
                     radius: constraints.maxWidth * 0.3,
-                    titleStyle: TextStyle(fontSize: 14, color: Colors.white),
-                    borderSide: BorderSide(color: Colors.black, width: 2),
+                    titleStyle:
+                        const TextStyle(fontSize: 14, color: Colors.white),
+                    borderSide: const BorderSide(color: Colors.black, width: 2),
                   ),
                   PieChartSectionData(
-                    value: 10,
-                    color: Color(0xFF01620B),
+                    value: parseDouble(data['fiber']),
+                    color: const Color(0xFF01620B),
                     title: 'Fiber',
                     radius: constraints.maxWidth * 0.3,
-                    titleStyle: TextStyle(fontSize: 14, color: Colors.white),
-                    borderSide: BorderSide(color: Colors.black, width: 2),
+                    titleStyle:
+                        const TextStyle(fontSize: 14, color: Colors.white),
+                    borderSide: const BorderSide(color: Colors.black, width: 2),
                   ),
                 ],
                 sectionsSpace: 2,
@@ -171,7 +202,8 @@ class MealCard extends StatelessWidget {
   final IconData icon;
   final VoidCallback onTap; // Add onTap callback
 
-  const MealCard({super.key, 
+  const MealCard({
+    super.key,
     required this.mealType,
     required this.calories,
     required this.details,
@@ -200,7 +232,8 @@ class MealCard extends StatelessWidget {
                   children: [
                     Text(
                       mealType,
-                      style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+                      style:
+                          TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
                     ),
                     Text(
                       calories,

@@ -1022,9 +1022,9 @@ Future<Map<String, dynamic>> fetchUserFitnessDetails() async {
         final row = result.first;
 
         // Convert nullable date fields to String or null if necessary
-        final targetDate = row[12] != null ? row[12].toString() : null;
-        final startDate = row[13] != null ? row[13].toString() : null;
-        final endDate = row[14] != null ? row[14].toString() : null;
+        final targetDate = row[12]?.toString();
+        final startDate = row[13]?.toString();
+        final endDate = row[14]?.toString();
 
         // Build JSON object
         final jsonResult = {
@@ -1067,5 +1067,32 @@ Future<Map<String, dynamic>> fetchUserFitnessDetails() async {
       rethrow;
     }
   }
+    Future<Map<String, dynamic>> getMealPlanData(String userEmail) async {
+    final conn = await getConnection();
+    try {
+      final result = await conn.query(
+        '''
+        SELECT total_carbs, total_fat, total_fiber, total_protein, total_calories
+        FROM mealplan
+        WHERE mp_id = (
+          SELECT mealplanid FROM meal WHERE useremail = @userEmail LIMIT 1
+        )
+        ''',
+        substitutionValues: {'userEmail': userEmail},
+      );
 
+      if (result.isNotEmpty) {
+        return {
+          'carbs': result.first[0],
+          'fat': result.first[1],
+          'fiber': result.first[2],
+          'protein': result.first[3],
+          'calories': result.first[4],
+        };
+      }
+    } catch (e) {
+      print("Error fetching meal plan data: $e");
+    }
+    return {};
+    }
 }
