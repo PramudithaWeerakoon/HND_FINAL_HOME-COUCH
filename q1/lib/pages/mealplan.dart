@@ -3,6 +3,9 @@ import 'package:fl_chart/fl_chart.dart';
 import 'db_connection.dart'; // Import your database connection
 import 'package:q1/components/menuBar/menuBar.dart';
 import 'auth_provider.dart';
+import 'breakfastmealoptions.dart';
+import 'lunchmealoptions.dart';
+import 'dinnermealoptions.dart';
 
 class DailyMealPlan extends StatefulWidget {
   const DailyMealPlan({super.key});
@@ -65,42 +68,45 @@ class _DailyMealPlanState extends State<DailyMealPlan> {
                   // Add MealCard widgets for different meals
                   MealCard(
                     mealType: 'Breakfast',
-                    calories: '400 - 450 cal',
-                    details: '80 carbs | 10 Fat | 7 Fiber | 45 Protein',
                     icon: Icons.breakfast_dining,
                     onTap: () {
                       // Handle tap for Breakfast card
                       print('Breakfast card tapped');
+                      Navigator.push(
+                        context,
+                        MaterialPageRoute(
+                          builder: (context) =>
+                              const breakfastMealPlanScreen(),
+                        ),
+                      );
                     },
                   ),
                   MealCard(
                     mealType: 'Lunch',
-                    calories: '500 - 600 cal',
-                    details: '80 carbs | 15 Fat | 10 Fiber | 50 Protein',
                     icon: Icons.lunch_dining,
                     onTap: () {
                       // Handle tap for Lunch card
                       print('Lunch card tapped');
+                       Navigator.push(
+                        context,
+                        MaterialPageRoute(
+                          builder: (context) => const lunchMealPlanScreen(),
+                        ),
+                      );
                     },
                   ),
                   MealCard(
                     mealType: 'Dinner',
-                    calories: '500 - 600 cal',
-                    details: '80 carbs | 10 Fat | 7 Fiber | 45 Protein',
                     icon: Icons.dinner_dining,
                     onTap: () {
                       // Handle tap for Dinner card
                       print('Dinner card tapped');
-                    },
-                  ),
-                  MealCard(
-                    mealType: 'Mean',
-                    calories: '450 - 500 cal',
-                    details: '80 carbs | 12 Fat | 8 Fiber | 47 Protein',
-                    icon: Icons.rice_bowl, // Use a relevant icon for Mean card
-                    onTap: () {
-                      // Handle tap for Mean card
-                      print('Mean card tapped');
+                      Navigator.push(
+                        context,
+                        MaterialPageRoute(
+                          builder: (context) => const dinnerMealPlanScreen(),
+                        ),
+                      );
                     },
                   ),
                 ],
@@ -197,16 +203,12 @@ class PieChartWidget extends StatelessWidget {
 
 class MealCard extends StatelessWidget {
   final String mealType;
-  final String calories;
-  final String details;
   final IconData icon;
   final VoidCallback onTap; // Add onTap callback
 
   const MealCard({
     super.key,
     required this.mealType,
-    required this.calories,
-    required this.details,
     required this.icon,
     required this.onTap, // Required callback for tap action
   });
@@ -234,14 +236,6 @@ class MealCard extends StatelessWidget {
                       mealType,
                       style:
                           TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
-                    ),
-                    Text(
-                      calories,
-                      style: TextStyle(fontSize: 16, color: Colors.black),
-                    ),
-                    Text(
-                      details,
-                      style: TextStyle(fontSize: 14, color: Colors.black),
                     ),
                   ],
                 ),

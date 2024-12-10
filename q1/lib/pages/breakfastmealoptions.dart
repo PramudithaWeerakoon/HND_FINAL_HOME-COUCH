@@ -1,12 +1,12 @@
 import 'package:flutter/material.dart';
 
-class MealPlanScreen extends StatelessWidget {
+class breakfastMealPlanScreen extends StatelessWidget {
   final String oatmealImage = 'lib/assets/sweet-breakfast-omelette.jpg';
   final String omeletImage = 'lib/assets/egg.jpeg';
   final String shakeImage = 'lib/assets/Mixed-Berry-Banana-Smoothie.jpg';
   final String yogurtImage = 'lib/assets/blueberry-almond-yogurt.jpeg';
 
-  const MealPlanScreen({super.key});
+  const breakfastMealPlanScreen({super.key});
 
   @override
   Widget build(BuildContext context) {
