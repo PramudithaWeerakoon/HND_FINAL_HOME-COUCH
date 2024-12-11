@@ -977,15 +977,16 @@ Future<void> insertMultipleOtherEquipmentFixed(Set<String> selectedEquipment) as
 }
 
 Future<Map<String, dynamic>> fetchUserFitnessDetails() async {
-    final email = SessionManager.getUserEmail();
-    if (email == null) {
-      throw Exception("No user email found in session.");
-    }
+  final email = SessionManager.getUserEmail();
+  if (email == null) {
+    throw Exception("No user email found in session.");
+  }
 
-    final conn = await getConnection();
+  final conn = await getConnection();
 
-    try {
-      final query = '''
+  try {
+    // Query for user and fitness details
+    final query = '''
     SELECT 
         u.useremail,
         u.username,
@@ -1015,58 +1016,100 @@ Future<Map<String, dynamic>> fetchUserFitnessDetails() async {
         u.useremail = @userEmail;
     ''';
 
-      final result =
-          await conn.query(query, substitutionValues: {'userEmail': email});
-
-      if (result.isNotEmpty) {
-        final row = result.first;
-
-        // Convert nullable date fields to String or null if necessary
-        final targetDate = row[12]?.toString();
-        final startDate = row[13]?.toString();
-        final endDate = row[14]?.toString();
-
-        // Build JSON object
-        final jsonResult = {
-          "user_info": {
-            "email": row[0],
-            "username": row[1],
-          },
-          "fitness_details": {
-            "current_weight": row[2],
-            "current_height": row[3],
-            "gender": row[4],
-            "waist_circumference": row[5],
-            "neck_circumference": row[6],
-            "fitness_background": row[7],
-            "injuries": row[8],
-            "medical_conditions": row[9],
-            "goal": {
-              "fitness_goal": row[10],
-              "target_weight": row[11],
-              "target_date": targetDate,
-              "start_date": startDate,
-              "end_date": endDate,
-              "workout_period": row[15],
-              "start_bmi": row[16],
-              "workout_days_per_week": row[17]
-            }
-          }
-        };
-
-        // Convert to JSON string and print in the terminal
-        String jsonString = jsonEncode(jsonResult);
-        print("Fetched JSON Data: $jsonString");
-
-        return jsonResult;
-      } else {
-        throw Exception("No data found for email: $email");
-      }
-    } catch (e) {
-      print("Error fetching user fitness details: $e");
-      rethrow;
+    final result = await conn.query(query, substitutionValues: {'userEmail': email});
+    if (result.isEmpty) {
+      throw Exception("No data found for email: $email");
     }
+
+    final row = result.first;
+
+    // Query for equipment details
+    final equipmentQuery = '''
+    SELECT e.equipmentname, e.equipmenttype, uef.uef_weight, uef.uef_pairs, 
+           uea.uea_weightmin, uea.uea_weightmax, uep.plateweight, uep.platecount
+    FROM equipment e
+    LEFT JOIN userequipmentfixed uef ON e.equipmentid = uef.equipmentid
+    LEFT JOIN userequipmentadjustable uea ON e.equipmentid = uea.equipmentid
+    LEFT JOIN userequipmentplates uep ON uea.uea_id = uep.uea_id
+    WHERE e.equipmentid IN (
+        SELECT equipmentid
+        FROM userequipmentadjustable
+        UNION
+        SELECT equipmentid
+        FROM userequipmentfixed
+    ) AND (uef.userid = @userEmail OR uea.userid = @userEmail);
+    ''';
+
+    final equipmentResult = await conn.query(equipmentQuery, substitutionValues: {'userEmail': email});
+    final equipmentDetails = {};
+
+    // Parse equipment data
+    for (var eqRow in equipmentResult) {
+      final equipmentName = eqRow[0];
+      final equipmentType = eqRow[1];
+
+      if (equipmentType == "Fixed") {
+        equipmentDetails[equipmentName] = equipmentDetails[equipmentName] ?? [];
+        equipmentDetails[equipmentName].add({
+          "type": equipmentType,
+          "weight": [eqRow[2]],
+          "pairs": eqRow[3],
+        });
+      } else if (equipmentType == "Adjustable") {
+        equipmentDetails[equipmentName] = equipmentDetails[equipmentName] ?? [];
+        equipmentDetails[equipmentName].add({
+          "type": equipmentType,
+          "weight_range": {
+            "min": eqRow[4],
+            "max": eqRow[5],
+          },
+          "plates": equipmentResult
+              .where((plateRow) => plateRow[0] == equipmentName)
+              .map((plateRow) => {
+                    "weight": plateRow[6],
+                    "count": plateRow[7],
+                  })
+              .toList(),
+          "pairs": eqRow[3],
+        });
+      }
+    }
+
+    // Add general equipment and bodyweight
+    equipmentDetails["bodyweight"] = true;
+    equipmentDetails["other_equipment"] = ["Skipping Rope", "Fitness Bench"];
+
+    // Build the JSON response
+    final jsonResult = {
+      "user_info": {
+        "age": 25, // Add age (can be calculated or fetched from a table if available)
+        "gender": row[4],
+        "height": (row[3] * 100).round(), // Convert height to cm
+        "weight": row[2],
+        "body_composition": "Lean", // Add as a static or derived value
+      },
+      "fitness_details": {
+        "fitness_level": "Beginner", // Static or calculated field
+        "goal": "Build muscle and increase strength", // Replace if dynamic
+        "body_mechanics": "No current injuries, full range of motion",
+        "exercise_preferences": "Enjoys compound exercises",
+        "equipment": equipmentDetails,
+        "nutritional_needs": "Slight caloric surplus",
+        "medical_conditions": row[9] ?? "None",
+      }
+    };
+
+    // Log and return JSON
+    String jsonString = jsonEncode(jsonResult);
+    print("Fetched JSON Data: $jsonString");
+    return jsonResult;
+  } catch (e) {
+    print("Error fetching user fitness details: $e");
+    rethrow;
   }
+}
+
+
     Future<Map<String, dynamic>> getMealPlanData(String userEmail) async {
     final conn = await getConnection();
     try {
