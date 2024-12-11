@@ -977,7 +977,7 @@ Future<void> insertMultipleOtherEquipmentFixed(Set<String> selectedEquipment) as
 }
 
 Future<Map<String, dynamic>> fetchUserFitnessDetails() async {
-  final email = SessionManager.getUserEmail();
+    final email = SessionManager.getUserEmail();
   if (email == null) {
     throw Exception("No user email found in session.");
   }
@@ -1025,19 +1025,21 @@ Future<Map<String, dynamic>> fetchUserFitnessDetails() async {
 
     // Query for equipment details
     final equipmentQuery = '''
-    SELECT e.equipmentname, e.equipmenttype, uef.uef_weight, uef.uef_pairs, 
-           uea.uea_weightmin, uea.uea_weightmax, uep.plateweight, uep.platecount
-    FROM equipment e
-    LEFT JOIN userequipmentfixed uef ON e.equipmentid = uef.equipmentid
-    LEFT JOIN userequipmentadjustable uea ON e.equipmentid = uea.equipmentid
-    LEFT JOIN userequipmentplates uep ON uea.uea_id = uep.uea_id
-    WHERE e.equipmentid IN (
-        SELECT equipmentid
-        FROM userequipmentadjustable
-        UNION
-        SELECT equipmentid
-        FROM userequipmentfixed
-    ) AND (uef.userid = @userEmail OR uea.userid = @userEmail);
+    SELECT 
+        e.EquipmentName, 
+        e.EquipmentType,
+        uef.UEF_Weight, 
+        uef.UEF_Count,
+        uea.UEA_WeightMin, 
+        uea.UEA_WeightMax, 
+        uea.UEA_Pairs,
+        uep.PlateWeight, 
+        uep.PlateCount
+    FROM Equipment e
+    LEFT JOIN UserEquipmentFixed uef ON e.EquipmentID = uef.EquipmentID
+    LEFT JOIN UserEquipmentAdjustable uea ON e.EquipmentID = uea.EquipmentID
+    LEFT JOIN UserEquipmentPlates uep ON uea.UEA_ID = uep.UEA_ID
+    WHERE uef.UserID = @userEmail OR uea.UserID = @userEmail;
     ''';
 
     final equipmentResult = await conn.query(equipmentQuery, substitutionValues: {'userEmail': email});
@@ -1045,57 +1047,85 @@ Future<Map<String, dynamic>> fetchUserFitnessDetails() async {
 
     // Parse equipment data
     for (var eqRow in equipmentResult) {
-      final equipmentName = eqRow[0];
-      final equipmentType = eqRow[1];
+      final equipmentName = eqRow[0]; // EquipmentName
+      final equipmentType = eqRow[1]; // EquipmentType
+
+      if (!equipmentDetails.containsKey(equipmentName)) {
+        equipmentDetails[equipmentName] = [];
+      }
 
       if (equipmentType == "Fixed") {
-        equipmentDetails[equipmentName] = equipmentDetails[equipmentName] ?? [];
         equipmentDetails[equipmentName].add({
           "type": equipmentType,
-          "weight": [eqRow[2]],
-          "pairs": eqRow[3],
+          "weight": eqRow[2] ?? "Unknown", // UEF_Weight
+          "count": eqRow[3] ?? 1,          // UEF_Count
         });
       } else if (equipmentType == "Adjustable") {
-        equipmentDetails[equipmentName] = equipmentDetails[equipmentName] ?? [];
+        final existingEquipment = equipmentDetails[equipmentName]
+            .firstWhere(
+              (item) => item["type"] == "Adjustable",
+              orElse: () => null,
+            );
+
+        if (existingEquipment == null) {
+          equipmentDetails[equipmentName].add({
+            "type": equipmentType,
+            "weight_range": {
+              "min": eqRow[4] ?? "Unknown", // UEA_WeightMin
+              "max": eqRow[5] ?? "Unknown", // UEA_WeightMax
+            },
+            "pairs": eqRow[6] ?? 1, // UEA_Pairs
+            "plates": [],
+          });
+        }
+
+        // Add plates to the "plates" array of the corresponding equipment
+        final plates = {
+          "weight": eqRow[7], // PlateWeight
+          "count": eqRow[8],  // PlateCount
+        };
+        if (plates["weight"] != null && plates["count"] != null) {
+          equipmentDetails[equipmentName].last["plates"].add(plates);
+        }
+      } else if (equipmentType == "General") {
         equipmentDetails[equipmentName].add({
           "type": equipmentType,
-          "weight_range": {
-            "min": eqRow[4],
-            "max": eqRow[5],
-          },
-          "plates": equipmentResult
-              .where((plateRow) => plateRow[0] == equipmentName)
-              .map((plateRow) => {
-                    "weight": plateRow[6],
-                    "count": plateRow[7],
-                  })
-              .toList(),
-          "pairs": eqRow[3],
+          "description": "General equipment, no weights or pairs",
         });
+      } else if (equipmentType == "None") {
+        equipmentDetails[equipmentName] = "No equipment used.";
       }
     }
 
-    // Add general equipment and bodyweight
-    equipmentDetails["bodyweight"] = true;
+    // Include general equipment explicitly
     equipmentDetails["other_equipment"] = ["Skipping Rope", "Fitness Bench"];
 
     // Build the JSON response
     final jsonResult = {
       "user_info": {
-        "age": 25, // Add age (can be calculated or fetched from a table if available)
-        "gender": row[4],
-        "height": (row[3] * 100).round(), // Convert height to cm
-        "weight": row[2],
-        "body_composition": "Lean", // Add as a static or derived value
+        "email": row[0],
+        "username": row[1],
       },
       "fitness_details": {
-        "fitness_level": "Beginner", // Static or calculated field
-        "goal": "Build muscle and increase strength", // Replace if dynamic
-        "body_mechanics": "No current injuries, full range of motion",
-        "exercise_preferences": "Enjoys compound exercises",
+        "current_weight": row[2],
+        "current_height": row[3],
+        "gender": row[4],
+        "waist_circumference": row[5],
+        "neck_circumference": row[6],
+        "fitness_background": row[7],
+        "injuries": row[8],
+        "medical_conditions": row[9],
+        "goal": {
+          "fitness_goal": row[10],
+          "target_weight": row[11],
+          "target_date": row[12]?.toString(),
+          "start_date": row[13]?.toString(),
+          "end_date": row[14]?.toString(),
+          "workout_period": row[15],
+          "start_bmi": row[16],
+          "workout_days_per_week": row[17]
+        },
         "equipment": equipmentDetails,
-        "nutritional_needs": "Slight caloric surplus",
-        "medical_conditions": row[9] ?? "None",
       }
     };
 
@@ -1106,10 +1136,8 @@ Future<Map<String, dynamic>> fetchUserFitnessDetails() async {
   } catch (e) {
     print("Error fetching user fitness details: $e");
     rethrow;
+    }
   }
-}
-
-
     Future<Map<String, dynamic>> getMealPlanData(String userEmail) async {
     final conn = await getConnection();
     try {
