@@ -1168,40 +1168,43 @@ Future<Map<String, dynamic>> fetchUserFitnessDetails() async {
     }
   
     Future<Map<String, dynamic>> getFitnessProgress(String userEmail) async {
-      try {
-        final connection = await getConnection();
-        final results = await connection.query(
-          '''
-          SELECT fg_fitness_goal, fg_startdate, fg_targetdate
-          FROM fitnessgoal
-          WHERE fg_userid = @userEmail
-          ''',
-          substitutionValues: {'userEmail': userEmail},
-        );
+  try {
+    final connection = await getConnection();
+    final results = await connection.query(
+      '''
+      SELECT fg_fitness_goal, fg_startdate, fg_targetdate
+      FROM fitnessgoal
+      WHERE fg_userid = @userEmail
+      ''',
+      substitutionValues: {'userEmail': userEmail},
+    );
 
-        if (results.isNotEmpty) {
-          final row = results.first;
-          final fitnessGoal = row[0];
-          final startDate = row[1] as DateTime;
-          final targetDate = row[2] as DateTime;
+    if (results.isNotEmpty) {
+      final row = results.first;
+      final fitnessGoal = row[0];
+      final startDate = row[1] as DateTime;
+      final targetDate = row[2] as DateTime;
 
-          final today = DateTime.now();
-          final completedDays = today.difference(startDate).inDays;
-          final totalDays = targetDate.difference(startDate).inDays;
+      final today = DateTime.now();
+      final completedDays = today.difference(startDate).inDays;
+      final totalDays = targetDate.difference(startDate).inDays;
+      final totalWeeks = (totalDays / 7).ceil();
 
-          return {
-            'fitnessGoal': fitnessGoal,
-            'completedDays': completedDays,
-            'totalDays': totalDays,
-          };
-        } else {
-          throw Exception("No fitness goal found for user ID: $userEmail");
-        }
-      } catch (e) {
-        print("Error fetching fitness progress: $e");
-        throw e;
-      }
+
+      return {
+        'fitnessGoal': fitnessGoal,
+        'completedDays': completedDays,
+        'totalDays': totalDays,
+        'totalWeeks': totalWeeks,
+      };
+    } else {
+      throw Exception("No fitness goal found for user ID: $userEmail");
     }
+  } catch (e) {
+    print("Error fetching fitness progress: $e");
+    throw e;
+  }
+}
     Future<int> getWorkoutDaysPerWeek(String userEmail) async {
   try {
     final connection = await getConnection();
@@ -1353,4 +1356,25 @@ Future<double> getTargetWeight(String userEmail) async {
     throw e;
   }
 }
+Future<void> updateTargetWeight(String userEmail, double newTargetWeight) async {
+  try {
+    final connection = await getConnection();
+    await connection.query(
+      '''
+      UPDATE fitnessgoal
+      SET fg_targetweight = @newTargetWeight
+      WHERE fg_userid = @userEmail
+      ''',
+      substitutionValues: {
+        'newTargetWeight': newTargetWeight,
+        'userEmail': userEmail,
+      },
+    );
+    print("Target weight updated successfully for $userEmail");
+  } catch (e) {
+    print("Error updating target weight: $e");
+    throw e;
+  }
+}
+
 }

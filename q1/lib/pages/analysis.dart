@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:fl_chart/fl_chart.dart';
-import 'package:q1/components/menuBar/menuBar.dart'; // Import the BottomMenuBar
+import 'package:q1/components/menuBar/menuBar.dart';
+import 'db_connection.dart'; // Import for database methods
 
 class WeightTrackerPage extends StatefulWidget {
   const WeightTrackerPage({super.key});
@@ -10,42 +11,95 @@ class WeightTrackerPage extends StatefulWidget {
 }
 
 class _WeightTrackerPageState extends State<WeightTrackerPage> {
-  // Placeholder data; these will later be fetched from a database.
-  String profileName = "Pramudtha";
-  double beginningWeight = 80.8;
-  double goalWeight = 100.0;
-  double currentWeight = 85.3;
-  double newRecordWeight = 100.3;
+  String profileName = "User";
+  double beginningWeight = 0.0;
+  double goalWeight = 0.0;
+  double currentWeight = 0.0;
   List<double> weeklyWeights = [];
   TextEditingController weightController = TextEditingController();
+  List<int> keyWeeks = [];
+
+
 
   @override
   void initState() {
     super.initState();
-    _generateWeeklyWeights();
+    _fetchUserName();
+    fetchWeights();
+  }
+   String _getGreeting() {
+    final hour = DateTime.now().hour;
+    if (hour < 12) {
+      return "Good Morning 👋";
+    } else if (hour < 17) {
+      return "Good Afternoon 👋";
+    } else {
+      return "Good Evening 👋";
+    }
+  }
+ 
+  void _fetchUserName() async {
+    try {
+      DatabaseConnection db = DatabaseConnection();
+      final name = await db.getUserName();
+      setState(() {
+        profileName = name;
+      });
+    } catch (e) {
+      print("Error fetching user name: $e");
+    }
+  }
+  
+  void fetchWeights() async {
+    try {
+      final userEmail = SessionManager.getUserEmail();
+      if (userEmail != null) {
+        final db = DatabaseConnection();
+        final fetchedCurrentWeight = await db.getCurrentWeight(userEmail);
+        final fetchedTargetWeight = await db.getTargetWeight(userEmail);
+        final fitnessProgress = await db.getFitnessProgress(userEmail);
+
+
+        setState(() {
+          beginningWeight = fetchedCurrentWeight; // Assume beginning weight is the current weight
+          goalWeight = fetchedTargetWeight;
+          currentWeight = fetchedCurrentWeight;
+          final totalWeeks = fitnessProgress['totalWeeks'];
+
+          if (totalWeeks > 0) {
+            keyWeeks.add(1); // Always include the first week
+            for (int i = 1; i <= 3; i++) {
+              int week = (totalWeeks * i / 4).ceil();
+              if (!keyWeeks.contains(week)) {
+                keyWeeks.add(week);
+              }
+            }
+            keyWeeks.add(totalWeeks); // Always include the last week
+          }
+
+          _generateWeeklyWeights(keyWeeks.length);
+        });
+
+        
+      } else {
+        print("No user is logged in.");
+      }
+    } catch (e) {
+      print("Error fetching weights: $e");
+    }
   }
 
-  void _generateWeeklyWeights() {
-    int totalWeeks = 4;
-    double weightChangePerWeek = (goalWeight - beginningWeight) / totalWeeks;
+void _generateWeeklyWeights(int totalWeeks) {
+  double weightChangePerWeek = (goalWeight - beginningWeight) / totalWeeks;
 
-    weeklyWeights = List.generate(totalWeeks, (index) {
-      return beginningWeight + (weightChangePerWeek * index);
-    });
-  }
-
-  void _updateNewRecordWeight() {
-    setState(() {
-      double enteredWeight = double.tryParse(weightController.text) ?? newRecordWeight;
-      goalWeight = enteredWeight;
-      _generateWeeklyWeights();
-    });
-  }
+  weeklyWeights = List.generate(totalWeeks, (index) {
+    return beginningWeight + (weightChangePerWeek * index);
+  });
+}
 
   @override
   Widget build(BuildContext context) {
     final screenSize = MediaQuery.of(context).size;
-    final isSmallScreen = screenSize.width < 350;
     double minWeight = (beginningWeight < goalWeight ? beginningWeight : goalWeight) - 5;
     double maxWeight = (beginningWeight > goalWeight ? beginningWeight : goalWeight) + 5;
 
@@ -56,14 +110,14 @@ class _WeightTrackerPageState extends State<WeightTrackerPage> {
           children: [
             CircleAvatar(
               backgroundImage: AssetImage('lib/assets/profileimage.jpg'),
-              radius: screenSize.width * 0.05, // Adjust radius for responsiveness
+              radius: screenSize.width * 0.05,
             ),
             SizedBox(width: screenSize.width * 0.02),
             Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 Text(
-                  'Good Morning 👋',
+                  _getGreeting(),
                   style: TextStyle(fontSize: screenSize.width * 0.04),
                 ),
                 Text(
@@ -102,15 +156,15 @@ class _WeightTrackerPageState extends State<WeightTrackerPage> {
                     mainAxisSize: MainAxisSize.min,
                     children: [
                       Text(
-                        "Beginning : ${beginningWeight}Kg",
+                        "Beginning : ${beginningWeight.toStringAsFixed(1)}Kg",
                         style: TextStyle(fontSize: screenSize.width * 0.04),
                       ),
                       Text(
-                        "Goal : ${goalWeight}Kg",
+                        "Goal : ${goalWeight.toStringAsFixed(1)}Kg",
                         style: TextStyle(fontSize: screenSize.width * 0.04),
                       ),
                       Text(
-                        "Weight now : ${currentWeight}Kg",
+                        "Current : ${currentWeight.toStringAsFixed(1)}Kg",
                         style: TextStyle(fontSize: screenSize.width * 0.04),
                       ),
                     ],
@@ -118,50 +172,68 @@ class _WeightTrackerPageState extends State<WeightTrackerPage> {
                 ),
                 SizedBox(height: screenSize.height * 0.03),
                 Center(
-                  child: Text(
-                    'Enter new Record',
-                    style: TextStyle(
-                      fontSize: screenSize.width * 0.045,
-                      fontWeight: FontWeight.bold,
-                    ),
-                  ),
-                ),
-                SizedBox(height: screenSize.height * 0.02),
-                Center(
-                  child: ElevatedButton(
-                    style: ElevatedButton.styleFrom(
-                      backgroundColor: const Color(0xFFB30000),
-                      foregroundColor: Colors.white,
-                      shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(30),
-                      ),
-                    ),
-                    onPressed: _updateNewRecordWeight,
-                    child: Row(
-                      mainAxisSize: MainAxisSize.min,
-                      children: [
-                        SizedBox(
-                          width: screenSize.width * 0.1,
-                          child: TextField(
-                            controller: weightController,
-                            keyboardType: TextInputType.number,
-                            decoration: InputDecoration(
-                              hintText: 'Weight',
-                              border: InputBorder.none,
-                            ),
-                          ),
-                        ),
-                        SizedBox(width: screenSize.width * 0.02),
-                        Text('KG', style: TextStyle(fontSize: screenSize.width * 0.04)),
-                        SizedBox(width: screenSize.width * 0.02),
-                        Icon(Icons.add, size: screenSize.width * 0.05),
-                      ],
-                    ),
-                  ),
-                ),
+  child: ElevatedButton(
+    style: ElevatedButton.styleFrom(
+      backgroundColor: const Color(0xFFB30000),
+      foregroundColor: Colors.white,
+      shape: RoundedRectangleBorder(
+        borderRadius: BorderRadius.circular(30),
+      ),
+    ),
+    onPressed: () async {
+      try {
+        final userEmail = SessionManager.getUserEmail();
+        if (userEmail != null) {
+          final newTargetWeight = double.tryParse(weightController.text);
+          if (newTargetWeight != null && newTargetWeight > 0) {
+            final db = DatabaseConnection();
+            await db.updateTargetWeight(userEmail, newTargetWeight);
+
+            setState(() {
+              goalWeight = newTargetWeight; // Update local state
+              weightController.clear(); // Clear the text field
+            });
+
+            ScaffoldMessenger.of(context).showSnackBar(
+              SnackBar(content: Text('Target weight updated to $newTargetWeight kg')),
+            );
+          } else {
+            ScaffoldMessenger.of(context).showSnackBar(
+              SnackBar(content: Text('Please enter a valid number')),
+            );
+          }
+        } else {
+          print("No user is logged in.");
+        }
+      } catch (e) {
+        print("Error updating target weight: $e");
+      }
+    },
+    child: Row(
+      mainAxisSize: MainAxisSize.min,
+      children: [
+        SizedBox(
+          width: screenSize.width * 0.1,
+          child: TextField(
+            controller: weightController,
+            keyboardType: TextInputType.number,
+            decoration: InputDecoration(
+              hintText: 'Weight',
+              border: InputBorder.none,
+            ),
+          ),
+        ),
+        SizedBox(width: screenSize.width * 0.02),
+        Text('KG', style: TextStyle(fontSize: screenSize.width * 0.04)),
+        SizedBox(width: screenSize.width * 0.02),
+        Icon(Icons.add, size: screenSize.width * 0.05),
+      ],
+    ),
+  ),
+),
                 SizedBox(height: screenSize.height * 0.03),
                 SizedBox(
-                  height: screenSize.height * 0.3, // Responsive height for the chart
+                  height: screenSize.height * 0.3,
                   child: LineChart(
                     LineChartData(
                       minY: minWeight,
@@ -171,21 +243,28 @@ class _WeightTrackerPageState extends State<WeightTrackerPage> {
                         bottomTitles: AxisTitles(
                           sideTitles: SideTitles(
                             showTitles: true,
-                            getTitlesWidget: (value, meta) => Text(
-                              'Week ${value.toInt() + 1}',
-                              style: TextStyle(fontSize: screenSize.width * 0.035),
-                            ),
-                            interval: 1,
+                            getTitlesWidget: (value, meta) {
+                              // Ensure value matches the index of keyWeeks
+                              int index = value.toInt();
+                              if (index >= 0 && index < keyWeeks.length) {
+                                return Text(
+                                  'Week ${keyWeeks[index]}',
+                                  style: TextStyle(fontSize: screenSize.width * 0.035),
+                                );
+                              }
+                              return const Text('');
+                            },
+                            interval: 1, // Align labels with keyWeeks
                           ),
                         ),
                         leftTitles: AxisTitles(
                           sideTitles: SideTitles(
                             showTitles: true,
                             getTitlesWidget: (value, meta) => Text(
-                              '${value.toInt()}',
+                              '${value.toInt()}Kg',
                               style: TextStyle(fontSize: screenSize.width * 0.035),
                             ),
-                            reservedSize: screenSize.width * 0.12, // Extra padding
+                            reservedSize: screenSize.width * 0.12,
                           ),
                         ),
                       ),
