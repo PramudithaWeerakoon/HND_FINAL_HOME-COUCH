@@ -156,8 +156,6 @@ class _CardDetailsPageState extends State<CardDetailsPage> {
                               validator: (value) {
                                 if (value == null || value.isEmpty) {
                                   return 'Card number is required';
-                                } else if (!_cardNumberRegExp.hasMatch(value)) {
-                                  return 'Enter a valid 16-digit card number';
                                 }
                                 return null;
                               },

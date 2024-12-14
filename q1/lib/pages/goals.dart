@@ -157,27 +157,19 @@ class _FitnessHomePageState extends State<FitnessHomePage> {
                   padding: const EdgeInsets.all(16.0),
                   child: Column(
                     children: [
-                      CircularPercentIndicator(
+                      HalfCircleProgressBar(
+                        progress: progressPercentage,
                         radius: 80.0,
-                        lineWidth: 15.0,
-                        percent: progressPercentage,
-                        center: Text(
-                          "${(progressPercentage * 100).toInt()}%",
-                          style: TextStyle(
-                            fontSize: 24,
-                            fontWeight: FontWeight.bold,
-                            color: Colors.black,
-                          ),
-                        ),
                         progressColor: Color(0xFF21007E),
                         backgroundColor: Color(0xFFBDB9B9),
+                        showPercentage: true,
                       ),
-                      SizedBox(height: 10),
+                      SizedBox(height: 5),
                         Text(
                          'Days done: $completedDays/$totalDays',
                         style: TextStyle(
                           color: const Color.fromARGB(137, 0, 0, 0),
-                          fontSize: 18,
+                          fontSize: 16,
                           fontWeight: FontWeight.bold,
                         ),
                         ),
@@ -349,11 +341,11 @@ List<Widget> generateWeekProgressCards(int totalDays, List<Map<String, dynamic>>
         weekNumber: i,
         progress: progress,
         hours: '${(totalDuration / 60).toStringAsFixed(1)} hrs', // Convert minutes to hours
-        progressColor: progress >= 0.75
-            ? Colors.green
+        progressColor: progress == 1.0
+            ? Color(0xFF21007E)
             : progress >= 0.5
-                ? Colors.orange
-                : Colors.red,
+                ? Color(0xFF01620B)
+                : Color(0xFFEAB804),
       ),
     );
   }
@@ -361,6 +353,91 @@ List<Widget> generateWeekProgressCards(int totalDays, List<Map<String, dynamic>>
   return weekCards;
 }
 
+class HalfCircleProgressBar extends StatelessWidget {
+  final double progress; // Progress in percentage (0.0 to 1.0)
+  final double radius; // Radius of the half-circle
+  final Color progressColor;
+  final Color backgroundColor;
+  final bool showPercentage;
+
+  HalfCircleProgressBar({
+    required this.progress,
+    required this.radius,
+    this.progressColor = Colors.blue,
+    this.backgroundColor = Colors.grey,
+    this.showPercentage = true,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return Stack(
+      alignment: Alignment.center,
+      children: [
+        CustomPaint(
+          size: Size(radius * 2.2, radius * 1.19), // Increase height for more curve
+          painter: HalfCirclePainter(
+            progress: progress,
+            progressColor: progressColor,
+            backgroundColor: backgroundColor,
+          ),
+        ),
+        if (showPercentage)
+          Positioned(
+            bottom: 1, // Adjust the position of the percentage text
+            child: Text(
+              "${(progress * 100).toInt()}%", // Convert progress to percentage
+              style: TextStyle(
+                fontSize: 55,
+                fontWeight: FontWeight.bold,
+                color: Colors.black,
+              ),
+            ),
+          ),
+      ],
+    );
+  }
+}
+
+class HalfCirclePainter extends CustomPainter {
+  final double progress; // Progress in percentage (0.0 to 1.0)
+  final Color progressColor;
+  final Color backgroundColor;
+
+  HalfCirclePainter({
+    required this.progress,
+    required this.progressColor,
+    required this.backgroundColor,
+  });
+
+  @override
+  void paint(Canvas canvas, Size size) {
+    final Paint backgroundPaint = Paint()
+      ..color = backgroundColor
+      ..style = PaintingStyle.stroke
+      ..strokeWidth = 18.0
+      ..strokeCap = StrokeCap.round; // Rounded ends
+
+    final Paint progressPaint = Paint()
+      ..color = progressColor
+      ..style = PaintingStyle.stroke
+      ..strokeWidth = 18.0
+      ..strokeCap = StrokeCap.round; // Rounded ends
+
+    final double startAngle = -3.14; // Start from the left
+    final double sweepAngle = 3.14 * progress; // Cover the progress as a sweep
+
+    final Rect rect = Rect.fromLTWH(0, 0, size.width, size.height * 2);
+
+    // Draw background half-circle
+    canvas.drawArc(rect, startAngle, 3.14, false, backgroundPaint);
+
+    // Draw progress half-circle
+    canvas.drawArc(rect, startAngle, sweepAngle, false, progressPaint);
+  }
+
+  @override
+  bool shouldRepaint(covariant CustomPainter oldDelegate) => true;
+}
 
 
 

@@ -1246,7 +1246,7 @@ Future<Map<int, int>> getTotalDurationPerDay(String userEmail, int weekNumber) a
     Map<int, int> durationPerDay = {};
     for (final row in results) {
       final dayNumber = row[0] as int;
-      final totalDuration = row[1] as int;
+      final totalDuration = row[1] != null ? row[1] as int : 0;
       durationPerDay[dayNumber] = totalDuration;
     }
     print("Total duration per day for week $weekNumber fetched successfully.");
