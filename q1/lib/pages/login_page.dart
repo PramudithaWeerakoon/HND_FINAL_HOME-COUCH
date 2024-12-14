@@ -3,6 +3,7 @@ import 'package:flutter/gestures.dart';
 import 'db_connection.dart'; // Import the database connection
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:google_sign_in/google_sign_in.dart';
+import 'package:shared_preferences/shared_preferences.dart'; // Added shared_preferences
 
 class LoginPage extends StatefulWidget {
   const LoginPage({super.key});
@@ -30,6 +31,7 @@ class _LoginPageState extends State<LoginPage> {
         _user = event;
       });
     });
+    _loadRememberMe(); // Load remember me state from shared preferences
   }
 
   @override
@@ -77,6 +79,13 @@ class _LoginPageState extends State<LoginPage> {
       });
 
       if (isLoggedIn) {
+        // Save the remember me state and user credentials if checked
+        if (rememberMe) {
+          _saveRememberMe(email, password); // Save to SharedPreferences
+        } else {
+          _clearRememberMe(); // Clear the saved credentials
+        }
+
         // Navigate to the home screen or authenticated area
         Navigator.pushReplacementNamed(context, '/home');
       } else {
@@ -88,9 +97,38 @@ class _LoginPageState extends State<LoginPage> {
     }
   }
 
+  // SharedPreferences: Save login credentials if "Remember me" is checked
+  Future<void> _saveRememberMe(String email, String password) async {
+    SharedPreferences prefs = await SharedPreferences.getInstance();
+    prefs.setBool('rememberMe', true);
+    prefs.setString('email', email);
+    prefs.setString('password', password);
+  }
+
+  // SharedPreferences: Load login credentials if "Remember me" was previously checked
+  Future<void> _loadRememberMe() async {
+    SharedPreferences prefs = await SharedPreferences.getInstance();
+    bool? isRemembered = prefs.getBool('rememberMe');
+    if (isRemembered == true) {
+      setState(() {
+        rememberMe = true;
+        usernameController.text = prefs.getString('email') ?? '';
+        passwordController.text = prefs.getString('password') ?? '';
+      });
+    }
+  }
+
+  // SharedPreferences: Clear saved credentials
+  Future<void> _clearRememberMe() async {
+    SharedPreferences prefs = await SharedPreferences.getInstance();
+    prefs.remove('rememberMe');
+    prefs.remove('email');
+    prefs.remove('password');
+  }
+
   String? loggedinAuthUserEmail;
   String? loggedinAuthUserName;
- Future<void> handleGoogleLogin(BuildContext context) async {
+  Future<void> handleGoogleLogin(BuildContext context) async {
     try {
       print('Starting Google login...');
       final GoogleSignIn googleSignIn = GoogleSignIn();
@@ -166,7 +204,6 @@ class _LoginPageState extends State<LoginPage> {
       print('Error during Google login: $error');
     }
   }
-
 
   @override
   Widget build(BuildContext context) {
@@ -309,11 +346,11 @@ class _LoginPageState extends State<LoginPage> {
                             ),
                           ),
                           const Padding(
-                            padding: EdgeInsets.symmetric(horizontal: 10.0),
+                            padding: EdgeInsets.symmetric(horizontal: 8.0),
                             child: Text(
-                              'or continue with',
-                              style: TextStyle(
-                                  color: Color.fromARGB(255, 77, 76, 76)),
+                              'or',
+                              style:
+                                  TextStyle(color: Colors.grey, fontSize: 18),
                             ),
                           ),
                           Expanded(
@@ -325,48 +362,31 @@ class _LoginPageState extends State<LoginPage> {
                         ],
                       ),
                     ),
-                    const SizedBox(height: 16),
-                    Row(
-                    mainAxisAlignment: MainAxisAlignment.center,
-                    children: [
-                      GestureDetector(
+                    const SizedBox(height: 15),
+                    GestureDetector(
                       onTap: () {
                         handleGoogleLogin(context);
-                      },  
-                      child: const AuthButton(imagePath: 'lib/assets/google.png'),
-                      ),
-                    ],
-                    ),
-                    const SizedBox(height: 170),
-                    TextButton(
-                      onPressed: null,
-                      child: RichText(
-                        text: TextSpan(
-                          children: [
-                            const TextSpan(
-                              text: "Don't have an account? ",
-                              style: TextStyle(
-                                color: Color.fromARGB(255, 128, 127, 127),
-                                fontSize: 17,
-                                fontWeight: FontWeight.bold,
-                              ),
+                      },
+                      child: Container(
+                        padding: const EdgeInsets.all(12.0),
+                        margin: const EdgeInsets.symmetric(horizontal: 35),
+                        decoration: BoxDecoration(
+                          color: const Color(0xFF4D74C5),
+                          borderRadius: BorderRadius.circular(50),
+                        ),
+                        child: const Center(
+                          child: Text(
+                            'Sign in with Google',
+                            style: TextStyle(
+                              color: Colors.white,
+                              fontSize: 20,
+                              fontWeight: FontWeight.bold,
                             ),
-                            TextSpan(
-                              text: "Sign up",
-                              style: const TextStyle(
-                                color: Color(0xFF21007E),
-                                fontSize: 17,
-                                fontWeight: FontWeight.bold,
-                              ),
-                              recognizer: TapGestureRecognizer()
-                                ..onTap = () {
-                                  Navigator.pushNamed(context, '/register');
-                                },
-                            ),
-                          ],
+                          ),
                         ),
                       ),
                     ),
+                    const SizedBox(height: 20),
                   ],
                 ),
               ),
@@ -377,7 +397,6 @@ class _LoginPageState extends State<LoginPage> {
     );
   }
 }
-
 // Custom text field widget
 class MyTextField extends StatefulWidget {
   final TextEditingController controller;
