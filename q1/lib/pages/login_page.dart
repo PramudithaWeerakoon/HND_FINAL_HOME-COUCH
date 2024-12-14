@@ -5,6 +5,7 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:google_sign_in/google_sign_in.dart';
 import 'package:shared_preferences/shared_preferences.dart'; // Added shared_preferences
 import 'register_page.dart';
+import 'forgotpassword1.dart';
 
 class LoginPage extends StatefulWidget {
   const LoginPage({super.key});
@@ -296,14 +297,24 @@ class _LoginPageState extends State<LoginPage> {
                               ),
                             ],
                           ),
-                          const Text(
-                            'Forgot Password?',
-                            style: TextStyle(
+                            GestureDetector(
+                            onTap: () {
+                              Navigator.push(
+                              context,
+                              MaterialPageRoute(
+                                builder: (context) => EnterEmailPage(),
+                              ),
+                              );
+                            },
+                            child: const Text(
+                              'Forgot Password?',
+                              style: TextStyle(
                               color: Color.fromARGB(255, 128, 127, 127),
                               fontSize: 17,
                               fontWeight: FontWeight.bold,
+                              ),
                             ),
-                          ),
+                            ),
                         ],
                       ),
                     ),
