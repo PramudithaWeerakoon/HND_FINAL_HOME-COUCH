@@ -1433,6 +1433,50 @@ Future<void> updateTargetWeight(String userEmail, double newTargetWeight) async 
       return [];
     }
   }
+   Future<int> getUniqueDaysDone(String userEmail) async {
+    try {
+      final connection = await getConnection();
+      final results = await connection.query(
+        '''
+        SELECT DISTINCT day_number, week_number
+        FROM userexercise
+        WHERE userid = @userEmail
+        ''',
+        substitutionValues: {'userEmail': userEmail},
+      );
+
+      return results.length; // Number of unique days done
+    } catch (e) {
+      print("Error fetching unique days done: $e");
+      throw e;
+    }
+  }
+  Future<List<Map<String, dynamic>>> getWeightHistory(String userEmail) async {
+  try {
+    final connection = await getConnection();
+    final results = await connection.query(
+      '''
+      SELECT wh_recordedat, wh_weight
+      FROM weighthistory
+      WHERE wh_userid = @userEmail
+      ORDER BY wh_recordedat ASC
+      ''',
+      substitutionValues: {'userEmail': userEmail},
+    );
+
+    // Convert results to a list of maps
+    return results.map((row) {
+      return {
+        'recordedAt': DateTime.parse(row[0].toString()),
+        'weight': double.parse(row[1].toString()),
+      };
+    }).toList();
+  } catch (e) {
+    // Use a logging framework instead of print
+    print("Error fetching weight history: $e");
+    rethrow;
+  }
+}
 }
 
 

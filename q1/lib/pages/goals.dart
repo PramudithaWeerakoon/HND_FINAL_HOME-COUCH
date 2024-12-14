@@ -47,36 +47,36 @@ class _FitnessHomePageState extends State<FitnessHomePage> {
   }
 
   void fetchFitnessData() async {
-    try {
-      final userEmail = SessionManager.getUserEmail();
-      print('User email: $userEmail');
-      if (userEmail != null) {
-        final db = DatabaseConnection();
-        final progress = await db.getFitnessProgress(userEmail);
-        final weeklyData = await db.getWeeklyDurations(userEmail);
-        final workoutDays = await db.getWorkoutDaysPerWeek(userEmail);
-        final totalDuration = await db.getTotalDuration(userEmail);
-        final currentWeight = await db.getCurrentWeight(userEmail);
-        final targetWeight = await db.getTargetWeight(userEmail);
+  try {
+    final userEmail = SessionManager.getUserEmail();
+    print('User email: $userEmail');
+    if (userEmail != null) {
+      final db = DatabaseConnection();
+      final progress = await db.getFitnessProgress(userEmail);
+      final weeklyData = await db.getWeeklyDurations(userEmail);
+      final workoutDays = await db.getWorkoutDaysPerWeek(userEmail);
+      final totalDuration = await db.getTotalDuration(userEmail);
+      final currentWeight = await db.getCurrentWeight(userEmail);
+      final targetWeight = await db.getTargetWeight(userEmail);
+      final uniqueDaysDone = await db.getUniqueDaysDone(userEmail); // Fetch unique days done
 
-
-        setState(() {
-          fitnessGoal = progress['fitnessGoal'];
-          completedDays = progress['completedDays'];
-          totalDays = progress['totalDays'];
-          weeklyDurations = weeklyData; // Save weekly durations
-          workoutDaysPerWeek = workoutDays; // Save workout days per week
-          totalDurationHours = totalDuration;
-          fpCurrentWeight = currentWeight;
-          fgTargetWeight = targetWeight;
-        });
-      } else {
-        print("No user is currently logged in.");
-      }
-    } catch (e) {
-      print("Error fetching fitness data: $e");
+      setState(() {
+        fitnessGoal = progress['fitnessGoal'];
+        completedDays = uniqueDaysDone; // Use unique days done
+        totalDays = progress['totalDays'];
+        weeklyDurations = weeklyData; // Save weekly durations
+        workoutDaysPerWeek = workoutDays; // Save workout days per week
+        totalDurationHours = totalDuration;
+        fpCurrentWeight = currentWeight;
+        fgTargetWeight = targetWeight;
+      });
+    } else {
+      print("No user is currently logged in.");
     }
+  } catch (e) {
+    print("Error fetching fitness data: $e");
   }
+}
     Widget buildWeightDetails() {
     // Total weight difference between current and target
     final weightDifference = (fgTargetWeight - fpCurrentWeight).abs();

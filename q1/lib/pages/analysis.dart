@@ -58,27 +58,20 @@ class _WeightTrackerPageState extends State<WeightTrackerPage> {
         final fetchedCurrentWeight = await db.getCurrentWeight(userEmail);
         final fetchedTargetWeight = await db.getTargetWeight(userEmail);
         final fitnessProgress = await db.getFitnessProgress(userEmail);
-
+        final fetchedWeights = await db.getWeightHistory(userEmail);
 
         setState(() {
           beginningWeight = fetchedCurrentWeight; // Assume beginning weight is the current weight
           goalWeight = fetchedTargetWeight;
           currentWeight = fetchedCurrentWeight;
           final totalWeeks = fitnessProgress['totalWeeks'];
-
-          if (totalWeeks > 0) {
-            keyWeeks.add(1); // Always include the first week
-            for (int i = 1; i <= 3; i++) {
-              int week = (totalWeeks * i / 4).ceil();
-              if (!keyWeeks.contains(week)) {
-                keyWeeks.add(week);
-              }
-            }
-            keyWeeks.add(totalWeeks); // Always include the last week
-          }
-
-          _generateWeeklyWeights(keyWeeks.length);
-        });
+           weeklyWeights = fetchedWeights.map((entry) => entry['weight'] as double).toList();
+        keyWeeks = List.generate(weeklyWeights.length, (index) => index + 1); // Week labels
+        if (weeklyWeights.isNotEmpty) {
+          beginningWeight = weeklyWeights.first;
+          currentWeight = weeklyWeights.last;
+        }
+      });
 
         
       } else {
@@ -89,19 +82,13 @@ class _WeightTrackerPageState extends State<WeightTrackerPage> {
     }
   }
 
-void _generateWeeklyWeights(int totalWeeks) {
-  double weightChangePerWeek = (goalWeight - beginningWeight) / totalWeeks;
-
-  weeklyWeights = List.generate(totalWeeks, (index) {
-    return beginningWeight + (weightChangePerWeek * index);
-  });
-}
-
   @override
   Widget build(BuildContext context) {
     final screenSize = MediaQuery.of(context).size;
-    double minWeight = (beginningWeight < goalWeight ? beginningWeight : goalWeight) - 5;
-    double maxWeight = (beginningWeight > goalWeight ? beginningWeight : goalWeight) + 5;
+
+    // Dynamically adjust min and max weight to ensure chart boundaries are maintained
+    double minWeight = (weeklyWeights.isNotEmpty ? weeklyWeights.reduce((a, b) => a < b ? a : b) : 0) - 5;
+    double maxWeight = (weeklyWeights.isNotEmpty ? weeklyWeights.reduce((a, b) => a > b ? a : b) : 0) + 5;
 
     return Scaffold(
       resizeToAvoidBottomInset: true,
@@ -195,7 +182,7 @@ void _generateWeeklyWeights(int totalWeeks) {
             });
 
             ScaffoldMessenger.of(context).showSnackBar(
-              SnackBar(content: Text('Target weight updated to $newTargetWeight kg')),
+              SnackBar(content: Text('Current weight updated to $newTargetWeight kg')),
             );
           } else {
             ScaffoldMessenger.of(context).showSnackBar(
@@ -236,44 +223,39 @@ void _generateWeeklyWeights(int totalWeeks) {
                   height: screenSize.height * 0.3,
                   child: LineChart(
                     LineChartData(
-                      minY: minWeight,
-                      maxY: maxWeight,
+                      minY: minWeight, // Dynamically adjusted min weight
+                      maxY: maxWeight, // Dynamically adjusted max weight
                       gridData: FlGridData(show: true),
                       titlesData: FlTitlesData(
                         bottomTitles: AxisTitles(
                           sideTitles: SideTitles(
                             showTitles: true,
                             getTitlesWidget: (value, meta) {
-                              // Ensure value matches the index of keyWeeks
                               int index = value.toInt();
                               if (index >= 0 && index < keyWeeks.length) {
                                 return Text(
-                                  'Week ${keyWeeks[index]}',
+                                  'Day ${keyWeeks[index]}', // Map weeks to X-axis
                                   style: TextStyle(fontSize: screenSize.width * 0.035),
                                 );
                               }
                               return const Text('');
                             },
-                            interval: 1, // Align labels with keyWeeks
+                            interval: 1,
                           ),
                         ),
                         leftTitles: AxisTitles(
                           sideTitles: SideTitles(
                             showTitles: true,
                             getTitlesWidget: (value, meta) => Text(
-                              '${value.toInt()}Kg',
+                              '${value.toInt()}Kg', // Map weights to Y-axis
                               style: TextStyle(fontSize: screenSize.width * 0.035),
                             ),
-                            reservedSize: screenSize.width * 0.12,
                           ),
                         ),
                       ),
                       borderData: FlBorderData(
                         show: true,
-                        border: Border(
-                          left: BorderSide(width: 1, color: Colors.grey),
-                          bottom: BorderSide(width: 1, color: Colors.grey),
-                        ),
+                        border: Border.all(color: Colors.grey, width: 1),
                       ),
                       lineBarsData: [
                         LineChartBarData(
@@ -282,26 +264,102 @@ void _generateWeeklyWeights(int totalWeeks) {
                               .entries
                               .map((entry) => FlSpot(entry.key.toDouble(), entry.value))
                               .toList(),
-                          isCurved: true,
+                          isCurved: true, // Smooth curve
                           color: Colors.blue,
-                          barWidth: screenSize.width * 0.01,
+                          barWidth: 3,
                           belowBarData: BarAreaData(show: false),
-                          dotData: FlDotData(
-                            show: true,
-                            getDotPainter: (spot, percent, barData, index) =>
-                                FlDotCirclePainter(radius: screenSize.width * 0.02, color: Colors.blue),
-                          ),
                         ),
+                        LineChartBarData(
+                        spots: [
+                          FlSpot(0, beginningWeight),
+                          FlSpot(weeklyWeights.length - 1, beginningWeight),
+                        ],
+                        isCurved: false,
+                        color: Colors.green,
+                        barWidth: 2,
+                        belowBarData: BarAreaData(show: false),
+                        dotData: FlDotData(show: false),
+                      ),
+                      LineChartBarData(
+                        spots: [
+                          FlSpot(0, goalWeight),
+                          FlSpot(weeklyWeights.length - 1, goalWeight),
+                        ],
+                        isCurved: false,
+                        color: Colors.red,
+                        barWidth: 2,
+                        belowBarData: BarAreaData(show: false),
+                        dotData: FlDotData(show: false),
+                      ),
                       ],
                     ),
                   ),
                 ),
-                SizedBox(height: screenSize.height * 0.1),
+                SizedBox(height: screenSize.height * 0.03),
+                Padding(
+              padding: EdgeInsets.symmetric(horizontal: screenSize.width * 0.05),
+              child: Row(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  Flexible(
+                    child: Row(
+                      children: [
+                        Container(
+                          width: screenSize.width * 0.02,
+                          height: screenSize.width * 0.02,
+                          color: Colors.red,
+                        ),
+                        SizedBox(width: screenSize.width * 0.01),
+                        Text(
+                          'Target Weight',
+                          style: TextStyle(fontSize: screenSize.width * 0.030),
+                        ),
+                      ],
+                    ),
+                  ),
+                  SizedBox(width: screenSize.width * 0.02), // Consistent spacing
+                  Flexible(
+                    child: Row(
+                      children: [
+                        Container(
+                          width: screenSize.width * 0.02,
+                          height: screenSize.width * 0.02,
+                          color: Colors.green,
+                        ),
+                        SizedBox(width: screenSize.width * 0.01),
+                        Text(
+                          'Beginning Weight',
+                          style: TextStyle(fontSize: screenSize.width * 0.030),
+                        ),
+                      ],
+                    ),
+                  ),
+                  SizedBox(width: screenSize.width * 0.02), // Consistent spacing
+                  Flexible(
+                    child: Row(
+                      children: [
+                        Container(
+                          width: screenSize.width * 0.02,
+                          height: screenSize.width * 0.02,
+                          color: Colors.blue,
+                        ),
+                        SizedBox(width: screenSize.width * 0.01),
+                        Text(
+                          'Ongoing Weight',
+                          style: TextStyle(fontSize: screenSize.width * 0.030),
+                        ),
+                      ],
+                    ),
+                  ),  
+                ],
+              ),
+            ),
               ],
             ),
           ),
         ),
       ),
+
       bottomNavigationBar: BottomMenuBar(
         currentIndex: 2,
         onTabSelected: (index) {
