@@ -3,6 +3,7 @@ import 'dart:math';
 import 'package:flutter/services.dart';
 import 'send_email.dart'; // Import the email service
 import 'fogotpassword2.dart';
+import 'forgotpassword3.dart';
 
 class EnterEmailPage extends StatefulWidget {
   @override
@@ -15,19 +16,26 @@ class _EnterEmailPageState extends State<EnterEmailPage> {
   void sendOTP() {
     String email = emailController.text.trim();
     if (email.isNotEmpty) {
-      // Generate 6 digit OTP
+      // Generate 6-digit OTP
       String otp = generateOTP();
-      
+
       // Call the email service to send OTP to the user
       sendEmailOTP(email, otp);
 
       // Navigate to the OTP entry page
       Navigator.push(
         context,
-        MaterialPageRoute(builder: (context) => EnterOTPPage(email: email, otp: otp)),
+        MaterialPageRoute(
+          builder: (context) => EnterOTPPage(
+            email: email,
+            otp: otp,
+          ),
+        ),
       );
     } else {
-      ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text('Please enter your email')));
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text('Please enter your email')),
+      );
     }
   }
 

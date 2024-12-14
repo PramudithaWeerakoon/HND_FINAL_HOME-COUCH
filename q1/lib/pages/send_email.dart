@@ -10,8 +10,21 @@ Future<void> sendEmailOTP(String email, String otp) async {
   final message = Message()
     ..from = Address(username, 'Couch@Home')
     ..recipients.add(email)
-    ..subject = 'Password Reset OTP'
-    ..text = 'Your OTP for password reset in Couch@Home is: $otp';
+    ..subject = 'Your Secure OTP for Password Reset - Couch@Home'
+    ..text = '''
+Hello,
+
+We received a request to reset the password for your Couch@Home account. 
+Here is your One-Time Password (OTP) to proceed with the reset:
+
+$otp
+
+Please enter this OTP in the app to verify your request. If you did not request a password reset, please ignore this email.
+
+Thank you,  
+Couch@Home Team
+''';
+
 
   try {
     final sendReport = await send(message, smtpServer);

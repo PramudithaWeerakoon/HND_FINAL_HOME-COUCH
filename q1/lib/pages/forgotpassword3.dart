@@ -10,14 +10,27 @@ class UpdatePasswordPage extends StatefulWidget {
 
 class _UpdatePasswordPageState extends State<UpdatePasswordPage> {
   final TextEditingController passwordController = TextEditingController();
-  final TextEditingController confirmPasswordController = TextEditingController();
+  final TextEditingController confirmPasswordController =
+      TextEditingController();
+
+  @override
+  void initState() {
+    super.initState();
+    email = widget.email; // Assign the passed email to the variable
+  }
+
+  String email = '';
+  
 
   void updatePassword() {
     if (passwordController.text == confirmPasswordController.text) {
+      print(email); // This is the email of the user
       // You would typically send the new password to your backend for updating.
-      ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text('Password Updated')));
+      ScaffoldMessenger.of(context)
+          .showSnackBar(SnackBar(content: Text('Password Updated')));
     } else {
-      ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text('Passwords do not match')));
+      ScaffoldMessenger.of(context)
+          .showSnackBar(SnackBar(content: Text('Passwords do not match')));
     }
   }
 
@@ -29,6 +42,7 @@ class _UpdatePasswordPageState extends State<UpdatePasswordPage> {
         padding: EdgeInsets.all(16.0),
         child: Column(
           children: [
+            Text('Email: $email'),
             TextField(
               controller: passwordController,
               decoration: InputDecoration(labelText: 'New Password'),
