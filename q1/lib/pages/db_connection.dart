@@ -1376,5 +1376,63 @@ Future<void> updateTargetWeight(String userEmail, double newTargetWeight) async 
     throw e;
   }
 }
+ Future<List<Map<String, dynamic>>> getDinnerMeals(String email) async {
+    final conn = await getConnection();
+    try {
+      final result = await conn.mappedResultsQuery(
+        '''
+        SELECT ms.ms_name, ms.ms_calories, ms.ms_protein, ms.ms_fat, ms.ms_fiber, ms.ms_carbs
+        FROM meal m
+        JOIN mealsuggestions ms ON m.m_id = ms.mealid
+        WHERE m.useremail = @userEmail AND m.m_type = 'Dinner'
+        ''',
+        substitutionValues: {'userEmail': email},
+      );
 
+      return result.map((row) => row.values.first).toList();
+    } catch (e) {
+      print("Error fetching dinner meals: \$e");
+      return [];
+    }
+  }
+  Future<List<Map<String, dynamic>>> getlunchMeals(String email) async {
+    final conn = await getConnection();
+    try {
+      final result = await conn.mappedResultsQuery(
+        '''
+        SELECT ms.ms_name, ms.ms_calories, ms.ms_protein, ms.ms_fat, ms.ms_fiber, ms.ms_carbs
+        FROM meal m
+        JOIN mealsuggestions ms ON m.m_id = ms.mealid
+        WHERE m.useremail = @userEmail AND m.m_type = 'Lunch'
+        ''',
+        substitutionValues: {'userEmail': email},
+      );
+
+      return result.map((row) => row.values.first).toList();
+    } catch (e) {
+      print("Error fetching Lunch meals: \$e");
+      return [];
+    }
+  }
+  Future<List<Map<String, dynamic>>> getbreakfastMeals(String email) async {
+    final conn = await getConnection();
+    try {
+      final result = await conn.mappedResultsQuery(
+        '''
+        SELECT ms.ms_name, ms.ms_calories, ms.ms_protein, ms.ms_fat, ms.ms_fiber, ms.ms_carbs
+        FROM meal m
+        JOIN mealsuggestions ms ON m.m_id = ms.mealid
+        WHERE m.useremail = @userEmail AND m.m_type = 'Breakfast'
+        ''',
+        substitutionValues: {'userEmail': email},
+      );
+
+      return result.map((row) => row.values.first).toList();
+    } catch (e) {
+      print("Error fetching Breakfast meals: \$e");
+      return [];
+    }
+  }
 }
+
+

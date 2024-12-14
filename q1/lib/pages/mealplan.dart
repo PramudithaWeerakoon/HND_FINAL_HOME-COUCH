@@ -75,7 +75,7 @@ class _DailyMealPlanState extends State<DailyMealPlan> {
                         context,
                         MaterialPageRoute(
                           builder: (context) =>
-                              const breakfastMealPlanScreen(),
+                              const BreakfastMealPlanScreen(),
                         ),
                       );
                     },
@@ -89,7 +89,7 @@ class _DailyMealPlanState extends State<DailyMealPlan> {
                        Navigator.push(
                         context,
                         MaterialPageRoute(
-                          builder: (context) => const lunchMealPlanScreen(),
+                          builder: (context) => const LunchMealPlanScreen(),
                         ),
                       );
                     },
@@ -103,7 +103,7 @@ class _DailyMealPlanState extends State<DailyMealPlan> {
                       Navigator.push(
                         context,
                         MaterialPageRoute(
-                          builder: (context) => const dinnerMealPlanScreen(),
+                          builder: (context) => const DinnerMealPlanScreen(),
                         ),
                       );
                     },
