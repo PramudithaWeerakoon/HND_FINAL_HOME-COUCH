@@ -4,6 +4,7 @@ import 'db_connection.dart'; // Import the database connection
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:google_sign_in/google_sign_in.dart';
 import 'package:shared_preferences/shared_preferences.dart'; // Added shared_preferences
+import 'register_page.dart';
 
 class LoginPage extends StatefulWidget {
   const LoginPage({super.key});
@@ -220,7 +221,7 @@ class _LoginPageState extends State<LoginPage> {
                 key: _formKey,
                 child: Column(
                   children: [
-                    const SizedBox(height: 50),
+                    const SizedBox(height: 20),
                     Image.asset(
                       'lib/assets/logo.png',
                       width: 300,
@@ -349,8 +350,9 @@ class _LoginPageState extends State<LoginPage> {
                             padding: EdgeInsets.symmetric(horizontal: 8.0),
                             child: Text(
                               'or',
-                              style:
-                                  TextStyle(color: Colors.grey, fontSize: 18),
+                              style: TextStyle(
+                                  color: Colors.black,
+                                  fontWeight: FontWeight.bold),
                             ),
                           ),
                           Expanded(
@@ -363,10 +365,10 @@ class _LoginPageState extends State<LoginPage> {
                       ),
                     ),
                     const SizedBox(height: 15),
+
+                    // Google Sign-in Button
                     GestureDetector(
-                      onTap: () {
-                        handleGoogleLogin(context);
-                      },
+                      onTap: () => handleGoogleLogin(context),
                       child: Container(
                         padding: const EdgeInsets.all(12.0),
                         margin: const EdgeInsets.symmetric(horizontal: 35),
@@ -386,7 +388,47 @@ class _LoginPageState extends State<LoginPage> {
                         ),
                       ),
                     ),
-                    const SizedBox(height: 20),
+                    const SizedBox(height: 70),
+
+                    // Sign up link
+                   Row(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: [
+                        const Text(
+                          'Don’t have an account? ',
+                          style: TextStyle(
+                            color: Color.fromARGB(255, 128, 127, 127),
+                            fontSize: 17,
+                            fontWeight: FontWeight.bold,
+                          ),
+                        ),
+                        TextButton(
+                          onPressed: () {
+                            Navigator.push(
+                              context,
+                              MaterialPageRoute(
+                                builder: (context) => const RegisterPage(),
+                              ),
+                            );
+                          },
+                          child: RichText(
+                            text: TextSpan(
+                              children: [
+                                const TextSpan(
+                                  text: 'Sign Up',
+                                  style: TextStyle(
+                                    color: Color(0xFF21007E),
+                                    fontSize: 17,
+                                    fontWeight: FontWeight.bold,
+                                  ),
+                                ),
+                              ],
+                            ),
+                          ),
+                        ),
+                      ],
+                    ),
+
                   ],
                 ),
               ),
