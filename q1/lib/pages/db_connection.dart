@@ -1166,4 +1166,215 @@ Future<Map<String, dynamic>> fetchUserFitnessDetails() async {
     }
     return {};
     }
+  
+    Future<Map<String, dynamic>> getFitnessProgress(String userEmail) async {
+  try {
+    final connection = await getConnection();
+    final results = await connection.query(
+      '''
+      SELECT fg_fitness_goal, fg_startdate, fg_targetdate
+      FROM fitnessgoal
+      WHERE fg_userid = @userEmail
+      ''',
+      substitutionValues: {'userEmail': userEmail},
+    );
+
+    if (results.isNotEmpty) {
+      final row = results.first;
+      final fitnessGoal = row[0];
+      final startDate = row[1] as DateTime;
+      final targetDate = row[2] as DateTime;
+
+      final today = DateTime.now();
+      final completedDays = today.difference(startDate).inDays;
+      final totalDays = targetDate.difference(startDate).inDays;
+      final totalWeeks = (totalDays / 7).ceil();
+
+
+      return {
+        'fitnessGoal': fitnessGoal,
+        'completedDays': completedDays,
+        'totalDays': totalDays,
+        'totalWeeks': totalWeeks,
+      };
+    } else {
+      throw Exception("No fitness goal found for user ID: $userEmail");
+    }
+  } catch (e) {
+    print("Error fetching fitness progress: $e");
+    throw e;
+  }
+}
+    Future<int> getWorkoutDaysPerWeek(String userEmail) async {
+  try {
+    final connection = await getConnection();
+    final results = await connection.query(
+      '''
+      SELECT fg_workoutdaysperweek
+      FROM fitnessgoal
+      WHERE fg_userid = @userEmail
+      ''',
+      substitutionValues: {'userEmail': userEmail},
+    );
+
+    if (results.isNotEmpty) {
+      final row = results.first;
+      final workoutDaysPerWeek = row[0] as int;
+      return workoutDaysPerWeek;
+    } else {
+      throw Exception("No fitness goal found for user ID: $userEmail");
+    }
+  } catch (e) {
+    print("Error fetching workout days per week: $e");
+    throw e;
+  }
+}
+Future<Map<int, int>> getTotalDurationPerDay(String userEmail, int weekNumber) async {
+  try {
+    final connection = await getConnection();
+    final results = await connection.query(
+      '''
+      SELECT day_number, SUM(ue_duration) as total_duration
+      FROM userexercise
+      WHERE userid = @userEmail AND week_number = @weekNumber
+      GROUP BY day_number
+      ORDER BY day_number
+      ''',
+      substitutionValues: {'userEmail': userEmail, 'weekNumber': weekNumber},
+    );
+
+    Map<int, int> durationPerDay = {};
+    for (final row in results) {
+      final dayNumber = row[0] as int;
+      final totalDuration = row[1] as int;
+      durationPerDay[dayNumber] = totalDuration;
+    }
+    print("Total duration per day for week $weekNumber fetched successfully.");
+
+    return durationPerDay;
+  } catch (e) {
+    print("Error fetching total duration per day for week $weekNumber: $e");
+    throw e;
+  }
+}
+Future<List<Map<String, dynamic>>> getWeeklyDurations(String userEmail) async {
+  try {
+    final connection = await getConnection();
+    final results = await connection.query(
+      '''
+      SELECT
+        ue.week_number AS week,
+        SUM(ue.ue_duration) AS total_duration
+      FROM userexercise ue
+      WHERE ue.userid = @userEmail
+      GROUP BY ue.week_number
+      ORDER BY ue.week_number ASC;
+      ''',
+      substitutionValues: {'userEmail': userEmail},
+    );
+
+    List<Map<String, dynamic>> weeklyDurations = [];
+    for (final row in results) {
+      weeklyDurations.add({
+        'week': row[0],
+        'total_duration': row[1],
+      });
+    }
+
+    return weeklyDurations;
+  } catch (e) {
+    print("Error fetching weekly durations: $e");
+    throw e;
+  }
+}
+Future<double> getTotalDuration(String userEmail) async {
+  try {
+    final connection = await getConnection();
+    final results = await connection.query(
+      '''
+      SELECT SUM(ue_duration) as total_duration
+      FROM userexercise
+      WHERE userid = @userEmail
+      ''',
+      substitutionValues: {'userEmail': userEmail},
+    );
+
+    if (results.isNotEmpty) {
+      final totalDuration = results.first[0];
+      return totalDuration != null ? totalDuration / 60 : 0.0; // Convert minutes to hours
+    } else {
+      return 0.0;
+    }
+  } catch (e) {
+    print("Error fetching total duration: $e");
+    throw e;
+  }
+}
+Future<double> getCurrentWeight(String userEmail) async {
+  try {
+    final connection = await getConnection();
+    final results = await connection.query(
+      '''
+      SELECT fp_currentweight
+      FROM fitnessprofile
+      WHERE fp_userid = @userEmail
+      ''',
+      substitutionValues: {'userEmail': userEmail},
+    );
+
+    if (results.isNotEmpty) {
+      final currentWeight = results.first[0];
+      return currentWeight != null ? double.parse(currentWeight.toString()) : 0.0;
+    } else {
+      throw Exception("No current weight found for user ID: $userEmail");
+    }
+  } catch (e) {
+    print("Error fetching current weight: $e");
+    throw e;
+  }
+}
+Future<double> getTargetWeight(String userEmail) async {
+  try {
+    final connection = await getConnection();
+    final results = await connection.query(
+      '''
+      SELECT fg_targetweight
+      FROM fitnessgoal
+      WHERE fg_userid = @userEmail
+      ''',
+      substitutionValues: {'userEmail': userEmail},
+    );
+
+    if (results.isNotEmpty) {
+      final targetWeight = results.first[0];
+      return targetWeight != null ? double.parse(targetWeight.toString()) : 0.0;
+    } else {
+      throw Exception("No target weight found for user ID: $userEmail");
+    }
+  } catch (e) {
+    print("Error fetching target weight: $e");
+    throw e;
+  }
+}
+Future<void> updateTargetWeight(String userEmail, double newTargetWeight) async {
+  try {
+    final connection = await getConnection();
+    await connection.query(
+      '''
+      UPDATE fitnessgoal
+      SET fg_targetweight = @newTargetWeight
+      WHERE fg_userid = @userEmail
+      ''',
+      substitutionValues: {
+        'newTargetWeight': newTargetWeight,
+        'userEmail': userEmail,
+      },
+    );
+    print("Target weight updated successfully for $userEmail");
+  } catch (e) {
+    print("Error updating target weight: $e");
+    throw e;
+  }
+}
+
 }

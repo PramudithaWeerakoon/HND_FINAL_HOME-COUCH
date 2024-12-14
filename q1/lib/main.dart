@@ -15,6 +15,7 @@ import 'pages/db_connection.dart';
 import 'pages/auth_provider.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'pages/analysis.dart';
+import 'pages/goal_byday.dart';
 
 
 Future<void> main() async {
@@ -57,6 +58,11 @@ class MyApp extends StatelessWidget {
         '/meals': (context) => const DailyMealPlan(),
         '/loading': (context) => const LoadingScreen(),
         '/statistics': (context) => const WeightTrackerPage(),
+        //'/q20': (context) => const MealPlanScreen(),
+        '/meals': (context) => const DailyMealPlan(),
+        '/loading': (context) => const LoadingScreen(),
+        '/statistics': (context) => const WeightTrackerPage(),
+        '/goal_byday': (context) => const GoalsByDay(weekNumber: 1),
       },
     );
   }

@@ -2,6 +2,9 @@ import 'package:flutter/material.dart';
 import 'package:percent_indicator/circular_percent_indicator.dart';
 import 'package:q1/components/menuBar/menuBar.dart';
 import 'package:q1/widgets/gradient_background.dart';
+import 'db_connection.dart';
+import 'goal_byday.dart';
+
 
 void main() => runApp(FitnessApp());
 
@@ -27,10 +30,102 @@ class FitnessHomePage extends StatefulWidget {
 }
 
 class _FitnessHomePageState extends State<FitnessHomePage> {
-  int _currentIndex = 3;
+   int _currentIndex = 3;
+  String fitnessGoal = "Loading...";
+  int completedDays = 0;
+  int totalDays = 0;
+  int workoutDaysPerWeek = 0;
+  List<Map<String, dynamic>> weeklyDurations = [];
+  double totalDurationHours = 0.0;
+  double fpCurrentWeight = 0.0;
+  double fgTargetWeight = 0.0;
+
+  @override
+  void initState() {
+    super.initState();
+    fetchFitnessData(); // Fetch the data when the page loads
+  }
+
+  void fetchFitnessData() async {
+    try {
+      final userEmail = SessionManager.getUserEmail();
+      print('User email: $userEmail');
+      if (userEmail != null) {
+        final db = DatabaseConnection();
+        final progress = await db.getFitnessProgress(userEmail);
+        final weeklyData = await db.getWeeklyDurations(userEmail);
+        final workoutDays = await db.getWorkoutDaysPerWeek(userEmail);
+        final totalDuration = await db.getTotalDuration(userEmail);
+        final currentWeight = await db.getCurrentWeight(userEmail);
+        final targetWeight = await db.getTargetWeight(userEmail);
+
+
+        setState(() {
+          fitnessGoal = progress['fitnessGoal'];
+          completedDays = progress['completedDays'];
+          totalDays = progress['totalDays'];
+          weeklyDurations = weeklyData; // Save weekly durations
+          workoutDaysPerWeek = workoutDays; // Save workout days per week
+          totalDurationHours = totalDuration;
+          fpCurrentWeight = currentWeight;
+          fgTargetWeight = targetWeight;
+        });
+      } else {
+        print("No user is currently logged in.");
+      }
+    } catch (e) {
+      print("Error fetching fitness data: $e");
+    }
+  }
+    Widget buildWeightDetails() {
+    // Total weight difference between current and target
+    final weightDifference = (fgTargetWeight - fpCurrentWeight).abs();
+
+    // Calculate daily weight change (gain or loss)
+    final weightPerDay = totalDays > 0 ? weightDifference / totalDays : 0.0;
+
+    // Calculate total weight change achieved so far
+    final weightSoFar = weightPerDay * completedDays;
+
+    String displayText;
+    Color displayColor;
+
+    if (fgTargetWeight > fpCurrentWeight) {
+      // Weight gain scenario
+      displayText = weightSoFar.toStringAsFixed(2);
+      displayColor = Colors.green;
+    } else {
+      // Weight loss scenario
+      displayText = weightSoFar.toStringAsFixed(2);
+      displayColor = Colors.red;
+    }
+
+    return Column(
+      children: [
+        Text(
+          'Weight',
+          style: TextStyle(
+            color: Colors.black54,
+            fontSize: 16,
+            fontWeight: FontWeight.bold,
+          ),
+        ),
+        SizedBox(height: 4),
+        Text(
+          displayText,
+          style: TextStyle(
+            fontWeight: FontWeight.bold,
+            color: displayColor,
+          ),
+        ),
+      ],
+    );
+  }
 
   @override
   Widget build(BuildContext context) {
+    final progressPercentage =
+        totalDays > 0 ? completedDays / totalDays : 0.0; // Calculate percentage
     return GradientBackground(
       child: Scaffold(
         backgroundColor: Colors.transparent,
@@ -44,7 +139,7 @@ class _FitnessHomePageState extends State<FitnessHomePage> {
             crossAxisAlignment: CrossAxisAlignment.center,
             children: [
               Text(
-                'Build Muscles &\nLose Weight',
+                fitnessGoal,
                 style: TextStyle(
                   fontSize: 44,
                   fontWeight: FontWeight.bold,
@@ -65,9 +160,9 @@ class _FitnessHomePageState extends State<FitnessHomePage> {
                       CircularPercentIndicator(
                         radius: 80.0,
                         lineWidth: 15.0,
-                        percent: 0.7,
+                        percent: progressPercentage,
                         center: Text(
-                          "70%",
+                          "${(progressPercentage * 100).toInt()}%",
                           style: TextStyle(
                             fontSize: 24,
                             fontWeight: FontWeight.bold,
@@ -79,7 +174,7 @@ class _FitnessHomePageState extends State<FitnessHomePage> {
                       ),
                       SizedBox(height: 10),
                         Text(
-                        'Days done: 63/90',
+                         'Days done: $completedDays/$totalDays',
                         style: TextStyle(
                           color: const Color.fromARGB(137, 0, 0, 0),
                           fontSize: 18,
@@ -92,17 +187,17 @@ class _FitnessHomePageState extends State<FitnessHomePage> {
                         children: [
                           Column(
                             children: [
-                                Text(
+                              Text(
                                 'Duration',
                                 style: TextStyle(
                                   color: Colors.black54,
                                   fontSize: 16,
                                   fontWeight: FontWeight.bold,
                                 ),
-                                ),
+                              ),
                               SizedBox(height: 4),
                               Text(
-                                '31.5 hrs',
+                                '${totalDurationHours.toStringAsFixed(1)} hrs',
                                 style: TextStyle(
                                   fontWeight: FontWeight.bold,
                                   color: Colors.black,
@@ -110,26 +205,7 @@ class _FitnessHomePageState extends State<FitnessHomePage> {
                               ),
                             ],
                           ),
-                          Column(
-                            children: [
-                                Text(
-                                'Weight',
-                                style: TextStyle(
-                                  color: Colors.black54,
-                                  fontSize: 16,
-                                  fontWeight: FontWeight.bold,
-                                ),
-                                ),
-                              SizedBox(height: 4),
-                              Text(
-                                '5.5 kg',
-                                style: TextStyle(
-                                  fontWeight: FontWeight.bold,
-                                  color: Colors.green,
-                                ),
-                              ),
-                            ],
-                          ),
+                           buildWeightDetails(),
                         ],
                       ),
                     ],
@@ -138,30 +214,15 @@ class _FitnessHomePageState extends State<FitnessHomePage> {
               ),
               SizedBox(height: 20),
               Expanded(
-                child: ListView(
-                  padding: EdgeInsets.only(bottom: 16.0), // Adjust padding to prevent overflow
-                  children: [
-                    WeekProgressCard(
-                      week: 'Week 1',
-                      progress: 0.75,
-                      hours: '2.6 hrs',
-                        progressColor: Color(0xFF01620B),
+                child: workoutDaysPerWeek > 0
+                  ? ListView(
+                      padding: EdgeInsets.only(bottom: 16.0),
+                      children: generateWeekProgressCards(totalDays, weeklyDurations),
+                    )
+                  : Center(
+                      child: Text("No workout days available."),
                     ),
-                    WeekProgressCard(
-                      week: 'Week 2',
-                      progress: 1.0,
-                      hours: '3.5 hrs',
-                        progressColor: Color(0xFF21007E),
-                    ),
-                    WeekProgressCard(
-                      week: 'Week 3',
-                      progress: 0.55,
-                      hours: '2.1 hrs',
-                        progressColor: Color(0xFFEAB804),
-                    ),
-                    // Add more cards if needed
-                  ],
-                ),
+                
               ),
             ],
           ),
@@ -181,12 +242,14 @@ class _FitnessHomePageState extends State<FitnessHomePage> {
 
 class WeekProgressCard extends StatelessWidget {
   final String week;
+  final int weekNumber;
   final double progress;
   final String hours;
   final Color progressColor;
 
-  const WeekProgressCard({super.key, 
+  WeekProgressCard({
     required this.week,
+    required this.weekNumber,
     required this.progress,
     required this.hours,
     required this.progressColor,
@@ -196,66 +259,110 @@ class WeekProgressCard extends StatelessWidget {
   Widget build(BuildContext context) {
     return Padding(
       padding: const EdgeInsets.symmetric(vertical: 8.0),
-      child: Card(
-        shape: RoundedRectangleBorder(
-          borderRadius: BorderRadius.circular(16),
-        ),
-        elevation: 4,
-        child: Container(
-          padding: EdgeInsets.all(20.0), // Increased padding inside the card
-          child: Row(
-            crossAxisAlignment:
-                CrossAxisAlignment.center, // Centers items vertically
-            children: [
-              CircularPercentIndicator(
-                radius: 40.0,
-                lineWidth: 8.0,
-                percent: progress,
-                center: Text(
-                  "${(progress * 100).toInt()}%",
-                  style: TextStyle(
-                    fontSize: 14,
-                    fontWeight: FontWeight.bold,
+      child: InkWell(
+        onTap: () {
+          Navigator.push(
+            context,
+            MaterialPageRoute(builder: (context) => GoalsByDay(weekNumber: weekNumber)),
+          );
+        },
+        child: Card(
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(16),
+          ),
+          elevation: 4,
+          child: Container(
+            padding: EdgeInsets.all(20.0),
+            child: Row(
+              crossAxisAlignment: CrossAxisAlignment.center,
+              children: [
+                CircularPercentIndicator(
+                  radius: 40.0,
+                  lineWidth: 8.0,
+                  percent: progress,
+                  center: Text(
+                    "${(progress * 100).toInt()}%",
+                    style: TextStyle(
+                      fontSize: 14,
+                      fontWeight: FontWeight.bold,
+                    ),
+                  ),
+                  progressColor: progressColor,
+                  backgroundColor: Colors.grey[200]!,
+                ),
+                SizedBox(width: 16.0),
+                Expanded(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(
+                        week,
+                        style: TextStyle(
+                          fontWeight: FontWeight.bold,
+                          fontSize: 18,
+                        ),
+                      ),
+                      SizedBox(height: 4.0),
+                      Text(
+                        hours,
+                        style: TextStyle(
+                          fontSize: 16,
+                          color: Colors.black54,
+                          fontWeight: FontWeight.bold,
+                        ),
+                      ),
+                    ],
                   ),
                 ),
-                progressColor: progressColor,
-                backgroundColor: Colors.grey[200]!,
-              ),
-              SizedBox(
-                  width: 16.0), // Add some space between the indicator and text
-              Expanded(
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Text(
-                      week,
-                      style: TextStyle(
-                        fontWeight: FontWeight.bold,
-                        fontSize: 18,
-                      ),
-                    ),
-                    SizedBox(height: 4.0), // Space between title and subtitle
-                    Text(
-                      hours,
-                      style: TextStyle(
-                      fontSize: 16,
-                      color: Colors.black54,
-                      fontWeight: FontWeight.bold,
-                      ),
-                    ),
-                  ],
+                Icon(
+                  Icons.arrow_forward_ios,
+                  color: const Color.fromARGB(255, 0, 0, 0),
                 ),
-              ),
-              Icon(
-                Icons.arrow_forward_ios,
-                color: const Color.fromARGB(255, 0, 0, 0),
-                size: 24,
-              ),
-            ],
+              ],
+            ),
           ),
         ),
       ),
     );
   }
 }
+
+
+List<Widget> generateWeekProgressCards(int totalDays, List<Map<String, dynamic>> weeklyDurations) {
+  int totalWeeks = (totalDays / 7).ceil();
+  List<Widget> weekCards = [];
+
+  // Create a map of week numbers to durations for quick lookup, ensuring correct data types
+  Map<int, double> weekDurationsMap = {
+    for (var data in weeklyDurations)
+      int.parse(data['week'].toString()): 
+          double.tryParse(data['total_duration'].toString()) ?? 0.0
+  };
+
+  for (int i = 1; i <= totalWeeks; i++) {
+    final totalDuration = weekDurationsMap[i] ?? 0.0; // Default to 0 if no data for the week
+    final progress = totalDuration / (7 * 60); // Assuming 7 days a week and duration in minutes
+
+    weekCards.add(
+      WeekProgressCard(
+        week: 'Week $i',
+        weekNumber: i,
+        progress: progress,
+        hours: '${(totalDuration / 60).toStringAsFixed(1)} hrs', // Convert minutes to hours
+        progressColor: progress >= 0.75
+            ? Colors.green
+            : progress >= 0.5
+                ? Colors.orange
+                : Colors.red,
+      ),
+    );
+  }
+
+  return weekCards;
+}
+
+
+
+
+
 
