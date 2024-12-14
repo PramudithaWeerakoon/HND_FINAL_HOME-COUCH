@@ -2,7 +2,6 @@ import 'package:flutter/material.dart';
 import 'package:fl_chart/fl_chart.dart';
 import 'db_connection.dart'; // Import your database connection
 import 'package:q1/components/menuBar/menuBar.dart';
-import 'auth_provider.dart';
 import 'breakfastmealoptions.dart';
 import 'lunchmealoptions.dart';
 import 'dinnermealoptions.dart';

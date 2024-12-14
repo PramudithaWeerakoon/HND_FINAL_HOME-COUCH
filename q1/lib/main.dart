@@ -8,7 +8,6 @@ import 'pages/register_page.dart';
 import 'pages/instructionPage.dart';
 import 'pages/settings.dart';
 import 'pages/q19.dart';
-import 'pages/breakfastmealoptions.dart';
 import 'pages/mealplan.dart';
 import 'pages/goals.dart';
 import 'pages/loading.dart';
@@ -55,11 +54,9 @@ class MyApp extends StatelessWidget {
         '/settings': (context) => const SettingsPage(),
         '/goals': (context) => const FitnessHomePage(),
         '/q19': (context) => const CustomizedPlanScreen(),
-        '/q20': (context) => const MealPlanScreen(),
         '/meals': (context) => const DailyMealPlan(),
         '/loading': (context) => const LoadingScreen(),
         '/statistics': (context) => const WeightTrackerPage(),
-     
       },
     );
   }

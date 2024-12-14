@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:q1/widgets/gradient_background.dart';
+import 'camera.dart';
 
 class InstructionPage extends StatefulWidget {
   const InstructionPage({super.key});
@@ -181,7 +182,13 @@ class _InstructionPageState extends State<InstructionPage> {
               bottom: screenHeight * 0.05,
               child: ElevatedButton.icon(
                 onPressed: () {
-                  // Start workout action here
+                   Navigator.push(
+                    context,
+                    MaterialPageRoute(
+                      builder: (context) =>
+                          CameraScreen(), // Navigate to Q15Screen
+                    ),
+                  );
                 },
                 icon: Icon(
                   Icons.play_arrow,

@@ -333,7 +333,7 @@ class _LoginPageState extends State<LoginPage> {
                       onTap: () {
                         handleGoogleLogin(context);
                       },  
-                      child: const AuthButton(imagePath: 'lib/assets/microsoft.png'),
+                      child: const AuthButton(imagePath: 'lib/assets/google.png'),
                       ),
                     ],
                     ),
