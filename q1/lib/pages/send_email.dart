@@ -8,10 +8,10 @@ Future<void> sendEmailOTP(String email, String otp) async {
   final smtpServer = gmail(username, password);
 
   final message = Message()
-    ..from = Address(username, 'Your App')
+    ..from = Address(username, 'Couch@Home')
     ..recipients.add(email)
     ..subject = 'Password Reset OTP'
-    ..text = 'Your OTP is: $otp';
+    ..text = 'Your OTP for password reset in Couch@Home is: $otp';
 
   try {
     final sendReport = await send(message, smtpServer);
