@@ -13,12 +13,14 @@ class CameraScreen extends StatefulWidget {
   _CameraScreenState createState() => _CameraScreenState();
 }
 
-class _CameraScreenState extends State<CameraScreen> with SingleTickerProviderStateMixin {
+class _CameraScreenState extends State<CameraScreen>
+    with SingleTickerProviderStateMixin {
   late AnimationController _controller;
   late CameraController _cameraController;
   late List<CameraDescription> _cameras;
   late CameraDescription _camera;
   late Future<void> _initializeControllerFuture;
+  Timer? _frameCaptureTimer; // Timer reference
 
   @override
   void initState() {
@@ -34,8 +36,7 @@ class _CameraScreenState extends State<CameraScreen> with SingleTickerProviderSt
     Timer(const Duration(seconds: 4), () {
       Navigator.pushReplacement(
         context,
-        MaterialPageRoute(
-            builder: (context) => const InstructionPage()), // Replace with your next screen
+        MaterialPageRoute(builder: (context) => const InstructionPage()),
       );
     });
 
@@ -46,19 +47,8 @@ class _CameraScreenState extends State<CameraScreen> with SingleTickerProviderSt
   Future<void> sendFrameToApi(Uint8List frameBytes) async {
     var uri = Uri.parse('http://127.0.0.1:8000/process_frame');
     var request = http.MultipartRequest('POST', uri)
-      ..files.add(http.MultipartFile.fromBytes('file', frameBytes, filename: 'frame.jpg'));
-
-    var client = http.Client();
-    client.send(request).timeout(Duration(seconds: 10)).then((response) async {
-      if (response.statusCode == 200) {
-        final responseBody = await response.stream.bytesToString();
-        print('API Response: $responseBody');
-      } else {
-        print('Failed to send frame: ${response.statusCode}');
-      }
-    }).catchError((e) {
-      print('Error sending frame: $e');
-    }).whenComplete(() => client.close());
+      ..files.add(http.MultipartFile.fromBytes('file', frameBytes,
+          filename: 'frame.jpg'));
 
     try {
       var response = await request.send();
@@ -80,15 +70,21 @@ class _CameraScreenState extends State<CameraScreen> with SingleTickerProviderSt
     _initializeControllerFuture = _cameraController.initialize();
 
     // Start sending frames to the API periodically
-    Timer.periodic(Duration(seconds: 1), (timer) async {
+    _frameCaptureTimer = Timer.periodic(Duration(seconds: 1), (timer) async {
       await _initializeControllerFuture;
 
-      // Capture a frame
-      final frame = await _cameraController.takePicture();
-      final imageBytes = await frame.readAsBytes();
+      if (mounted) {
+        try {
+          // Capture a frame
+          final frame = await _cameraController.takePicture();
+          final imageBytes = await frame.readAsBytes();
 
-      // Send the captured frame to the API
-      await sendFrameToApi(imageBytes);
+          // Send the captured frame to the API
+          await sendFrameToApi(imageBytes);
+        } catch (e) {
+          print('Error capturing frame: $e');
+        }
+      }
     });
   }
 
@@ -96,6 +92,7 @@ class _CameraScreenState extends State<CameraScreen> with SingleTickerProviderSt
   void dispose() {
     _controller.dispose();
     _cameraController.dispose();
+    _frameCaptureTimer?.cancel(); // Cancel the timer
     super.dispose();
   }
 
