@@ -1356,23 +1356,23 @@ Future<double> getTargetWeight(String userEmail) async {
     throw e;
   }
 }
-Future<void> updateTargetWeight(String userEmail, double newTargetWeight) async {
+Future<void> updateCurrentWeight(String userEmail, double newCurrentWeight) async {
   try {
     final connection = await getConnection();
     await connection.query(
       '''
-      UPDATE fitnessgoal
-      SET fg_targetweight = @newTargetWeight
-      WHERE fg_userid = @userEmail
+      UPDATE fitnessprofile
+      SET fp_currentweight = @newCurrentWeight
+      WHERE fp_userid = @userEmail
       ''',
       substitutionValues: {
-        'newTargetWeight': newTargetWeight,
+        'newCurrentWeight': newCurrentWeight,
         'userEmail': userEmail,
       },
     );
-    print("Target weight updated successfully for $userEmail");
+    print("Current weight updated successfully for $userEmail");
   } catch (e) {
-    print("Error updating target weight: $e");
+    print("Error updating current weight: $e");
     throw e;
   }
 }
@@ -1475,6 +1475,30 @@ Future<void> updateTargetWeight(String userEmail, double newTargetWeight) async 
     // Use a logging framework instead of print
     print("Error fetching weight history: $e");
     rethrow;
+  }
+}
+Future<double> getBeginningWeight(String userEmail) async {
+  try {
+    final connection = await getConnection();
+    final results = await connection.query(
+      '''
+      SELECT wh.wh_weight
+      FROM weighthistory wh
+      JOIN fitnessgoal fg ON wh.wh_userid = fg.fg_userid
+      WHERE wh.wh_userid = @userEmail AND DATE(wh.wh_recordedat) = fg.fg_startdate
+      ''',
+      substitutionValues: {'userEmail': userEmail},
+    );
+
+    if (results.isNotEmpty) {
+      final beginningWeight = results.first[0];
+      return beginningWeight != null ? double.parse(beginningWeight.toString()) : 0.0;
+    } else {
+      throw Exception("No beginning weight found for user ID: $userEmail");
+    }
+  } catch (e) {
+    print("Error fetching beginning weight: $e");
+    throw e;
   }
 }
 }

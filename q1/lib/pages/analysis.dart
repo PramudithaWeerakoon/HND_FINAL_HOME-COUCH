@@ -12,12 +12,13 @@ class WeightTrackerPage extends StatefulWidget {
 
 class _WeightTrackerPageState extends State<WeightTrackerPage> {
   String profileName = "User";
-  double beginningWeight = 0.0;
   double goalWeight = 0.0;
-  double currentWeight = 0.0;
   List<double> weeklyWeights = [];
   TextEditingController weightController = TextEditingController();
   List<int> keyWeeks = [];
+  double fpCurrentWeight = 0.0;
+  double fpBeginningWeight = 0.0;
+
 
 
 
@@ -59,17 +60,19 @@ class _WeightTrackerPageState extends State<WeightTrackerPage> {
         final fetchedTargetWeight = await db.getTargetWeight(userEmail);
         final fitnessProgress = await db.getFitnessProgress(userEmail);
         final fetchedWeights = await db.getWeightHistory(userEmail);
+        final beginningWeight = await db.getBeginningWeight(userEmail); // Fetch beginning weight
+
 
         setState(() {
-          beginningWeight = fetchedCurrentWeight; // Assume beginning weight is the current weight
+          fpBeginningWeight = beginningWeight; // Save beginning weigh
           goalWeight = fetchedTargetWeight;
-          currentWeight = fetchedCurrentWeight;
+          fpCurrentWeight = fetchedCurrentWeight;
           final totalWeeks = fitnessProgress['totalWeeks'];
            weeklyWeights = fetchedWeights.map((entry) => entry['weight'] as double).toList();
         keyWeeks = List.generate(weeklyWeights.length, (index) => index + 1); // Week labels
         if (weeklyWeights.isNotEmpty) {
-          beginningWeight = weeklyWeights.first;
-          currentWeight = weeklyWeights.last;
+          fpBeginningWeight = weeklyWeights.first;
+          fpCurrentWeight = weeklyWeights.last;
         }
       });
 
@@ -143,7 +146,7 @@ class _WeightTrackerPageState extends State<WeightTrackerPage> {
                     mainAxisSize: MainAxisSize.min,
                     children: [
                       Text(
-                        "Beginning : ${beginningWeight.toStringAsFixed(1)}Kg",
+                        "Beginning : ${fpBeginningWeight.toStringAsFixed(1)}Kg",
                         style: TextStyle(fontSize: screenSize.width * 0.04),
                       ),
                       Text(
@@ -151,7 +154,7 @@ class _WeightTrackerPageState extends State<WeightTrackerPage> {
                         style: TextStyle(fontSize: screenSize.width * 0.04),
                       ),
                       Text(
-                        "Current : ${currentWeight.toStringAsFixed(1)}Kg",
+                        "Current : ${fpCurrentWeight.toStringAsFixed(1)}Kg",
                         style: TextStyle(fontSize: screenSize.width * 0.04),
                       ),
                     ],
@@ -171,18 +174,18 @@ class _WeightTrackerPageState extends State<WeightTrackerPage> {
       try {
         final userEmail = SessionManager.getUserEmail();
         if (userEmail != null) {
-          final newTargetWeight = double.tryParse(weightController.text);
-          if (newTargetWeight != null && newTargetWeight > 0) {
+          final newCurrentWeight = double.tryParse(weightController.text);
+          if (newCurrentWeight != null && newCurrentWeight > 0) {
             final db = DatabaseConnection();
-            await db.updateTargetWeight(userEmail, newTargetWeight);
+            await db.updateCurrentWeight(userEmail, newCurrentWeight);
 
             setState(() {
-              goalWeight = newTargetWeight; // Update local state
+              fpCurrentWeight = newCurrentWeight; // Update local state
               weightController.clear(); // Clear the text field
             });
 
             ScaffoldMessenger.of(context).showSnackBar(
-              SnackBar(content: Text('Current weight updated to $newTargetWeight kg')),
+              SnackBar(content: Text('Current weight updated to $newCurrentWeight kg')),
             );
           } else {
             ScaffoldMessenger.of(context).showSnackBar(
@@ -193,7 +196,7 @@ class _WeightTrackerPageState extends State<WeightTrackerPage> {
           print("No user is logged in.");
         }
       } catch (e) {
-        print("Error updating target weight: $e");
+        print("Error updating current weight: $e");
       }
     },
     child: Row(
@@ -271,8 +274,8 @@ class _WeightTrackerPageState extends State<WeightTrackerPage> {
                         ),
                         LineChartBarData(
                         spots: [
-                          FlSpot(0, beginningWeight),
-                          FlSpot(weeklyWeights.length - 1, beginningWeight),
+                          FlSpot(0, fpBeginningWeight),
+                          FlSpot(weeklyWeights.length - 1, fpBeginningWeight),
                         ],
                         isCurved: false,
                         color: Colors.green,
@@ -280,17 +283,17 @@ class _WeightTrackerPageState extends State<WeightTrackerPage> {
                         belowBarData: BarAreaData(show: false),
                         dotData: FlDotData(show: false),
                       ),
-                      LineChartBarData(
-                        spots: [
-                          FlSpot(0, goalWeight),
-                          FlSpot(weeklyWeights.length - 1, goalWeight),
-                        ],
-                        isCurved: false,
-                        color: Colors.red,
-                        barWidth: 2,
-                        belowBarData: BarAreaData(show: false),
-                        dotData: FlDotData(show: false),
-                      ),
+                     LineChartBarData(
+  spots: [
+    FlSpot(0, goalWeight),
+    FlSpot((weeklyWeights.length - 1).toDouble(), goalWeight),
+  ],
+  isCurved: false,
+  color: Colors.red,
+  barWidth: 2,
+  belowBarData: BarAreaData(show: false),
+  dotData: FlDotData(show: false),
+),
                       ],
                     ),
                   ),

@@ -39,6 +39,7 @@ class _FitnessHomePageState extends State<FitnessHomePage> {
   double totalDurationHours = 0.0;
   double fpCurrentWeight = 0.0;
   double fgTargetWeight = 0.0;
+  double fpBeginningWeight = 0.0;
 
   @override
   void initState() {
@@ -59,6 +60,8 @@ class _FitnessHomePageState extends State<FitnessHomePage> {
       final currentWeight = await db.getCurrentWeight(userEmail);
       final targetWeight = await db.getTargetWeight(userEmail);
       final uniqueDaysDone = await db.getUniqueDaysDone(userEmail); // Fetch unique days done
+      final beginningWeight = await db.getBeginningWeight(userEmail); // Fetch beginning weight
+
 
       setState(() {
         fitnessGoal = progress['fitnessGoal'];
@@ -69,6 +72,7 @@ class _FitnessHomePageState extends State<FitnessHomePage> {
         totalDurationHours = totalDuration;
         fpCurrentWeight = currentWeight;
         fgTargetWeight = targetWeight;
+        fpBeginningWeight = beginningWeight; // Save beginning weigh
       });
     } else {
       print("No user is currently logged in.");
@@ -78,49 +82,33 @@ class _FitnessHomePageState extends State<FitnessHomePage> {
   }
 }
     Widget buildWeightDetails() {
-    // Total weight difference between current and target
-    final weightDifference = (fgTargetWeight - fpCurrentWeight).abs();
+  // Calculate the weight difference between current and beginning weight
+  final weightDifference = fpCurrentWeight - fpBeginningWeight;
 
-    // Calculate daily weight change (gain or loss)
-    final weightPerDay = totalDays > 0 ? weightDifference / totalDays : 0.0;
+  String displayText = weightDifference.toStringAsFixed(2);
+  Color displayColor = weightDifference < 0 ? Colors.red : Colors.green;
 
-    // Calculate total weight change achieved so far
-    final weightSoFar = weightPerDay * completedDays;
-
-    String displayText;
-    Color displayColor;
-
-    if (fgTargetWeight > fpCurrentWeight) {
-      // Weight gain scenario
-      displayText = weightSoFar.toStringAsFixed(2);
-      displayColor = Colors.green;
-    } else {
-      // Weight loss scenario
-      displayText = weightSoFar.toStringAsFixed(2);
-      displayColor = Colors.red;
-    }
-
-    return Column(
-      children: [
-        Text(
-          'Weight',
-          style: TextStyle(
-            color: Colors.black54,
-            fontSize: 16,
-            fontWeight: FontWeight.bold,
-          ),
+  return Column(
+    children: [
+      Text(
+        'Weight',
+        style: TextStyle(
+          color: Colors.black54,
+          fontSize: 16,
+          fontWeight: FontWeight.bold,
         ),
-        SizedBox(height: 4),
-        Text(
-          displayText,
-          style: TextStyle(
-            fontWeight: FontWeight.bold,
-            color: displayColor,
-          ),
+      ),
+      SizedBox(height: 4),
+      Text(
+        displayText,
+        style: TextStyle(
+          fontWeight: FontWeight.bold,
+          color: displayColor,
         ),
-      ],
-    );
-  }
+      ),
+    ],
+  );
+}
 
   @override
   Widget build(BuildContext context) {
