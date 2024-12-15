@@ -19,6 +19,8 @@ class _FitnessGoalSelectionScreen extends State<FitnessGoalSelectionScreen> {
 
   @override
   Widget build(BuildContext context) {
+    final screenWidth = MediaQuery.of(context).size.width;
+    final screenHeight = MediaQuery.of(context).size.height;
     return Scaffold(
       backgroundColor: const Color(0xFFF2F6FF), // Light background color
       body: Stack(
@@ -30,7 +32,7 @@ class _FitnessGoalSelectionScreen extends State<FitnessGoalSelectionScreen> {
                 mainAxisAlignment: MainAxisAlignment.center,
                 crossAxisAlignment: CrossAxisAlignment.center,
                 children: [
-                  const SizedBox(height: 50),
+                  SizedBox(height: screenHeight * 0.05),
                   const Text(
                     "Let's Set Your \nFitness Goal!",
                     textAlign: TextAlign.center,
@@ -40,7 +42,7 @@ class _FitnessGoalSelectionScreen extends State<FitnessGoalSelectionScreen> {
                       color: Colors.black,
                     ),
                   ),
-                  const SizedBox(height: 90),
+                 SizedBox(height: screenHeight * 0.1),
                   const Text(
                     'Choose one of the goals to help us tailor your workout plan.',
                     textAlign: TextAlign.center,
@@ -50,7 +52,7 @@ class _FitnessGoalSelectionScreen extends State<FitnessGoalSelectionScreen> {
                       color: Colors.black,
                     ),
                   ),
-                  const SizedBox(height: 90), // Space between question and options
+                 SizedBox(height: screenHeight * 0.1),// Space between question and options
 
                   // Images with fitness goal options
                   Expanded(
@@ -58,13 +60,13 @@ class _FitnessGoalSelectionScreen extends State<FitnessGoalSelectionScreen> {
                       mainAxisAlignment: MainAxisAlignment.spaceAround,
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
-                        _buildGoalOption('Lose Weight', loseWeightImagePath, 0),
-                        _buildGoalOption('Build Muscle\n& Lose Weight', bothImagePath, 1),
-                        _buildGoalOption('Build Muscle', buildMuscleImagePath, 2),
+                        _buildGoalOption('Lose Weight', loseWeightImagePath, 0, screenWidth),
+                        _buildGoalOption('Build Muscle\n& Lose Weight', bothImagePath, 1, screenWidth),
+                        _buildGoalOption('Build Muscle', buildMuscleImagePath, 2, screenWidth),
                       ],
                     ),
                   ),
-                  const SizedBox(height: 20), // Space before progress text
+                  SizedBox(height: screenHeight * 0.1), // Space before progress text
                 ],
               ),
             ),
@@ -115,9 +117,11 @@ class _FitnessGoalSelectionScreen extends State<FitnessGoalSelectionScreen> {
   }
 
   // Widget for building each fitness goal option with an image and label
-  Widget _buildGoalOption(String label, String imagePath, int index) {
+  Widget _buildGoalOption(String label, String imagePath, int index, double screenWidth) {
     // Calculate size based on selection state
-    double boxSize = _selectedGoal == index ? 140 : (_selectedGoal == null ? 125 : 90);
+       double boxSize = _selectedGoal == index
+        ? screenWidth * 0.35
+        : (_selectedGoal == null ? screenWidth * 0.3 : screenWidth * 0.2);
 
     return GestureDetector(
       onTap: () {

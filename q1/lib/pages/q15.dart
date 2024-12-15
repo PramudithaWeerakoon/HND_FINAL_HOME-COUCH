@@ -14,16 +14,18 @@ class _Q15ScreenState extends State<Q15Screen> {
   final List<String> _selectedGroups = [];
 
   // Define image paths for each muscle group (update paths as necessary)
-  final String chestImagePath = 'lib/assets/Skinny.png';
-  final String shouldersImagePath = 'lib/assets/Skinny.png';
-  final String absImagePath = 'lib/assets/Skinny.png';
-  final String bicepImagePath = 'lib/assets/Skinny-Fat.png';
+  final String chestImagePath = 'lib/assets/chest.png';
+  final String shouldersImagePath = 'lib/assets/shoulders.png';
+  final String absImagePath = 'lib/assets/absplan.png';
+  final String bicepImagePath = 'lib/assets/bicep.png';
 
   // Map index to muscle group names
   final List<String> muscleGroups = ['Chest', 'Shoulders', 'Abs', 'Bicep'];
 
   @override
   Widget build(BuildContext context) {
+    final screenWidth = MediaQuery.of(context).size.width;
+    final screenHeight = MediaQuery.of(context).size.height;
     return Scaffold(
       backgroundColor: const Color(0xFFF2F6FF), // Light background color
       body: Stack(
@@ -35,7 +37,7 @@ class _Q15ScreenState extends State<Q15Screen> {
                 mainAxisAlignment: MainAxisAlignment.center,
                 crossAxisAlignment: CrossAxisAlignment.center,
                 children: [
-                  const SizedBox(height: 50),
+                  SizedBox(height: screenHeight * 0.05),
                   const Text(
                     "Let's Set Your \nFitness Goal!",
                     textAlign: TextAlign.center,
@@ -45,7 +47,7 @@ class _Q15ScreenState extends State<Q15Screen> {
                       color: Colors.black,
                     ),
                   ),
-                  const SizedBox(height: 50),
+                  SizedBox(height: screenHeight * 0.02),
                   const Text(
                     'Which muscle groups \nwould you like to focus on?',
                     textAlign: TextAlign.center,
@@ -55,21 +57,21 @@ class _Q15ScreenState extends State<Q15Screen> {
                       color: Colors.black,
                     ),
                   ),
-                  const SizedBox(
-                      height: 40), // Space between question and options
+                   SizedBox(height: screenHeight * 0.04), // Space between question and options
 
                   // Images with muscle group options
                   Expanded(
+                    flex: 1,
                     child: GridView.count(
                       crossAxisCount: 2,
-                      mainAxisSpacing: 20,
-                      crossAxisSpacing: 20,
+                      mainAxisSpacing: 1,
+                      crossAxisSpacing: 1,
+                      childAspectRatio: screenWidth / (screenHeight * 0.55), // Dynamic aspect ratio
                       children: [
-                        _buildMuscleGroupOption('Chest', chestImagePath, 0),
-                        _buildMuscleGroupOption(
-                            'Shoulders', shouldersImagePath, 1),
-                        _buildMuscleGroupOption('Abs', absImagePath, 2),
-                        _buildMuscleGroupOption('Bicep', bicepImagePath, 3),
+                        _buildMuscleGroupOption('Chest', chestImagePath, 0, screenWidth, screenHeight),
+                        _buildMuscleGroupOption('Shoulders', shouldersImagePath, 1, screenWidth, screenHeight),
+                        _buildMuscleGroupOption('Abs', absImagePath, 2, screenWidth, screenHeight),
+                        _buildMuscleGroupOption('Bicep', bicepImagePath, 3, screenWidth, screenHeight),
                       ],
                     ),
                   ),
@@ -133,9 +135,9 @@ class _Q15ScreenState extends State<Q15Screen> {
   }
 
   // Widget for each muscle group option with specified box size (159x148)
-  Widget _buildMuscleGroupOption(String label, String imagePath, int index) {
-    double boxWidth = 159;
-    double boxHeight = 148;
+  Widget _buildMuscleGroupOption(String label, String imagePath, int index, double screenWidth, double screenHeight) {
+    double boxWidth = screenWidth * 0.4; // Adjust width based on screen width
+    double boxHeight = screenHeight * 0.17; // Adjust height based on screen height
 
     return GestureDetector(
       onTap: () {
@@ -191,7 +193,7 @@ class _Q15ScreenState extends State<Q15Screen> {
               ],
             ),
           ),
-          const SizedBox(height: 2.0),
+          SizedBox(height: screenHeight * 0.01),
           Text(
             label,
             textAlign: TextAlign.center,

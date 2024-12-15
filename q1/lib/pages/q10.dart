@@ -21,12 +21,12 @@ class _Q10ScreenState extends State<Q10Screen> {
   ];
   // Map linking equipment to their image paths
   final Map<String, String> equipmentImages = {
-    'Dumbbell': 'assets/dumbbell.png', // Replace with your asset path
-    'Barbell': 'assets/barbell.png',
-    'Kettlebell': 'assets/kettlebell.png',
-    'Fitness Bench': 'assets/fitness_bench.png',
-    'Skipping Rope': 'assets/skipping_rope.png',
-    'No Equipment': 'assets/no_equipment.png', // Or use an icon if needed
+    'Dumbbell': 'lib/assets/dumbbell.png', // Replace with your asset path
+    'Barbell': 'lib/assets/barbell.png',
+    'Kettlebell': 'lib/assets/kettlebell.png',
+    'Fitness Bench': 'lib/assets/fitness_bench.png',
+    'Skipping Rope': 'lib/assets/skipping_rope.png',
+    'No Equipment': 'lib/assets/no_equipment.png', // Or use an icon if needed
   };
   Set<String> selectedEquipment = {};
   bool isLoading = false;

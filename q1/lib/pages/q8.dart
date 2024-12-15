@@ -94,7 +94,7 @@ class _Q8ScreenState extends State<Q8Screen> {
                 keyboardType: TextInputType.numberWithOptions(decimal: true), // Allow decimal input
                 textAlign: TextAlign.center,
                 style: TextStyle(
-                  fontSize: screenWidth * 0.175,
+                  fontSize: screenWidth * 0.15,
                   fontWeight: FontWeight.bold,
                   color: Colors.black,
                 ),
@@ -110,7 +110,7 @@ class _Q8ScreenState extends State<Q8Screen> {
               // Horizontal line
               Container(
                 height: 2, // Changed thickness to 2
-                width: screenWidth * 0.33,
+                width: screenWidth * 0.35,
                 color: Colors.black,
               ),
               SizedBox(height: screenHeight * 0.016),
