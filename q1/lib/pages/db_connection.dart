@@ -1057,7 +1057,7 @@ Future<Map<String, dynamic>> fetchUserFitnessDetails() async {
       if (equipmentType == "Fixed") {
         equipmentDetails[equipmentName].add({
           "type": equipmentType,
-          "weight": eqRow[2] ?? "Unknown", // UEF_Weight
+          "weight": "${eqRow[2]} kg" ?? "Unknown", // UEF_Weight
           "count": eqRow[3] ?? 1,          // UEF_Count
         });
       } else if (equipmentType == "Adjustable") {
@@ -1071,8 +1071,8 @@ Future<Map<String, dynamic>> fetchUserFitnessDetails() async {
           equipmentDetails[equipmentName].add({
             "type": equipmentType,
             "weight_range": {
-              "min": eqRow[4] ?? "Unknown", // UEA_WeightMin
-              "max": eqRow[5] ?? "Unknown", // UEA_WeightMax
+              "min": "${eqRow[4]} kg" ?? "Unknown", // UEA_WeightMin
+              "max": "${eqRow[5]} kg" ?? "Unknown", // UEA_WeightMax
             },
             "pairs": eqRow[6] ?? 1, // UEA_Pairs
             "plates": [],
@@ -1081,7 +1081,7 @@ Future<Map<String, dynamic>> fetchUserFitnessDetails() async {
 
         // Add plates to the "plates" array of the corresponding equipment
         final plates = {
-          "weight": eqRow[7], // PlateWeight
+          "weight": "${eqRow[7]} kg", // PlateWeight
           "count": eqRow[8],  // PlateCount
         };
         if (plates["weight"] != null && plates["count"] != null) {
@@ -1103,15 +1103,14 @@ Future<Map<String, dynamic>> fetchUserFitnessDetails() async {
     // Build the JSON response
     final jsonResult = {
       "user_info": {
-        "email": row[0],
-        "username": row[1],
+        
       },
       "fitness_details": {
-        "current_weight": row[2],
-        "current_height": row[3],
+        "current_weight": "${row[2]} kg",
+        "current_height": "${row[3]} m",
         "gender": row[4],
-        "waist_circumference": row[5],
-        "neck_circumference": row[6],
+        "waist_circumference": "${row[5]} inch",
+        "neck_circumference": "${row[6]} inch",
         "fitness_background": row[7],
         "injuries": row[8],
         "medical_conditions": row[9],
@@ -1129,9 +1128,14 @@ Future<Map<String, dynamic>> fetchUserFitnessDetails() async {
       }
     };
 
-    // Log and return JSON
-    String jsonString = jsonEncode(jsonResult);
-    print("Fetched JSON Data: $jsonString");
+     String jsonString = jsonEncode(jsonResult);
+
+    // Print JSON in chunks
+    const int chunkSize = 1000;
+    for (int i = 0; i < jsonString.length; i += chunkSize) {
+      print(jsonString.substring(i, i + chunkSize > jsonString.length ? jsonString.length : i + chunkSize));
+    }
+
     return jsonResult;
   } catch (e) {
     print("Error fetching user fitness details: $e");
