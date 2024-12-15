@@ -148,6 +148,11 @@ class _BodyTypeSelectionScreenState extends State<BodyTypeSelectionScreen> {
 
   // Widget for building each body type option with an image and label
   Widget _buildBodyTypeOption(String label, String imagePath, int index, double screenWidth) {
+   double boxSize = _selectedBodyType == index
+        ? screenWidth * 0.35
+        : (_selectedBodyType == null ? screenWidth * 0.3 : screenWidth * 0.2);
+
+
     return GestureDetector(
       onTap: () {
         setState(() {
@@ -159,8 +164,8 @@ class _BodyTypeSelectionScreenState extends State<BodyTypeSelectionScreen> {
         children: [
           // Image box itself is selectable
           Container(
-            width: screenWidth * 0.3, // Adjust size based on screen width
-            height: screenWidth * 0.3,
+            width: boxSize, // Adjust size based on screen width
+            height: boxSize,
             decoration: BoxDecoration(
               color: _selectedBodyType == index
                   ? Colors.blueAccent.withOpacity(0.2)
@@ -175,8 +180,8 @@ class _BodyTypeSelectionScreenState extends State<BodyTypeSelectionScreen> {
             ),
             child: Image.asset(
               imagePath,
-              width: screenWidth * 0.3,
-              height: screenWidth * 0.3,
+              width: boxSize,
+              height: boxSize,
               fit: BoxFit.cover, // Ensures the image fits within the box
             ),
           ),
