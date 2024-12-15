@@ -8,7 +8,11 @@ import 'tandc.dart'; // Import the TermsAndConditionsPage
 import 'policy.dart'; // Import the PrivacyPolicyPage
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:google_sign_in/google_sign_in.dart';
+import 'package:flutter_local_notifications/flutter_local_notifications.dart';
 
+final FlutterLocalNotificationsPlugin flutterLocalNotificationsPlugin = FlutterLocalNotificationsPlugin();
+
+                 
 
 class SettingsPage extends StatefulWidget {
   const SettingsPage({super.key});
@@ -41,6 +45,8 @@ class _SettingsPageState extends State<SettingsPage> {
       print("Error fetching user name: $e");
     }
   }
+
+  
 
   void _fetchUserEmail() async {
     try {
@@ -79,6 +85,29 @@ class _SettingsPageState extends State<SettingsPage> {
   }
 }
 
+
+Future<void> _showNotification() async {
+    const AndroidNotificationDetails androidPlatformChannelSpecifics =
+        AndroidNotificationDetails(
+      'your_channel_id', // Unique channel ID
+      'your_channel_name', // Channel name
+      channelDescription: 'your_channel_description', // Channel description
+      importance: Importance.max,
+      priority: Priority.high,
+    );
+
+    const NotificationDetails platformChannelSpecifics =
+        NotificationDetails(android: androidPlatformChannelSpecifics);
+
+    await flutterLocalNotificationsPlugin.show(
+      0, // Notification ID
+      'Notifications Enabled',
+      'You will now receive updates.',
+      platformChannelSpecifics,
+    );
+  }
+
+
   @override
   Widget build(BuildContext context) {
     final screenWidth = MediaQuery.of(context).size.width;
@@ -97,8 +126,6 @@ class _SettingsPageState extends State<SettingsPage> {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                const SizedBox(height: 0),
-                SizedBox(height: screenHeight * 0.02),
                 const Center(
                   child: Text(
                     'Settings',
@@ -108,7 +135,7 @@ class _SettingsPageState extends State<SettingsPage> {
                     ),
                   ),
                 ),
-                SizedBox(height: screenHeight * 0.03),
+                const SizedBox(height: 10),
                 Row(
                   children: [
                     CircleAvatar(
@@ -133,7 +160,7 @@ class _SettingsPageState extends State<SettingsPage> {
                     ),
                   ],
                 ),
-                SizedBox(height: screenHeight * 0.05),
+                const SizedBox(height: 15),
                 _buildSettingsOption(
                   context,
                   label: 'Edit Profile',
@@ -159,12 +186,16 @@ class _SettingsPageState extends State<SettingsPage> {
                 _buildSettingsToggle(
                   label: 'Notifications',
                   value: _notificationsEnabled,
-                  onChanged: (value) {
+                  onChanged: (value) async {
                     setState(() {
                       _notificationsEnabled = value;
                     });
+                    if (value) {
+                      await _showNotification();
+                    }
                   },
                 ),
+
                 
                 _buildSettingsOption(
                   context,

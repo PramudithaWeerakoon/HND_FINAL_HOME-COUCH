@@ -1202,7 +1202,7 @@ Future<Map<String, dynamic>> fetchUserFitnessDetails() async {
     }
   } catch (e) {
     print("Error fetching fitness progress: $e");
-    throw e;
+    rethrow;
   }
 }
     Future<int> getWorkoutDaysPerWeek(String userEmail) async {
@@ -1226,7 +1226,7 @@ Future<Map<String, dynamic>> fetchUserFitnessDetails() async {
     }
   } catch (e) {
     print("Error fetching workout days per week: $e");
-    throw e;
+    rethrow;
   }
 }
 Future<Map<int, int>> getTotalDurationPerDay(String userEmail, int weekNumber) async {
@@ -1254,7 +1254,7 @@ Future<Map<int, int>> getTotalDurationPerDay(String userEmail, int weekNumber) a
     return durationPerDay;
   } catch (e) {
     print("Error fetching total duration per day for week $weekNumber: $e");
-    throw e;
+    rethrow;
   }
 }
 Future<List<Map<String, dynamic>>> getWeeklyDurations(String userEmail) async {
@@ -1284,7 +1284,7 @@ Future<List<Map<String, dynamic>>> getWeeklyDurations(String userEmail) async {
     return weeklyDurations;
   } catch (e) {
     print("Error fetching weekly durations: $e");
-    throw e;
+    rethrow;
   }
 }
 Future<double> getTotalDuration(String userEmail) async {
@@ -1307,7 +1307,7 @@ Future<double> getTotalDuration(String userEmail) async {
     }
   } catch (e) {
     print("Error fetching total duration: $e");
-    throw e;
+    rethrow;
   }
 }
 Future<double> getCurrentWeight(String userEmail) async {
@@ -1330,7 +1330,7 @@ Future<double> getCurrentWeight(String userEmail) async {
     }
   } catch (e) {
     print("Error fetching current weight: $e");
-    throw e;
+    rethrow;
   }
 }
 Future<double> getTargetWeight(String userEmail) async {
@@ -1353,7 +1353,7 @@ Future<double> getTargetWeight(String userEmail) async {
     }
   } catch (e) {
     print("Error fetching target weight: $e");
-    throw e;
+    rethrow;
   }
 }
 Future<void> updateCurrentWeight(String userEmail, double newCurrentWeight) async {
@@ -1373,7 +1373,7 @@ Future<void> updateCurrentWeight(String userEmail, double newCurrentWeight) asyn
     print("Current weight updated successfully for $userEmail");
   } catch (e) {
     print("Error updating current weight: $e");
-    throw e;
+    rethrow;
   }
 }
  Future<List<Map<String, dynamic>>> getDinnerMeals(String email) async {
@@ -1448,7 +1448,7 @@ Future<void> updateCurrentWeight(String userEmail, double newCurrentWeight) asyn
       return results.length; // Number of unique days done
     } catch (e) {
       print("Error fetching unique days done: $e");
-      throw e;
+      rethrow;
     }
   }
   Future<List<Map<String, dynamic>>> getWeightHistory(String userEmail) async {
@@ -1498,9 +1498,27 @@ Future<double> getBeginningWeight(String userEmail) async {
     }
   } catch (e) {
     print("Error fetching beginning weight: $e");
-    throw e;
+    rethrow;
   }
 }
+// Method to update a user's password
+  Future<void> updatePasswordInDatabase(
+      String email, String newPassword) async {
+    try {
+      final conn = await getConnection();
+      await conn.query(
+        'UPDATE users SET userpassword = @password WHERE useremail = @userEmail',
+        substitutionValues: {
+          'password': newPassword, // Use a hashed password in production
+          'userEmail': email,
+        },
+      );
+      print("Password updated successfully for user: $email");
+    } catch (e) {
+      print("Error updating password: $e");
+      rethrow;
+    }
+  }
 }
 
 

@@ -6,6 +6,8 @@ import 'fogotpassword2.dart';
 import 'forgotpassword3.dart';
 
 class EnterEmailPage extends StatefulWidget {
+  const EnterEmailPage({super.key});
+
   @override
   _EnterEmailPageState createState() => _EnterEmailPageState();
 }

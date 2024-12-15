@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import 'db_connection.dart';
 
 class DinnerMealPlanScreen extends StatefulWidget {
-  const DinnerMealPlanScreen({Key? key}) : super(key: key);
+  const DinnerMealPlanScreen({super.key});
 
   @override
   _DinnerMealPlanScreenState createState() => _DinnerMealPlanScreenState();
@@ -36,8 +36,8 @@ class _DinnerMealPlanScreenState extends State<DinnerMealPlanScreen> {
       child: ListTile(
         contentPadding: const EdgeInsets.all(16.0),
         leading: CircleAvatar(
-          child: Text(meal['ms_name'][0]), // Placeholder for meal image
           radius: 30,
+          child: Text(meal['ms_name'][0]),
         ),
         title: Text(
           meal['ms_name'],
@@ -99,7 +99,7 @@ class _DinnerMealPlanScreenState extends State<DinnerMealPlanScreen> {
                   ),
                 ),
                 const SizedBox(height: 16),
-                ...meals.map((meal) => _buildMealOptionCard(meal)).toList(),
+                ...meals.map((meal) => _buildMealOptionCard(meal)),
               ],
             );
           },

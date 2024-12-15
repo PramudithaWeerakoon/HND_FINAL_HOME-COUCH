@@ -227,7 +227,7 @@ class WeekProgressCard extends StatelessWidget {
   final String hours;
   final Color progressColor;
 
-  WeekProgressCard({
+  const WeekProgressCard({super.key, 
     required this.week,
     required this.weekNumber,
     required this.progress,
@@ -348,7 +348,7 @@ class HalfCircleProgressBar extends StatelessWidget {
   final Color backgroundColor;
   final bool showPercentage;
 
-  HalfCircleProgressBar({
+  const HalfCircleProgressBar({super.key, 
     required this.progress,
     required this.radius,
     this.progressColor = Colors.blue,
