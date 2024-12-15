@@ -31,131 +31,150 @@ class _DumbbellSelectionScreenState extends State<DumbbellSelectionScreen> {
 
   @override
   Widget build(BuildContext context) {
-    bool isNextButtonEnabled = _checkIfAnyWeightSelected();
+  bool isNextButtonEnabled = _checkIfAnyWeightSelected();
 
-    return Scaffold(
-      backgroundColor: const Color(0xFFF2F6FF),
-      body: SafeArea(
-        child: Padding(
-          padding: const EdgeInsets.all(16.0),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.center,
-            children: [
-              const SizedBox(height: 50),
-              const Text(
-                "Let's get to know \n you!",
-                textAlign: TextAlign.center,
-                style: TextStyle(
-                  fontSize: 40,
-                  fontWeight: FontWeight.bold,
-                  color: Colors.black,
-                ),
+  return Scaffold(
+    backgroundColor: const Color(0xFFF2F6FF),
+    body: SafeArea(
+      child: LayoutBuilder(
+        builder: (context, constraints) {
+          return SingleChildScrollView(
+            child: ConstrainedBox(
+              constraints: BoxConstraints(
+                minHeight: constraints.maxHeight,
               ),
-              const SizedBox(height: 40),
-              const Text(
-                "Which type of equipment do you have?",
-                textAlign: TextAlign.center,
-                style: TextStyle(
-                  fontSize: 30,
-                  fontWeight: FontWeight.w600,
-                  color: Colors.black,
-                ),
-              ),
-              const SizedBox(height: 30),
+              child: IntrinsicHeight(
+                child: Padding(
+                  padding: const EdgeInsets.all(16.0),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.center,
+                    children: [
+                      const SizedBox(height: 50),
+                      const Text(
+                        "Let's get to know \n you!",
+                        textAlign: TextAlign.center,
+                        style: TextStyle(
+                          fontSize: 40,
+                          fontWeight: FontWeight.bold,
+                          color: Colors.black,
+                        ),
+                      ),
+                      const SizedBox(height: 40),
+                      const Text(
+                        "Which type of equipment do you have?",
+                        textAlign: TextAlign.center,
+                        style: TextStyle(
+                          fontSize: 30,
+                          fontWeight: FontWeight.w600,
+                          color: Colors.black,
+                        ),
+                      ),
+                      const SizedBox(height: 30),
 
-              // Render equipment sections based on selection
-              if (widget.selectedEquipment.contains('Dumbbell')) ...[
-                _buildEquipmentSection(
-                  'Dumbbell',
-                  selectedDumbbellType,
-                  (type) => setState(() => selectedDumbbellType = type),
-                  selectedDumbbellFixedWeights,
-                  selectedDumbbellPlatedWeights,
-                ),
-              ],
-              if (widget.selectedEquipment.contains('Barbell')) ...[
-                _buildEquipmentSection(
-                  'Barbell',
-                  selectedBarbellType,
-                  (type) => setState(() => selectedBarbellType = type),
-                  selectedBarbellFixedWeights,
-                  selectedBarbellPlatedWeights,
-                ),
-              ],
-              if (widget.selectedEquipment.contains('Kettlebell')) ...[
-                _buildKettlebellSection(),
-              ],
+                      // Render equipment sections based on selection
+                      if (widget.selectedEquipment.contains('Dumbbell')) ...[
+                        _buildEquipmentSection(
+                          'Dumbbell',
+                          selectedDumbbellType,
+                          (type) => setState(() => selectedDumbbellType = type),
+                          selectedDumbbellFixedWeights,
+                          selectedDumbbellPlatedWeights,
+                        ),
+                      ],
+                      if (widget.selectedEquipment.contains('Barbell')) ...[
+                        _buildEquipmentSection(
+                          'Barbell',
+                          selectedBarbellType,
+                          (type) => setState(() => selectedBarbellType = type),
+                          selectedBarbellFixedWeights,
+                          selectedBarbellPlatedWeights,
+                        ),
+                      ],
+                      if (widget.selectedEquipment.contains('Kettlebell')) ...[
+                        _buildKettlebellSection(),
+                      ],
 
-              const Spacer(),
+                      const Spacer(),
 
-              // Page Indicator and Navigation Buttons
-              Row(
-                mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                children: [
-                  FloatingActionButton(
-                    heroTag: 'back',
-                    backgroundColor: const Color(0xFF21007E),
-                    onPressed: () {
-                      Navigator.pop(context); // Navigate to the previous screen
-                    },
-                    child: const Icon(Icons.arrow_back, color: Colors.white),
-                  ),
-                  const Text(
-                    "11/12",
-                    style: TextStyle(
-                      fontSize: 28,
-                      fontWeight: FontWeight.bold,
-                      color: Colors.black,
-                    ),
-                  ),
-                  FloatingActionButton(
-                    heroTag: 'next',
-                    backgroundColor:
-                        isNextButtonEnabled ? const Color(0xFF21007E) : Colors.grey,
-                    onPressed: isNextButtonEnabled
-                              ? () async {
-                                  Map<String, dynamic> userSelections = {
-                                    'Dumbbell': {
-                                      'Fixed': selectedDumbbellFixedWeights,
-                                      'Plated': selectedDumbbellPlatedWeights,
-                                    },
-                                    'Barbell': {
-                                      'Fixed': selectedBarbellFixedWeights,
-                                      'Plated': selectedBarbellPlatedWeights,
-                                    },
-                                    'Kettlebell': selectedKettlebellWeights,
-                                    'equipments': widget.selectedEquipment,
-                                  };
-                                  print("Collected User Selections: $userSelections");
+                      // Page Indicator and Navigation Buttons
+                      Row(
+                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                        children: [
+                          FloatingActionButton(
+                            heroTag: 'back',
+                            backgroundColor: const Color(0xFF21007E),
+                            onPressed: () {
+                              Navigator.pop(context); // Navigate to the previous screen
+                            },
+                            child: const Icon(Icons.arrow_back, color: Colors.white),
+                          ),
+                          const Text(
+                            "11/12",
+                            style: TextStyle(
+                              fontSize: 28,
+                              fontWeight: FontWeight.bold,
+                              color: Colors.black,
+                            ),
+                          ),
+                          FloatingActionButton(
+                            heroTag: 'next',
+                            backgroundColor: isNextButtonEnabled
+                                ? const Color(0xFF21007E)
+                                : Colors.grey,
+                            onPressed: isNextButtonEnabled
+                                ? () async {
+                                    Map<String, dynamic> userSelections = {
+                                      'Dumbbell': {
+                                        'Fixed': selectedDumbbellFixedWeights,
+                                        'Plated': selectedDumbbellPlatedWeights,
+                                      },
+                                      'Barbell': {
+                                        'Fixed': selectedBarbellFixedWeights,
+                                        'Plated': selectedBarbellPlatedWeights,
+                                      },
+                                      'Kettlebell': selectedKettlebellWeights,
+                                      'equipments': widget.selectedEquipment,
+                                    };
+                                    print(
+                                        "Collected User Selections: $userSelections");
 
-                                  // Get current user email from SessionManager
-                                  final userEmail = SessionManager.getUserEmail();
-                                  if (userEmail != null) {
-                                    // Store selections in the database
-                                    await storeUserSelections(userEmail, userSelections);
+                                    // Get current user email from SessionManager
+                                    final userEmail =
+                                        SessionManager.getUserEmail();
+                                    if (userEmail != null) {
+                                      // Store selections in the database
+                                      await storeUserSelections(
+                                          userEmail, userSelections);
 
-                                    // Navigate to Q12
-                                    Navigator.push(
-                                      context,
-                                      MaterialPageRoute(builder: (context) => const Q12Screen()),
-                                    );
-                                  } else {
-                                    print("No user is logged in.");
+                                      // Navigate to Q12
+                                      Navigator.push(
+                                        context,
+                                        MaterialPageRoute(
+                                            builder: (context) =>
+                                                const Q12Screen()),
+                                      );
+                                    } else {
+                                      print("No user is logged in.");
+                                    }
                                   }
-                                }
-                              : null,
-
-                    child: const Icon(Icons.arrow_forward, color: Colors.white),
+                                : null,
+                            child: const Icon(Icons.arrow_forward,
+                                color: Colors.white),
+                          ),
+                        ],
+                      ),
+                      const SizedBox(height: 16), // Space below buttons
+                    ],
                   ),
-                ],
+                ),
               ),
-              const SizedBox(height: 16), // Space below buttons
-            ],
-          ),
-        ),
+            ),
+          );
+        },
       ),
-    );
-  }
+    ),
+  );
+}
 
   Widget _buildEquipmentSection(
     String label,
