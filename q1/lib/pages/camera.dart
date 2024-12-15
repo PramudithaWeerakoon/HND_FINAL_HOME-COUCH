@@ -13,8 +13,7 @@ class CameraScreen extends StatefulWidget {
   _CameraScreenState createState() => _CameraScreenState();
 }
 
-class _CameraScreenState extends State<CameraScreen>
-    with SingleTickerProviderStateMixin {
+class _CameraScreenState extends State<CameraScreen> with SingleTickerProviderStateMixin {
   late AnimationController _controller;
   late CameraController _cameraController;
   late List<CameraDescription> _cameras;
@@ -36,8 +35,7 @@ class _CameraScreenState extends State<CameraScreen>
       Navigator.pushReplacement(
         context,
         MaterialPageRoute(
-            builder: (context) =>
-                const InstructionPage()), // Replace with your next screen
+            builder: (context) => const InstructionPage()), // Replace with your next screen
       );
     });
 
@@ -48,8 +46,7 @@ class _CameraScreenState extends State<CameraScreen>
   Future<void> sendFrameToApi(Uint8List frameBytes) async {
     var uri = Uri.parse('http://127.0.0.1:8000/process_frame');
     var request = http.MultipartRequest('POST', uri)
-      ..files.add(http.MultipartFile.fromBytes('file', frameBytes,
-          filename: 'frame.jpg'));
+      ..files.add(http.MultipartFile.fromBytes('file', frameBytes, filename: 'frame.jpg'));
 
     var client = http.Client();
     client.send(request).timeout(Duration(seconds: 10)).then((response) async {
