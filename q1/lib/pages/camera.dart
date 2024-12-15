@@ -1,195 +1,269 @@
-import 'dart:async';
 import 'dart:convert';
+import 'dart:async';
+import 'dart:typed_data'; // For handling image data
+import 'package:camera/camera.dart';
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
-import 'dart:typed_data';
-import 'package:camera/camera.dart';
-import 'instructionPage.dart';
+import 'package:image/image.dart' as img; // Dependency to process the image
 
 class CameraScreen extends StatefulWidget {
-  const CameraScreen({super.key});
-
   @override
   _CameraScreenState createState() => _CameraScreenState();
 }
 
-class _CameraScreenState extends State<CameraScreen>
-    with SingleTickerProviderStateMixin {
-  late AnimationController _controller;
-  late CameraController _cameraController;
-  late List<CameraDescription> _cameras;
-  late CameraDescription _camera;
-  late Future<void> _initializeControllerFuture;
-  Timer? _frameCaptureTimer; // Timer reference
+class _CameraScreenState extends State<CameraScreen> {
+  CameraController? _cameraController;
+  List<CameraDescription>? _cameras;
+  int repCount = 0; // Repetition counter
 
   @override
   void initState() {
     super.initState();
-
-    // Initialize the animation controller for continuous rotation
-    _controller = AnimationController(
-      vsync: this,
-      duration: const Duration(seconds: 1), // Speed of rotation
-    )..repeat();
-
-    // Start a timer to navigate to the next screen after 4 seconds
-    Timer(const Duration(seconds: 4), () {
-      Navigator.pushReplacement(
-        context,
-        MaterialPageRoute(builder: (context) => const InstructionPage()),
-      );
-    });
-
-    // Initialize camera and start capturing frames
-    _initializeCamera();
+    initializeCamera();
   }
 
-  Future<void> sendFrameToApi(Uint8List frameBytes) async {
-    var uri = Uri.parse('http://127.0.0.1:8000/process_frame');
-    var request = http.MultipartRequest('POST', uri)
-      ..files.add(http.MultipartFile.fromBytes('file', frameBytes,
-          filename: 'frame.jpg'));
-
-    try {
-      var response = await request.send();
-      if (response.statusCode == 200) {
-        final responseBody = await response.stream.bytesToString();
-        print('API Response: $responseBody');
-      } else {
-        print('Failed to send frame: ${response.statusCode}');
-      }
-    } catch (e) {
-      print('Error sending frame: $e');
-    }
-  }
-
-  Future<void> _initializeCamera() async {
+  Future<void> initializeCamera() async {
+    WidgetsFlutterBinding.ensureInitialized();
     _cameras = await availableCameras();
-    _camera = _cameras.first; // Use the first available camera
-    _cameraController = CameraController(_camera, ResolutionPreset.high);
-    _initializeControllerFuture = _cameraController.initialize();
+    if (_cameras!.isNotEmpty) {
+      _cameraController = CameraController(
+        _cameras!.firstWhere(
+            (camera) => camera.lensDirection == CameraLensDirection.front),
+        ResolutionPreset.high,
+      );
+      await _cameraController?.initialize();
+      setState(() {});
 
-    // Start sending frames to the API periodically
-    _frameCaptureTimer = Timer.periodic(Duration(seconds: 1), (timer) async {
-      await _initializeControllerFuture;
-
-      if (mounted) {
-        try {
-          // Capture a frame
-          final frame = await _cameraController.takePicture();
-          final imageBytes = await frame.readAsBytes();
-
-          // Send the captured frame to the API
-          await sendFrameToApi(imageBytes);
-        } catch (e) {
-          print('Error capturing frame: $e');
-        }
-      }
-    });
+      // Start the camera stream to continuously capture frames
+      _cameraController?.startImageStream((CameraImage image) {
+        // Process the image frames here
+        captureFrame(image); // Send image to API
+      });
+    } else {
+      print('No cameras found');
+    }
   }
 
   @override
   void dispose() {
-    _controller.dispose();
-    _cameraController.dispose();
-    _frameCaptureTimer?.cancel(); // Cancel the timer
+    _cameraController?.dispose();
     super.dispose();
+  }
+
+  void resetReps() {
+    setState(() {
+      repCount = 0; // Reset the repetition counter
+    });
+  }
+
+  Future<void> captureFrame(CameraImage image) async {
+    try {
+      // Convert the CameraImage to bytes (JPEG format)
+      final bytes = await _convertImageToBytes(image);
+
+      // Send the captured frame to the API
+      sendToAPI(Uint8List.fromList(bytes));
+    } catch (e) {
+      print('Error capturing frame: $e');
+    }
+  }
+
+  // Convert CameraImage to bytes (JPEG format)
+  Future<List<int>> _convertImageToBytes(CameraImage image) async {
+    // Convert YUV420 image to RGB, then encode to JPEG
+    final img.Image imgFrame = img.Image.fromBytes(
+      width: image.width,
+      height: image.height,
+      bytes: Uint8List.fromList(_yuv420toRgb(image)).buffer,
+    );
+
+    // Encode the image as JPEG
+    final List<int> jpegBytes = img.encodeJpg(imgFrame);
+    return jpegBytes;
+  }
+
+  // Convert YUV420 to RGB
+  List<int> _yuv420toRgb(CameraImage image) {
+    int width = image.width;
+    int height = image.height;
+    List<int> output = List.filled(width * height * 3, 0);
+
+    // Get Y, U, and V planes
+    Plane yPlane = image.planes[0];
+    Plane uPlane = image.planes[1];
+    Plane vPlane = image.planes[2];
+
+    // Debug prints to check plane sizes
+    print('Y plane length: ${yPlane.bytes.length}');
+    print('U plane length: ${uPlane.bytes.length}');
+    print('V plane length: ${vPlane.bytes.length}');
+
+    int yIndex = 0, uvIndex = 0;
+    for (int row = 0; row < height; row++) {
+      for (int col = 0; col < width; col++) {
+        int y = yPlane.bytes[yIndex];
+        int u = uPlane.bytes[uvIndex];
+        int v = vPlane.bytes[uvIndex];
+
+        // YUV to RGB conversion
+        int r = (y + (1.402 * (v - 128))).clamp(0, 255).toInt();
+        int g = (y - (0.344136 * (u - 128)) - (0.714136 * (v - 128)))
+            .clamp(0, 255)
+            .toInt();
+        int b = (y + (1.772 * (u - 128))).clamp(0, 255).toInt();
+
+        int pixelIndex = (row * width + col) * 3;
+        output[pixelIndex] = r;
+        output[pixelIndex + 1] = g;
+        output[pixelIndex + 2] = b;
+
+        yIndex++; // Move to the next Y pixel
+
+        if (yIndex >= yPlane.bytes.length)
+          break; // Prevent overflows in Y-plane
+        if (uvIndex >= uPlane.bytes.length || uvIndex >= vPlane.bytes.length)
+          break; // Prevent overflow in UV-planes
+        if (col % 2 == 0 && row % 2 == 0)
+          uvIndex++; // Increment UV index every 2x2 pixels
+      }
+      if (yIndex >= yPlane.bytes.length) break;
+    }
+    return output;
+  }
+
+  Future<void> sendToAPI(Uint8List bytes) async {
+    print('Sending frame to API...');
+    final url = Uri.parse('http://192.168.1.5:8080/process_frame');
+
+
+    try {
+      var request = http.MultipartRequest('POST', url)
+        ..files.add(
+            http.MultipartFile.fromBytes('file', bytes, filename: 'frame.jpg'));
+
+      var response = await request.send(); // Send the request
+
+      if (response.statusCode == 200) {
+        var responseBody = await response.stream.bytesToString();
+        final data = json.decode(responseBody); // Decode the response to JSON
+        print("Response from API: $data");
+
+        // Process the response and update the UI
+        if (data['counted'] == true) {
+          setState(() {
+            repCount++; // Increment repetition count
+          });
+        }
+      } else {
+        print('Failed to send frame to API');
+      }
+    } catch (e) {
+      print('Error sending to API: $e');
+    }
   }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: const Color(0xFFF2F6FF), // Light background color
-      body: Center(
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            // Circular animated indicator with "Calibrating" text in the center
-            SizedBox(
-              width: 150,
-              height: 150,
-              child: Stack(
-                alignment: Alignment.center,
-                children: [
-                  // Gradient rotating arc
-                  RotationTransition(
-                    turns: _controller,
-                    child: CustomPaint(
-                      size: const Size(150, 150),
-                      painter: GradientArcPainter(),
-                    ),
-                  ),
-                  // Centered "Calibrating" text
-                  const Text(
-                    "Calibrating",
-                    style: TextStyle(
-                      fontSize: 20,
-                      fontWeight: FontWeight.bold,
-                      color: Colors.black,
-                      fontFamily: 'Inter',
-                    ),
-                  ),
-                ],
+      body: Column(
+        children: [
+          // Exercise Title
+          const SizedBox(height: 35),
+          Padding(
+            padding: const EdgeInsets.symmetric(vertical: 10.0),
+            child: Text(
+              'Overhead Press - Set 1',
+              style: TextStyle(
+                fontSize: 20,
+                fontWeight: FontWeight.bold,
+                color: const Color(0xFF21007E),
               ),
+              textAlign: TextAlign.center,
             ),
-            const SizedBox(height: 60),
-            // Instruction text
-            const Padding(
-              padding: EdgeInsets.symmetric(horizontal: 30.0),
-              child: Text(
-                "Ensure your entire body is visible on camera during workout",
-                textAlign: TextAlign.center,
-                style: TextStyle(
-                  fontSize: 18,
-                  fontStyle: FontStyle.italic,
-                  color: Colors.black,
-                  fontFamily: 'Inter',
+          ),
+          // Camera Feed or Loading Indicator
+          Expanded(
+            child: Container(
+              margin: EdgeInsets.symmetric(horizontal: 16.0),
+              decoration: BoxDecoration(
+                border: Border.all(color: Colors.black26, width: 2),
+                borderRadius: BorderRadius.circular(12),
+              ),
+              child: _cameraController != null &&
+                      _cameraController!.value.isInitialized
+                  ? CameraPreview(_cameraController!)
+                  : Center(
+                      child: CircularProgressIndicator(),
+                    ),
+            ),
+          ),
+          // Reps Counter
+          Padding(
+            padding: const EdgeInsets.only(top: 8.0),
+            child: Row(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                Text(
+                  '$repCount / 10',
+                  style: TextStyle(
+                    fontSize: 24,
+                    fontWeight: FontWeight.bold,
+                    color: const Color(0xFF21007E),
+                  ),
                 ),
-              ),
+                SizedBox(width: 8),
+                Text(
+                  'Reps',
+                  style: TextStyle(
+                    fontSize: 16,
+                    color: Colors.grey,
+                  ),
+                ),
+              ],
             ),
-          ],
-        ),
+          ),
+          // Buttons (Help, Reset, Skip)
+          Padding(
+            padding: const EdgeInsets.symmetric(vertical: 10.0),
+            child: Row(
+              mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+              children: [
+                // Help Button
+                ElevatedButton.icon(
+                  onPressed: () {
+                    // Add your help functionality here
+                  },
+                  icon: Icon(Icons.help_outline),
+                  label: Text('Help'),
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: const Color(0xFF21007E),
+                  ),
+                ),
+                // Reset Button
+                ElevatedButton.icon(
+                  onPressed: resetReps, // Reset button functionality
+                  icon: Icon(Icons.refresh, color: const Color(0xFFEAB804)),
+                  label: Text('Reset', style: TextStyle(color: Colors.black)),
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: const Color(0xFFEAB804),
+                  ),
+                ),
+                // Skip Button
+                ElevatedButton.icon(
+                  onPressed: () {
+                    // Add your skip functionality here
+                  },
+                  icon: Icon(Icons.skip_next),
+                  label: Text('Skip'),
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: const Color.fromARGB(179, 175, 2, 2),
+                  ),
+                ),
+              ],
+            ),
+          ),
+        ],
       ),
     );
-  }
-}
-
-class GradientArcPainter extends CustomPainter {
-  @override
-  void paint(Canvas canvas, Size size) {
-    // Define gradient for the arc
-    final gradient = SweepGradient(
-      startAngle: 0.0,
-      endAngle: 3.14 * 2,
-      colors: [
-        Color(0xFFD1C4E9), // Light purple start
-        Color(0xFF21007E), // Deep purple end
-      ],
-      stops: [0.0, 1.0],
-    );
-
-    // Paint setup for the gradient arc
-    final paint = Paint()
-      ..shader = gradient.createShader(Rect.fromCircle(
-          center: size.center(Offset.zero), radius: size.width / 2))
-      ..style = PaintingStyle.stroke
-      ..strokeWidth = 8.0
-      ..strokeCap = StrokeCap.round;
-
-    // Draw the arc with a gap to create a spinner effect
-    double startAngle = -3.14 / 2;
-    double sweepAngle = 3.14 * 2; // 270 degrees for an incomplete circle
-    canvas.drawArc(
-      Rect.fromCircle(center: size.center(Offset.zero), radius: size.width / 2),
-      startAngle,
-      sweepAngle,
-      false,
-      paint,
-    );
-  }
-
-  @override
-  bool shouldRepaint(covariant CustomPainter oldDelegate) {
-    return false;
   }
 }
