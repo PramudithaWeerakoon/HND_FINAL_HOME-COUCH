@@ -178,77 +178,63 @@ class GenderOptionButton extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-     final screenWidth = MediaQuery.of(context).size.width;
-    final screenHeight = MediaQuery.of(context).size.height;
-
-    // Calculate responsive width and height
-    final buttonWidth = screenWidth * 0.4; // Adjust percentage as needed
-    final buttonHeight = screenHeight * 0.2;
-
     return GestureDetector(
       onTap: onPressed,
-      child: SizedBox(
-        width: buttonWidth < 160 ? 160 : buttonWidth, // Default to 180 if screen is small
-        height: buttonHeight < 160 ? 160 : buttonHeight, 
-        child: Container(
-          decoration: BoxDecoration(
-            gradient: label == 'Male'
-                ? LinearGradient(
-                    colors: [Color(0xFFFFFFFF), Color(0xFFE7EAFF)],
-                    begin: Alignment.topCenter,
-                    end: Alignment.bottomCenter,
-                  )
-                : LinearGradient(
-                    colors: [Color(0xFFFFFFFF), Color(0xFFFFE7FE)],
-                    begin: Alignment.topCenter,
-                    end: Alignment.bottomCenter,
+      child: Container(
+        decoration: BoxDecoration(
+          gradient: label == 'Male'
+              ? LinearGradient(
+                  colors: [Color(0xFFFFFFFF), Color(0xFFE7EAFF)],
+                  begin: Alignment.topCenter,
+                  end: Alignment.bottomCenter,
+                )
+              : LinearGradient(
+                  colors: [Color(0xFFFFFFFF), Color(0xFFFFE7FE)],
+                  begin: Alignment.topCenter,
+                  end: Alignment.bottomCenter,
+                ),
+          borderRadius: BorderRadius.circular(30),
+          border: isSelected
+              ? Border.all(
+                  color:
+                      label == 'Male' ? Color(0xFF21007E) : Color(0xFFD00A6A),
+                  width: 5)
+              : Border.all(color: Colors.transparent),
+          boxShadow: isSelected
+              ? [
+                  BoxShadow(
+                    color: label == 'Male'
+                        ? Color(0xFF68A4FF).withOpacity(0.4)
+                        : Color(0xFFF263E9).withOpacity(0.4),
+                    offset: Offset(0, 0),
+                    blurRadius: 44,
+                    spreadRadius: 4,
                   ),
-            borderRadius: BorderRadius.circular(30),
-            border: isSelected
-                ? Border.all(
-                    color:
-                        label == 'Male' ? Color(0xFF21007E) : Color(0xFFD00A6A),
-                    width: 5)
-                : Border.all(color: Colors.transparent),
-            boxShadow: isSelected
-                ? [
-                    BoxShadow(
-                      color: label == 'Male'
-                          ? Color(0xFF68A4FF).withOpacity(0.4)
-                          : Color(0xFFF263E9).withOpacity(0.4),
-                      offset: Offset(0, 0),
-                      blurRadius: 44,
-                      spreadRadius: 4,
-                    ),
-                  ]
-                : [
-                    BoxShadow(
-                      color: Color(0xFF000000).withOpacity(0.25),
-                      offset: Offset(0, 0),
-                      blurRadius: 4,
-                      spreadRadius: 0,
-                    ),
-                  ],
-          ),
-          padding: const EdgeInsets.symmetric(vertical: 15, horizontal: 20),
-          child: Column(
-            mainAxisAlignment: MainAxisAlignment.center,
-            children: [
-                Image.asset(
-                imagePath,
-                height: buttonHeight * 0.5, // Adjust the height based on button height
-                ),
-              const SizedBox(height: 10),
-              Text(
-                label,
-                style: const TextStyle(
-                  fontSize: 24,
-                  fontWeight: FontWeight.w600,
-                  color: Colors.black,
-                ),
+                ]
+              : [
+                  BoxShadow(
+                    color: Color(0xFF000000).withOpacity(0.25),
+                    offset: Offset(0, 0),
+                    blurRadius: 4,
+                    spreadRadius: 0,
+                  ),
+                ],
+        ),
+        padding: const EdgeInsets.symmetric(vertical: 15, horizontal:20),
+        child: Row(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            Image.asset(imagePath, height: 60),
+            const SizedBox(width: 10),
+            Text(
+              label,
+              style: const TextStyle(
+                fontSize: 24,
+                fontWeight: FontWeight.w600,
+                color: Colors.black,
               ),
-            ],
-          ),
+            ),
+          ],
         ),
       ),
     );
