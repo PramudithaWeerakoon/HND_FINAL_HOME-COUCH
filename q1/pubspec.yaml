@@ -50,7 +50,8 @@ dependencies:
   mailer: ^5.0.0 
   flutter_email_sender: ^6.0.3
   flutter_local_notifications: ^18.0.1
-  
+  image: ^4.5.0
+  http: ^1.2.2
 
   
 dependency_overrides:

@@ -36,6 +36,8 @@ class _WeightInputScreenState extends State<WeightInputScreen> {
     final screenHeight = MediaQuery.of(context).size.height;
 
     return Scaffold(
+      resizeToAvoidBottomInset: true, // This will resize the screen to avoid the keyboard
+
       backgroundColor: const Color(0xFFF2F6FF), // Light background color
       body: SafeArea(
         child: Padding(
