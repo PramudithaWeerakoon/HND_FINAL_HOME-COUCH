@@ -28,7 +28,7 @@ Couch@Home Team
 
   try {
     final sendReport = await send(message, smtpServer);
-    print('Message sent: $sendReport');
+    print('Message sent: ' + sendReport.toString());
   } catch (e) {
     print('Error sending email: $e');
   }

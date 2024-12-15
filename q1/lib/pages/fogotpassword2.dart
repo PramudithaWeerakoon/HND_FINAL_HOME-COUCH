@@ -5,7 +5,7 @@ class EnterOTPPage extends StatefulWidget {
   final String email;
   final String otp;
 
-  const EnterOTPPage({super.key, required this.email, required this.otp});
+  EnterOTPPage({required this.email, required this.otp});
 
   @override
   _EnterOTPPageState createState() => _EnterOTPPageState();
