@@ -1,10 +1,10 @@
-import 'dart:convert';
-import 'dart:async';
-import 'dart:typed_data'; // For handling image data
-import 'package:camera/camera.dart';
 import 'package:flutter/material.dart';
+import 'package:camera/camera.dart';
+import 'dart:async';
+import 'dart:convert';
+import 'dart:typed_data';
 import 'package:http/http.dart' as http;
-import 'package:image/image.dart' as img; // Dependency to process the image
+import 'package:image/image.dart' as img;
 
 class CameraScreen extends StatefulWidget {
   @override
@@ -15,6 +15,7 @@ class _CameraScreenState extends State<CameraScreen> {
   CameraController? _cameraController;
   List<CameraDescription>? _cameras;
   int repCount = 0; // Repetition counter
+  List<PixelLocation> pixelLocations = []; // Store pixel locations with color
 
   @override
   void initState() {
@@ -36,7 +37,6 @@ class _CameraScreenState extends State<CameraScreen> {
 
       // Start the camera stream to continuously capture frames
       _cameraController?.startImageStream((CameraImage image) {
-        // Process the image frames here
         captureFrame(image); // Send image to API
       });
     } else {
@@ -70,14 +70,11 @@ class _CameraScreenState extends State<CameraScreen> {
 
   // Convert CameraImage to bytes (JPEG format)
   Future<List<int>> _convertImageToBytes(CameraImage image) async {
-    // Convert YUV420 image to RGB, then encode to JPEG
     final img.Image imgFrame = img.Image.fromBytes(
       width: image.width,
       height: image.height,
       bytes: Uint8List.fromList(_yuv420toRgb(image)).buffer,
     );
-
-    // Encode the image as JPEG
     final List<int> jpegBytes = img.encodeJpg(imgFrame);
     return jpegBytes;
   }
@@ -88,15 +85,9 @@ class _CameraScreenState extends State<CameraScreen> {
     int height = image.height;
     List<int> output = List.filled(width * height * 3, 0);
 
-    // Get Y, U, and V planes
     Plane yPlane = image.planes[0];
     Plane uPlane = image.planes[1];
     Plane vPlane = image.planes[2];
-
-    // Debug prints to check plane sizes
-    print('Y plane length: ${yPlane.bytes.length}');
-    print('U plane length: ${uPlane.bytes.length}');
-    print('V plane length: ${vPlane.bytes.length}');
 
     int yIndex = 0, uvIndex = 0;
     for (int row = 0; row < height; row++) {
@@ -105,7 +96,6 @@ class _CameraScreenState extends State<CameraScreen> {
         int u = uPlane.bytes[uvIndex];
         int v = vPlane.bytes[uvIndex];
 
-        // YUV to RGB conversion
         int r = (y + (1.402 * (v - 128))).clamp(0, 255).toInt();
         int g = (y - (0.344136 * (u - 128)) - (0.714136 * (v - 128)))
             .clamp(0, 255)
@@ -117,14 +107,10 @@ class _CameraScreenState extends State<CameraScreen> {
         output[pixelIndex + 1] = g;
         output[pixelIndex + 2] = b;
 
-        yIndex++; // Move to the next Y pixel
-
-        if (yIndex >= yPlane.bytes.length)
-          break; // Prevent overflows in Y-plane
-        if (uvIndex >= uPlane.bytes.length || uvIndex >= vPlane.bytes.length)
-          break; // Prevent overflow in UV-planes
-        if (col % 2 == 0 && row % 2 == 0)
-          uvIndex++; // Increment UV index every 2x2 pixels
+        yIndex++;
+        if (yIndex >= yPlane.bytes.length) break;
+        if (uvIndex >= uPlane.bytes.length || uvIndex >= vPlane.bytes.length) break;
+        if (col % 2 == 0 && row % 2 == 0) uvIndex++;
       }
       if (yIndex >= yPlane.bytes.length) break;
     }
@@ -133,25 +119,38 @@ class _CameraScreenState extends State<CameraScreen> {
 
   Future<void> sendToAPI(Uint8List bytes) async {
     print('Sending frame to API...');
-    final url = Uri.parse('http://192.168.1.5:8080/process_frame');
-
+    final url = Uri.parse('http://172.16.101.51:8080/process_frame');
 
     try {
       var request = http.MultipartRequest('POST', url)
-        ..files.add(
-            http.MultipartFile.fromBytes('file', bytes, filename: 'frame.jpg'));
+        ..files.add(http.MultipartFile.fromBytes('file', bytes, filename: 'frame.jpg'));
 
-      var response = await request.send(); // Send the request
+      var response = await request.send();
 
       if (response.statusCode == 200) {
         var responseBody = await response.stream.bytesToString();
-        final data = json.decode(responseBody); // Decode the response to JSON
+        final data = json.decode(responseBody);
         print("Response from API: $data");
 
-        // Process the response and update the UI
         if (data['counted'] == true) {
           setState(() {
-            repCount++; // Increment repetition count
+            // Extract pixel locations and form quality
+            pixelLocations = _extractPixelLocations(data);
+            
+            // Check if both right and left shoulder are green
+            bool bothAreGreen = _checkBothShouldersGreen(data);
+            
+            // If both are green, increment the repetition count
+            if (bothAreGreen) {
+              repCount++;
+            }
+          });
+
+          // Clear pixel locations after a short delay
+          Future.delayed(const Duration(milliseconds: 100), () {
+            setState(() {
+              pixelLocations = [];
+            });
           });
         }
       } else {
@@ -162,12 +161,38 @@ class _CameraScreenState extends State<CameraScreen> {
     }
   }
 
+  bool _checkBothShouldersGreen(Map<String, dynamic> data) {
+    // Check the status of both shoulders from the form_quality data
+    var rightShoulder = data['form_quality']['right_shoulder_to_elbow_to_wrist'];
+    var leftShoulder = data['form_quality']['left_shoulder_to_elbow_to_wrist'];
+
+    // Check if both statuses are "green"
+    return rightShoulder != null && rightShoulder['status'] == 'green' &&
+           leftShoulder != null && leftShoulder['status'] == 'green';
+  }
+
+  List<PixelLocation> _extractPixelLocations(Map<String, dynamic> data) {
+    List<PixelLocation> locations = [];
+    if (data['form_quality'] != null) {
+      var rightShoulder = data['form_quality']['right_shoulder_to_elbow_to_wrist'];
+      if (rightShoulder != null && rightShoulder['pixel_loc_right_shoulder'] != null) {
+        var loc = rightShoulder['pixel_loc_right_shoulder'];
+        locations.add(PixelLocation(Offset(loc[0].toDouble(), loc[1].toDouble()), rightShoulder['status']));
+      }
+      var leftShoulder = data['form_quality']['left_shoulder_to_elbow_to_wrist'];
+      if (leftShoulder != null && leftShoulder['pixel_loc_left_shoulder'] != null) {
+        var loc = leftShoulder['pixel_loc_left_shoulder'];
+        locations.add(PixelLocation(Offset(loc[0].toDouble(), loc[1].toDouble()), leftShoulder['status']));
+      }
+    }
+    return locations;
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       body: Column(
         children: [
-          // Exercise Title
           const SizedBox(height: 35),
           Padding(
             padding: const EdgeInsets.symmetric(vertical: 10.0),
@@ -181,7 +206,6 @@ class _CameraScreenState extends State<CameraScreen> {
               textAlign: TextAlign.center,
             ),
           ),
-          // Camera Feed or Loading Indicator
           Expanded(
             child: Container(
               margin: EdgeInsets.symmetric(horizontal: 16.0),
@@ -191,13 +215,18 @@ class _CameraScreenState extends State<CameraScreen> {
               ),
               child: _cameraController != null &&
                       _cameraController!.value.isInitialized
-                  ? CameraPreview(_cameraController!)
-                  : Center(
-                      child: CircularProgressIndicator(),
-                    ),
+                  ? Stack(
+                      children: [
+                        CameraPreview(_cameraController!), // Camera feed
+                        CustomPaint(
+                          painter: OverlayPainter(pixelLocations, _cameraController!), // CustomPainter for overlay
+                          size: Size(double.infinity, double.infinity), // Ensure size matches the container
+                        ),
+                      ],
+                    )
+                  : Center(child: CircularProgressIndicator()),
             ),
           ),
-          // Reps Counter
           Padding(
             padding: const EdgeInsets.only(top: 8.0),
             child: Row(
@@ -222,48 +251,54 @@ class _CameraScreenState extends State<CameraScreen> {
               ],
             ),
           ),
-          // Buttons (Help, Reset, Skip)
-          Padding(
-            padding: const EdgeInsets.symmetric(vertical: 10.0),
-            child: Row(
-              mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-              children: [
-                // Help Button
-                ElevatedButton.icon(
-                  onPressed: () {
-                    // Add your help functionality here
-                  },
-                  icon: Icon(Icons.help_outline),
-                  label: Text('Help'),
-                  style: ElevatedButton.styleFrom(
-                    backgroundColor: const Color(0xFF21007E),
-                  ),
-                ),
-                // Reset Button
-                ElevatedButton.icon(
-                  onPressed: resetReps, // Reset button functionality
-                  icon: Icon(Icons.refresh, color: const Color(0xFFEAB804)),
-                  label: Text('Reset', style: TextStyle(color: Colors.black)),
-                  style: ElevatedButton.styleFrom(
-                    backgroundColor: const Color(0xFFEAB804),
-                  ),
-                ),
-                // Skip Button
-                ElevatedButton.icon(
-                  onPressed: () {
-                    // Add your skip functionality here
-                  },
-                  icon: Icon(Icons.skip_next),
-                  label: Text('Skip'),
-                  style: ElevatedButton.styleFrom(
-                    backgroundColor: const Color.fromARGB(179, 175, 2, 2),
-                  ),
-                ),
-              ],
-            ),
-          ),
         ],
       ),
     );
   }
+}
+
+// CustomPainter to overlay pixel locations on the camera feed
+class OverlayPainter extends CustomPainter {
+  final List<PixelLocation> pixelLocations;
+  final CameraController cameraController;
+
+  OverlayPainter(this.pixelLocations, this.cameraController);
+
+  @override
+  void paint(Canvas canvas, Size size) {
+    final Paint paintGreen = Paint()
+      ..color = Colors.green
+      ..style = PaintingStyle.fill;
+
+    final Paint paintRed = Paint()
+      ..color = Colors.yellow
+      ..style = PaintingStyle.fill;
+
+    final double scaleX = size.width / cameraController.value.previewSize!.width;
+    final double scaleY = size.height / cameraController.value.previewSize!.height;
+
+    for (var location in pixelLocations) {
+      var position = location.offset;
+      var color = location.status == 'green' ? paintGreen : paintRed;
+
+      // Scale the pixel location
+      var scaledX = position.dx * scaleX;
+      var scaledY = position.dy * scaleY;
+
+      // Draw a circle at the position
+      canvas.drawCircle(Offset(scaledX, scaledY), 10, color);
+    }
+  }
+
+  @override
+  bool shouldRepaint(covariant CustomPainter oldDelegate) {
+    return true;
+  }
+}
+
+class PixelLocation {
+  final Offset offset;
+  final String status;
+
+  PixelLocation(this.offset, this.status);
 }

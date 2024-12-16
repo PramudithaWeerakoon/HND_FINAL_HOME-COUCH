@@ -12,15 +12,14 @@ class WeightInputScreen extends StatefulWidget {
 
 class _WeightInputScreenState extends State<WeightInputScreen> {
   final TextEditingController _weightController = TextEditingController();
-  bool isKgSelected = true; // Track the unit selection
+  bool isKgSelected = true;
 
   @override
   void initState() {
     super.initState();
     _weightController.text = '70.8'; // Default value
-    // Automatically update as the user types
     _weightController.addListener(() {
-      setState(() {});
+      setState(() {}); // Updates the UI when the weight input changes
     });
   }
 
@@ -36,169 +35,178 @@ class _WeightInputScreenState extends State<WeightInputScreen> {
     final screenHeight = MediaQuery.of(context).size.height;
 
     return Scaffold(
-      resizeToAvoidBottomInset: true, // This will resize the screen to avoid the keyboard
-
-      backgroundColor: const Color(0xFFF2F6FF), // Light background color
+      resizeToAvoidBottomInset: true, // Avoids overflow when keyboard pops up
+      backgroundColor: const Color(0xFFF2F6FF),
       body: SafeArea(
-        child: Padding(
-          padding: const EdgeInsets.all(16.0),
-          child: Column(
-            mainAxisAlignment: MainAxisAlignment.center, // Center everything vertically
-            crossAxisAlignment: CrossAxisAlignment.stretch, // Stretch to fill horizontally
-            children: [
-              SizedBox(height: screenHeight * 0.05),
-              const Text(
-                "Let's get to know \n you!",
-                textAlign: TextAlign.center,
-                style: TextStyle(
-                  fontSize: 40,
-                  fontWeight: FontWeight.bold,
-                  color: Colors.black,
-                ),
-              ),
-              SizedBox(height: screenHeight * 0.04), // Space between title and question
-              const Center( // Centering the question text
-                child: Text(
-                  'What is your weight?',
-                  style: TextStyle(
-                    fontSize: 30,
-                    fontWeight: FontWeight.w600, // Bold the question
-                    color: Colors.black,
-                  ),
-                ),
-              ),
-              SizedBox(height: screenHeight * 0.08), // Space between question and input field
-              
-              // Weight Input with editable Text
-              Center(
-                child: Column(
+        child: SingleChildScrollView(
+          child: SizedBox(
+            height: screenHeight * 0.95, // Ensures layout doesn't break
+            child: Column(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              crossAxisAlignment: CrossAxisAlignment.stretch,
+              children: [
+                Column(
                   children: [
-                    // Editable weight input
-                    SizedBox(
-                      width: screenWidth * 0.4, // Control the width for the input
-                      child: TextField(
-                        controller: _weightController,
-                        textAlign: TextAlign.center,
-                        keyboardType: TextInputType.numberWithOptions(decimal: true),
-                        style: TextStyle(
-                          fontSize: screenWidth * 0.15,
-                          fontWeight: FontWeight.bold,
-                        ),
-                        inputFormatters: [
-                          FilteringTextInputFormatter.allow(RegExp(r'^\d*\.?\d*')),
-                        ],
-                        decoration: const InputDecoration(
-                          border: InputBorder.none, // No visible border
-                        ),
-                      ),
-                    ),
-                    // Smaller black line under the input
-                    SizedBox(
-                      width: screenWidth * 0.35, // Set a smaller width for the black line
-                      child: const Divider(
+                    const SizedBox(height: 40),
+                    const Text(
+                      "Let's get to know \n you!",
+                      textAlign: TextAlign.center,
+                      style: TextStyle(
+                        fontSize: 40,
+                        fontWeight: FontWeight.bold,
                         color: Colors.black,
-                        thickness: 2, // Thickness of the black line
+                      ),
+                    ),
+                    const SizedBox(height: 30),
+                    const Text(
+                      'What is your weight?',
+                      style: TextStyle(
+                        fontSize: 30,
+                        fontWeight: FontWeight.w600,
+                        color: Colors.black,
+                      ),
+                    ),
+                    const SizedBox(height: 40),
+
+                    // Weight input field
+                    Center(
+                      child: Column(
+                        children: [
+                          SizedBox(
+                            width: screenWidth * 0.4,
+                            child: TextField(
+                              controller: _weightController,
+                              textAlign: TextAlign.center,
+                              keyboardType: const TextInputType.numberWithOptions(
+                                  decimal: true),
+                              style: TextStyle(
+                                fontSize: screenWidth * 0.15,
+                                fontWeight: FontWeight.bold,
+                              ),
+                              inputFormatters: [
+                                FilteringTextInputFormatter.allow(
+                                    RegExp(r'^\d*\.?\d*')),
+                              ],
+                              decoration: const InputDecoration(
+                                border: InputBorder.none,
+                              ),
+                            ),
+                          ),
+                          SizedBox(
+                            width: screenWidth * 0.35,
+                            child: const Divider(
+                              color: Colors.black,
+                              thickness: 2,
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+
+                    const SizedBox(height: 20),
+
+                    // Unit toggle buttons
+                    Center(
+                      child: Row(
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        children: [
+                          ElevatedButton(
+                            onPressed: () {
+                              setState(() {
+                                isKgSelected = true;
+                              });
+                            },
+                            style: ElevatedButton.styleFrom(
+                              backgroundColor: isKgSelected
+                                  ? const Color(0xFFB30000)
+                                  : Colors.white,
+                              foregroundColor: isKgSelected
+                                  ? Colors.white
+                                  : Colors.black,
+                              shape: RoundedRectangleBorder(
+                                borderRadius: BorderRadius.circular(10),
+                              ),
+                            ),
+                            child: const Text('KG'),
+                          ),
+                          const SizedBox(width: 20),
+                          ElevatedButton(
+                            onPressed: () {
+                              setState(() {
+                                isKgSelected = false;
+                              });
+                            },
+                            style: ElevatedButton.styleFrom(
+                              backgroundColor: isKgSelected
+                                  ? Colors.white
+                                  : const Color(0xFFB30000),
+                              foregroundColor: isKgSelected
+                                  ? Colors.black
+                                  : Colors.white,
+                              shape: RoundedRectangleBorder(
+                                borderRadius: BorderRadius.circular(10),
+                              ),
+                            ),
+                            child: const Text('LB'),
+                          ),
+                        ],
                       ),
                     ),
                   ],
                 ),
-              ),
-              
-              SizedBox(height: screenHeight * 0.01), // Space between weight and unit toggle
 
-              // Unit selection: KG or LB
-              Center(
-                child: Row(
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  children: [
-                    ElevatedButton(
-                      onPressed: () {
-                        setState(() {
-                          isKgSelected = true;
-                        });
-                      },
-                      style: ElevatedButton.styleFrom(
-                        backgroundColor: isKgSelected ? const Color(0xFFB30000) : Colors.white,
-                        foregroundColor: isKgSelected ? Colors.white : Colors.black,
-                        shape: RoundedRectangleBorder(
-                          borderRadius: BorderRadius.circular(10),
-                        ),
+                // Page number at the bottom
+                const Center(
+                  child: Padding(
+                    padding: EdgeInsets.only(bottom: 16),
+                    child: Text(
+                      "3/12",
+                      style: TextStyle(
+                        fontSize: 28,
+                        fontWeight: FontWeight.bold,
+                        color: Colors.black,
                       ),
-                      child: const Text('KG'),
                     ),
-                    SizedBox(width: screenWidth * 0.04),
-                    ElevatedButton(
-                      onPressed: () {
-                        setState(() {
-                          isKgSelected = false;
-                        });
-                      },
-                      style: ElevatedButton.styleFrom(
-                        backgroundColor: isKgSelected ? Colors.white : const Color(0xFFB30000),
-                        foregroundColor: isKgSelected ? Colors.black : Colors.white,
-                        shape: RoundedRectangleBorder(
-                          borderRadius: BorderRadius.circular(10),
-                        ),
-                      ),
-                      child: const Text('LB'),
-                    ),
-                  ],
-                ),
-              ),
-
-              const Spacer(), // Push the 3/12 text to the bottom
-
-              const Center(
-                child: Text(
-                  "3/12",
-                  style: TextStyle(
-                    fontSize: 28,
-                    fontWeight: FontWeight.bold,
-                    color: Colors.black,
                   ),
                 ),
-              ),
-              SizedBox(height: screenHeight * 0.02), // Small gap between text and FAB
-            ],
+              ],
+            ),
           ),
         ),
       ),
-      
-      // Floating action buttons for navigation
+
+      // Floating Buttons
       floatingActionButtonLocation: FloatingActionButtonLocation.centerFloat,
-      floatingActionButton: Stack(
+      floatingActionButton: Row(
+        mainAxisAlignment: MainAxisAlignment.spaceBetween,
         children: [
-          // Back button
-          Positioned(
-            left: 16, // Left position for the back button
-            bottom: 32, // Bottom position for alignment
+            Padding(
+            padding: const EdgeInsets.only(left: 16),
             child: FloatingActionButton(
-              heroTag: 'back_to_q2', // Unique tag for FAB
+              heroTag: 'back',
               backgroundColor: const Color(0xFF21007E),
               shape: RoundedRectangleBorder(
-                borderRadius: BorderRadius.circular(100),
+              borderRadius: BorderRadius.circular(100),
               ),
               onPressed: () {
-                Navigator.pop(context);
+              Navigator.push(
+                context,
+                MaterialPageRoute(builder: (context) => const Q4Page()),
+              );
               },
               child: const Icon(Icons.arrow_back, color: Colors.white),
             ),
-          ),
-          
-          // Next button
-          Positioned(
-            right: 16, // Right position for the next button
-            bottom: 32, // Bottom position for alignment
+            ),
+          Padding(
+            padding: const EdgeInsets.only(right: 16),
             child: FloatingActionButton(
-              heroTag: 'next_to_q4', // Unique tag for FAB
+              heroTag: 'next',
               backgroundColor: const Color(0xFF21007E),
               shape: RoundedRectangleBorder(
-                borderRadius: BorderRadius.circular(100),
+              borderRadius: BorderRadius.circular(100),
               ),
               onPressed: () async {
-                // Parse the input weight
                 final bodyWeight = double.tryParse(_weightController.text);
-
                 if (bodyWeight == null || bodyWeight <= 0) {
                   ScaffoldMessenger.of(context).showSnackBar(
                     const SnackBar(
@@ -209,22 +217,17 @@ class _WeightInputScreenState extends State<WeightInputScreen> {
                   return;
                 }
 
-                // Convert to kilograms if 'LB' is selected
                 final weightInKg =
                     isKgSelected ? bodyWeight : bodyWeight * 0.453592;
 
                 try {
-                  // Update the weight in the database
                   final db = DatabaseConnection();
                   await db.updateBodyWeight(weightInKg);
-
-                  // Navigate to the next screen after a successful update
                   Navigator.push(
                     context,
                     MaterialPageRoute(builder: (context) => const Q4Page()),
                   );
                 } catch (e) {
-                  print("Error updating body weight: $e");
                   ScaffoldMessenger.of(context).showSnackBar(
                     const SnackBar(
                       content: Text(
