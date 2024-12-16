@@ -5,6 +5,7 @@ import 'dart:convert';
 import 'dart:typed_data';
 import 'package:http/http.dart' as http;
 import 'package:image/image.dart' as img;
+import 'congratsScreen.dart';
 
 class CameraScreen extends StatefulWidget {
   @override
@@ -35,9 +36,8 @@ class _CameraScreenState extends State<CameraScreen> {
       await _cameraController?.initialize();
       setState(() {});
 
-      // Start the camera stream to continuously capture frames
       _cameraController?.startImageStream((CameraImage image) {
-        captureFrame(image); // Send image to API
+        captureFrame(image);
       });
     } else {
       print('No cameras found');
@@ -52,23 +52,19 @@ class _CameraScreenState extends State<CameraScreen> {
 
   void resetReps() {
     setState(() {
-      repCount = 0; // Reset the repetition counter
+      repCount = 0; // Reset repetition counter
     });
   }
 
   Future<void> captureFrame(CameraImage image) async {
     try {
-      // Convert the CameraImage to bytes (JPEG format)
       final bytes = await _convertImageToBytes(image);
-
-      // Send the captured frame to the API
       sendToAPI(Uint8List.fromList(bytes));
     } catch (e) {
       print('Error capturing frame: $e');
     }
   }
 
-  // Convert CameraImage to bytes (JPEG format)
   Future<List<int>> _convertImageToBytes(CameraImage image) async {
     final img.Image imgFrame = img.Image.fromBytes(
       width: image.width,
@@ -79,7 +75,6 @@ class _CameraScreenState extends State<CameraScreen> {
     return jpegBytes;
   }
 
-  // Convert YUV420 to RGB
   List<int> _yuv420toRgb(CameraImage image) {
     int width = image.width;
     int height = image.height;
@@ -108,11 +103,8 @@ class _CameraScreenState extends State<CameraScreen> {
         output[pixelIndex + 2] = b;
 
         yIndex++;
-        if (yIndex >= yPlane.bytes.length) break;
-        if (uvIndex >= uPlane.bytes.length || uvIndex >= vPlane.bytes.length) break;
         if (col % 2 == 0 && row % 2 == 0) uvIndex++;
       }
-      if (yIndex >= yPlane.bytes.length) break;
     }
     return output;
   }
@@ -134,19 +126,20 @@ class _CameraScreenState extends State<CameraScreen> {
 
         if (data['counted'] == true) {
           setState(() {
-            // Extract pixel locations and form quality
             pixelLocations = _extractPixelLocations(data);
-            
-            // Check if both right and left shoulder are green
-            bool bothAreGreen = _checkBothShouldersGreen(data);
-            
-            // If both are green, increment the repetition count
-            if (bothAreGreen) {
+            if (_checkBothShouldersGreen(data)) {
               repCount++;
             }
           });
 
-          // Clear pixel locations after a short delay
+          if (repCount >= 10) {
+            // Automatically navigate to CongratsScreen when repCount reaches 10
+            Navigator.pushReplacement(
+              context,
+              MaterialPageRoute(builder: (context) => CongratulationsScreen()),
+            );
+          }
+
           Future.delayed(const Duration(milliseconds: 100), () {
             setState(() {
               pixelLocations = [];
@@ -162,11 +155,9 @@ class _CameraScreenState extends State<CameraScreen> {
   }
 
   bool _checkBothShouldersGreen(Map<String, dynamic> data) {
-    // Check the status of both shoulders from the form_quality data
     var rightShoulder = data['form_quality']['right_shoulder_to_elbow_to_wrist'];
     var leftShoulder = data['form_quality']['left_shoulder_to_elbow_to_wrist'];
 
-    // Check if both statuses are "green"
     return rightShoulder != null && rightShoulder['status'] == 'green' &&
            leftShoulder != null && leftShoulder['status'] == 'green';
   }
@@ -193,16 +184,12 @@ class _CameraScreenState extends State<CameraScreen> {
     return Scaffold(
       body: Column(
         children: [
-          const SizedBox(height: 35),
+          SizedBox(height: 35),
           Padding(
             padding: const EdgeInsets.symmetric(vertical: 10.0),
             child: Text(
               'Overhead Press - Set 1',
-              style: TextStyle(
-                fontSize: 20,
-                fontWeight: FontWeight.bold,
-                color: const Color(0xFF21007E),
-              ),
+              style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold, color: Color(0xFF21007E)),
               textAlign: TextAlign.center,
             ),
           ),
@@ -217,36 +204,49 @@ class _CameraScreenState extends State<CameraScreen> {
                       _cameraController!.value.isInitialized
                   ? Stack(
                       children: [
-                        CameraPreview(_cameraController!), // Camera feed
+                        CameraPreview(_cameraController!),
                         CustomPaint(
-                          painter: OverlayPainter(pixelLocations, _cameraController!), // CustomPainter for overlay
-                          size: Size(double.infinity, double.infinity), // Ensure size matches the container
+                          painter: OverlayPainter(pixelLocations, _cameraController!),
+                          size: Size(double.infinity, double.infinity),
                         ),
                       ],
                     )
                   : Center(child: CircularProgressIndicator()),
             ),
           ),
+          Row(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              Text('$repCount / 10',
+                  style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold, color: Color(0xFF21007E))),
+              SizedBox(width: 8),
+              Text('Reps', style: TextStyle(fontSize: 16, color: Colors.grey)),
+            ],
+          ),
           Padding(
-            padding: const EdgeInsets.only(top: 8.0),
+            padding: const EdgeInsets.symmetric(vertical: 16.0, horizontal: 16.0),
             child: Row(
-              mainAxisAlignment: MainAxisAlignment.center,
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
-                Text(
-                  '$repCount / 10',
-                  style: TextStyle(
-                    fontSize: 24,
-                    fontWeight: FontWeight.bold,
-                    color: const Color(0xFF21007E),
-                  ),
+                ElevatedButton.icon(
+                  onPressed: resetReps,
+                  style: ElevatedButton.styleFrom(backgroundColor: Colors.yellow),
+                  icon: Icon(Icons.refresh, color: Colors.black),
+                  label: Text('Reset', style: TextStyle(color: Colors.black)),
                 ),
-                SizedBox(width: 8),
-                Text(
-                  'Reps',
-                  style: TextStyle(
-                    fontSize: 16,
-                    color: Colors.grey,
-                  ),
+                ElevatedButton.icon(
+                  onPressed: () {},
+                  style: ElevatedButton.styleFrom(backgroundColor: Colors.blueAccent),
+                  icon: Icon(Icons.help_outline, color: Colors.white),
+                  label: Text('Help', style: TextStyle(color: Colors.white)),
+                ),
+                ElevatedButton.icon(
+                  onPressed: () {
+                    Navigator.pushReplacementNamed(context, '/home');
+                  },
+                  style: ElevatedButton.styleFrom(backgroundColor: Colors.redAccent),
+                  icon: Icon(Icons.skip_next, color: Colors.white),
+                  label: Text('Skip', style: TextStyle(color: Colors.white)),
                 ),
               ],
             ),
@@ -257,7 +257,6 @@ class _CameraScreenState extends State<CameraScreen> {
   }
 }
 
-// CustomPainter to overlay pixel locations on the camera feed
 class OverlayPainter extends CustomPainter {
   final List<PixelLocation> pixelLocations;
   final CameraController cameraController;
@@ -266,34 +265,21 @@ class OverlayPainter extends CustomPainter {
 
   @override
   void paint(Canvas canvas, Size size) {
-    final Paint paintGreen = Paint()
-      ..color = Colors.green
-      ..style = PaintingStyle.fill;
-
-    final Paint paintRed = Paint()
-      ..color = Colors.yellow
-      ..style = PaintingStyle.fill;
+    final Paint paintGreen = Paint()..color = Colors.green..style = PaintingStyle.fill;
+    final Paint paintRed = Paint()..color = Colors.red..style = PaintingStyle.fill;
 
     final double scaleX = size.width / cameraController.value.previewSize!.width;
     final double scaleY = size.height / cameraController.value.previewSize!.height;
 
     for (var location in pixelLocations) {
-      var position = location.offset;
-      var color = location.status == 'green' ? paintGreen : paintRed;
-
-      // Scale the pixel location
-      var scaledX = position.dx * scaleX;
-      var scaledY = position.dy * scaleY;
-
-      // Draw a circle at the position
-      canvas.drawCircle(Offset(scaledX, scaledY), 10, color);
+      var scaledX = location.offset.dx * scaleX;
+      var scaledY = location.offset.dy * scaleY;
+      canvas.drawCircle(Offset(scaledX, scaledY), 10, location.status == 'green' ? paintGreen : paintRed);
     }
   }
 
   @override
-  bool shouldRepaint(covariant CustomPainter oldDelegate) {
-    return true;
-  }
+  bool shouldRepaint(CustomPainter oldDelegate) => true;
 }
 
 class PixelLocation {
