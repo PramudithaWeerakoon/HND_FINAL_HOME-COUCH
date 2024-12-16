@@ -174,7 +174,7 @@ class _CameraScreenState extends State<CameraScreen> {
   }
 
   Future<void> handleRepCompletion() async {
-    if (repCount >= 10) {
+    if (repCount == 10) {
       final db = DatabaseConnection();
       try {
         await db.saveExerciseData(
@@ -202,34 +202,41 @@ class _CameraScreenState extends State<CameraScreen> {
         children: [
           SizedBox(height: 35),
           Padding(
-            padding: const EdgeInsets.symmetric(vertical: 10.0),
-            child: Text(
-              'Overhead Press - Set 1',
-              style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold, color: Color(0xFF21007E)),
-              textAlign: TextAlign.center,
-            ),
-          ),
-          Expanded(
+            padding: const EdgeInsets.symmetric(vertical: 5.0),
             child: Container(
-              margin: EdgeInsets.symmetric(horizontal: 16.0),
+              padding: EdgeInsets.all(8.0),
               decoration: BoxDecoration(
-                border: Border.all(color: Colors.black26, width: 2),
-                borderRadius: BorderRadius.circular(12),
+              color: const Color(0xFF21007E),
+              borderRadius: BorderRadius.circular(20.0),
               ),
-              child: _cameraController != null &&
-                      _cameraController!.value.isInitialized
-                  ? Stack(
-                      children: [
-                        CameraPreview(_cameraController!),
-                        CustomPaint(
-                          painter: OverlayPainter(pixelLocations, _cameraController!),
-                          size: Size(double.infinity, double.infinity),
-                        ),
-                      ],
-                    )
-                  : Center(child: CircularProgressIndicator()),
+              child: Text(
+              'Bicep Curls - Set 1',
+              style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold, color: Colors.white),
+              textAlign: TextAlign.center,
+              ),
             ),
-          ),
+            ),
+          Expanded(
+  child: Container(
+    width: double.infinity, // Ensure the container takes the full width
+    margin: EdgeInsets.symmetric(horizontal:23.0),
+    decoration: BoxDecoration(
+      border: Border.all(color: Colors.black26, width: 2),
+      borderRadius: BorderRadius.circular(12),
+    ),
+    child: _cameraController != null && _cameraController!.value.isInitialized
+        ? Stack(
+            children: [
+              CameraPreview(_cameraController!),
+              CustomPaint(
+                painter: OverlayPainter(pixelLocations, _cameraController!),
+                size: Size(double.infinity, double.infinity),
+              ),
+            ],
+          )
+        : Center(child: CircularProgressIndicator()),
+  ),
+),
           Row(
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
@@ -246,13 +253,13 @@ class _CameraScreenState extends State<CameraScreen> {
               children: [
                 ElevatedButton.icon(
                   onPressed: resetReps,
-                  style: ElevatedButton.styleFrom(backgroundColor: Colors.yellow),
-                  icon: Icon(Icons.refresh, color: Colors.black),
-                  label: Text('Reset', style: TextStyle(color: Colors.black)),
+                  style: ElevatedButton.styleFrom(backgroundColor: const Color(0xFFEAB804)),
+                  icon: Icon(Icons.refresh, color: const Color.fromARGB(255, 255, 255, 255)),
+                  label: Text('Reset', style: TextStyle(color: const Color.fromARGB(255, 255, 255, 255))),
                 ),
                 ElevatedButton.icon(
                   onPressed: () {},
-                  style: ElevatedButton.styleFrom(backgroundColor: Colors.blueAccent),
+                  style: ElevatedButton.styleFrom(backgroundColor: const Color(0xFF21007E)),
                   icon: Icon(Icons.help_outline, color: Colors.white),
                   label: Text('Help', style: TextStyle(color: Colors.white)),
                 ),
@@ -260,7 +267,7 @@ class _CameraScreenState extends State<CameraScreen> {
                   onPressed: () {
                     Navigator.pushReplacementNamed(context, '/home');
                   },
-                  style: ElevatedButton.styleFrom(backgroundColor: Colors.redAccent),
+                  style: ElevatedButton.styleFrom(backgroundColor: const Color(0xFFB30000)),
                   icon: Icon(Icons.skip_next, color: Colors.white),
                   label: Text('Skip', style: TextStyle(color: Colors.white)),
                 ),
@@ -279,20 +286,39 @@ class OverlayPainter extends CustomPainter {
 
   OverlayPainter(this.pixelLocations, this.cameraController);
 
-  @override
-  void paint(Canvas canvas, Size size) {
-    final Paint paintGreen = Paint()..color = Colors.green..style = PaintingStyle.fill;
-    final Paint paintRed = Paint()..color = Colors.red..style = PaintingStyle.fill;
+@override
+void paint(Canvas canvas, Size size) {
+  final Paint paintGreen = Paint()
+    ..color = Colors.green
+    ..style = PaintingStyle.fill;
 
-    final double scaleX = size.width / cameraController.value.previewSize!.width;
-    final double scaleY = size.height / cameraController.value.previewSize!.height;
+  final Paint paintRed = Paint()
+    ..color = const Color.fromARGB(255, 206, 203, 8)
+    ..style = PaintingStyle.fill;
 
-    for (var location in pixelLocations) {
-      var scaledX = location.offset.dx * scaleX;
-      var scaledY = location.offset.dy * scaleY;
-      canvas.drawCircle(Offset(scaledX, scaledY), 10, location.status == 'green' ? paintGreen : paintRed);
-    }
+  final Paint paintOuterCircle = Paint()
+    ..color = const Color.fromARGB(255, 255, 255, 255).withOpacity(1) // Semi-transparent black for outer circle
+    ..style = PaintingStyle.stroke
+    ..strokeWidth = 3.0; // Thickness of the outer circle
+
+  final double previewWidth = cameraController.value.previewSize!.height;
+  final double previewHeight = cameraController.value.previewSize!.width;
+
+  final double scaleX = size.width / previewWidth;
+  final double scaleY = size.height / previewHeight;
+
+  for (var location in pixelLocations) {
+    // Swap scaledX and scaledY to align dots along the x-axis
+    var scaledX = location.offset.dy * scaleX; // Use y-coordinate for x-axis
+    var scaledY = location.offset.dx * scaleY; // Use x-coordinate for y-axis
+
+    // Draw the outer circle first
+    canvas.drawCircle(Offset(scaledX, scaledY), 20, paintOuterCircle);
+
+    // Draw the inner dot
+    canvas.drawCircle(Offset(scaledX, scaledY), 10, location.status == 'green' ? paintGreen : paintRed);
   }
+}
 
   @override
   bool shouldRepaint(CustomPainter oldDelegate) => true;

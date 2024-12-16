@@ -37,7 +37,7 @@ class _InstructionPageState extends State<InstructionPage> {
                         borderRadius: BorderRadius.circular(50),
                       ),
                       child: Text(
-                        'Overhead Press - 4 Sets',
+                        'Bicep Curls - 4 Sets',
                         style: TextStyle(
                           color: Colors.white,
                           fontSize: screenWidth * 0.05,
@@ -51,7 +51,7 @@ class _InstructionPageState extends State<InstructionPage> {
                       height: screenHeight * 0.3,
                       decoration: BoxDecoration(
                         image: DecorationImage(
-                          image: const AssetImage('lib/assets/overheadpress.gif'), // Replace with actual gif path
+                          image: const AssetImage('lib/assets/bicepcurls.gif'), // Replace with actual gif path
                           fit: BoxFit.contain,
                         ),
                         borderRadius: BorderRadius.circular(10),
