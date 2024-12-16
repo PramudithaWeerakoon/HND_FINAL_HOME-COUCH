@@ -1577,6 +1577,100 @@ Future<double> getBeginningWeight(String userEmail) async {
       throw Exception("An error occurred: ${e.toString()}");
     }
   }
+  Future<void> insertWorkoutPlan(
+  List<Map<String, dynamic>> workoutPlan,
+) async {
+  final email = SessionManager.getUserEmail();
+  try {
+    if (_connection.isClosed) {
+      await _connection.open();
+      print("Database connection opened.");
+    }
+
+    for (var day in workoutPlan) {
+      final dayNumber = int.tryParse(
+          day['day']?.toString()?.replaceAll(RegExp(r'[^0-9]'), '') ?? '0');
+
+      for (var exercise in day['workout']) {
+        final exerciseId = exercise['id'] ?? 'unknown';
+        final exerciseName = exercise['exercise'] ?? 'Unnamed Exercise';
+        final reps = int.tryParse(exercise['reps']?.toString() ?? '0') ?? 0;
+        final sets = int.tryParse(exercise['sets']?.toString() ?? '0') ?? 0;
+        final targetArea = exercise['target_area'] ?? 'Not Specified';
+
+        // Parse and convert `rest` to HH:MM:SS format
+        final restValue = exercise['rest']?.toString();
+        String? exerciseTime;
+
+        if (restValue != null && restValue.contains('seconds')) {
+          final restInSeconds = int.tryParse(
+              restValue.replaceAll(RegExp(r'[^0-9]'), '')); // Extract numbers
+          if (restInSeconds != null) {
+            exerciseTime = Duration(seconds: restInSeconds)
+                .toString()
+                .split('.')
+                .first; // Convert to HH:MM:SS
+          }
+        } else {
+          exerciseTime = null; // Handle missing or invalid rest time
+        }
+
+        // Debug: Log the parsed and formatted data
+        print(
+            "Exercise: $exerciseName, Reps: $reps, Sets: $sets, Rest: $exerciseTime, Day: $dayNumber");
+
+        // Check if the exercise_id exists in the `exercise` table
+        final result = await _connection.query('''
+          SELECT COUNT(*) FROM exercise WHERE ex_id = @exercise_id
+        ''', substitutionValues: {
+          'exercise_id': exerciseId,
+        });
+
+        final exists = result.first[0] > 0;
+
+        if (!exists) {
+          print(
+              "Skipping insertion for $exerciseName (ID: $exerciseId) - Exercise ID not found.");
+          continue; // Skip this exercise
+        }
+
+        // Insert valid exercises into the `bodyplan` table
+        await _connection.query('''
+          INSERT INTO public.bodyplan (
+            bp_name, bp_exercise, bp_reps, bp_sets, bp_targetarea,
+            bp_daynumber, bp_exercisetime, bp_userid, exercise_id
+          ) VALUES (
+            @bp_name, @bp_exercise, @bp_reps, @bp_sets, @bp_targetarea,
+            @bp_daynumber, @bp_exercisetime, @bp_userid, @exercise_id
+          )
+        ''', substitutionValues: {
+          'bp_name': 'Workout Plan',
+          'bp_exercise': exerciseName,
+          'bp_reps': reps,
+          'bp_sets': sets,
+          'bp_targetarea': targetArea,
+          'bp_daynumber': dayNumber,
+          'bp_exercisetime': exerciseTime,
+          'bp_userid': email,
+          'exercise_id': exerciseId,
+        });
+
+        print("Inserted: $exerciseName for Day $dayNumber");
+      }
+    }
+
+    print("Workout plan inserted successfully into public.bodyplan.");
+  } catch (e) {
+    print("Error inserting workout plan: $e");
+    throw Exception("Failed to insert workout plan.");
+  } finally {
+    if (!_connection.isClosed) {
+      await _connection.close();
+      print("Database connection closed.");
+    }
+  }
+}
+
 }
 
 
