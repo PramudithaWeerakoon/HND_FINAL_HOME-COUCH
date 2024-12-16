@@ -5,6 +5,7 @@ import 'dart:convert';
 import 'dart:typed_data';
 import 'package:http/http.dart' as http;
 import 'package:image/image.dart' as img;
+import 'db_connection.dart'; // Import the database connection
 import 'congratsScreen.dart';
 
 class CameraScreen extends StatefulWidget {
@@ -129,16 +130,9 @@ class _CameraScreenState extends State<CameraScreen> {
             pixelLocations = _extractPixelLocations(data);
             if (_checkBothShouldersGreen(data)) {
               repCount++;
+              handleRepCompletion(); // Call database save when repCount reaches 10
             }
           });
-
-          if (repCount >= 10) {
-            // Automatically navigate to CongratsScreen when repCount reaches 10
-            Navigator.pushReplacement(
-              context,
-              MaterialPageRoute(builder: (context) => CongratulationsScreen()),
-            );
-          }
 
           Future.delayed(const Duration(milliseconds: 100), () {
             setState(() {
@@ -177,6 +171,28 @@ class _CameraScreenState extends State<CameraScreen> {
       }
     }
     return locations;
+  }
+
+  Future<void> handleRepCompletion() async {
+    if (repCount >= 10) {
+      final db = DatabaseConnection();
+      try {
+        await db.saveExerciseData(
+          ueSets: 1,
+          ueReps: 10,
+          ueDuration: 60, // Example duration
+          dayNumber: DateTime.now().day,
+          weekNumber: DateTime.now().toIso8601String(), // Save raw date
+        );
+        print("Exercise data saved successfully.");
+        Navigator.pushReplacement(
+          context,
+          MaterialPageRoute(builder: (context) => CongratulationsScreen()),
+        );
+      } catch (e) {
+        print("Error saving exercise data: $e");
+      }
+    }
   }
 
   @override

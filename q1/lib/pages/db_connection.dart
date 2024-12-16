@@ -1523,6 +1523,60 @@ Future<double> getBeginningWeight(String userEmail) async {
       rethrow;
     }
   }
+
+  // Save exercise data into the database
+  Future<void> saveExerciseData({
+    required int ueSets,
+    required int ueReps,
+    required int ueDuration,
+    required int dayNumber,
+    required String weekNumber,
+    int exerciseId = 1,
+    int? bodyPlanId,
+  }) async {
+    final conn = await getConnection();
+
+    try {
+      final email = SessionManager.getUserEmail();
+
+      if (email == null) {
+        throw Exception("No user is currently logged in.");
+      }
+
+      final ueDate = DateTime.now();
+
+      await conn.query(
+        '''
+        INSERT INTO userexercise (
+          ue_sets, ue_reps, ue_date, ue_status, userid, exerciseid, 
+          ue_duration, day_number, week_number, bodyplan_id
+        )
+        VALUES (
+          @ueSets, @ueReps, @ueDate, @ueStatus, @userEmail, @exerciseId, 
+          @ueDuration, @dayNumber, @weekNumber, @bodyPlanId
+        )
+        ''',
+        substitutionValues: {
+          'ueSets': ueSets,
+          'ueReps': ueReps,
+          'ueDate': ueDate,
+          'ueStatus': 'Completed', // Status for completed exercise
+          'userEmail': email, // Current logged-in user's email
+          'exerciseId': exerciseId,
+          'ueDuration': ueDuration,
+          'dayNumber': dayNumber,
+          'weekNumber': weekNumber,
+          'bodyPlanId': bodyPlanId,
+        },
+      );
+
+      print("Exercise data saved successfully for user: $email");
+    } on PostgreSQLException catch (e) {
+      throw Exception("Database error occurred: ${e.message}");
+    } on Exception catch (e) {
+      throw Exception("An error occurred: ${e.toString()}");
+    }
+  }
 }
 
 
