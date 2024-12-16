@@ -1,192 +1,96 @@
+import 'dart:convert';
 import 'package:flutter/material.dart';
+import 'package:shared_preferences/shared_preferences.dart';
+import 'db_connection.dart'; // Replace with your actual file path
 
-class PlanSummaryScreen extends StatelessWidget {
-  final List<Map<String, dynamic>> daysData = [
-    {
-      "day": "Day 01",
-      "exercises": [
-        ["Overhead Press", "Shoulders", "4", "8"],
-        ["Dumbbell Fly", "Chest & Shoulders", "3", "10"],
-        ["Lateral Raise", "Shoulders", "4", "8"],
-        ["Concentration Curls", "Shoulders", "4", "8"],
-        ["Skull-Crushes", "Triceps", "3", "10"],
-        ["Bicep Curls", "Biceps", "4", "8"],
-      ]
-    },
-    {
-      "day": "Day 02",
-      "exercises": [
-        ["Bench Press", "Chest", "3", "8"],
-        ["Pushup", "Chest", "3", "10"],
-      ]
-    },
-    {
-      "day": "Day 03",
-      "exercises": [
-        ["Deadlift", "Back", "4", "6"],
-        ["Pull-up", "Back", "3", "8"],
-      ]
-    },
-    // Add more day data as needed
-  ];
+class PlanSummaryScreen extends StatefulWidget {
+  const PlanSummaryScreen({Key? key}) : super(key: key);
 
-  PlanSummaryScreen({super.key});
+  @override
+  _PlanSummaryScreenState createState() => _PlanSummaryScreenState();
+}
+
+class _PlanSummaryScreenState extends State<PlanSummaryScreen> {
+  Future<Map<String, dynamic>>? userFitnessData;
+
+  @override
+  void initState() {
+    super.initState();
+    userFitnessData = _fetchAndSaveFitnessData();
+  }
+
+  Future<Map<String, dynamic>> _fetchAndSaveFitnessData() async {
+    try {
+      final data = await fetchUserFitnessDetails();
+      final prefs = await SharedPreferences.getInstance();
+      // Save JSON string locally
+      await prefs.setString('user_fitness_data', jsonEncode(data));
+      return data;
+    } catch (e) {
+      print("Error fetching or saving user fitness details: $e");
+      return {};
+    }
+  }
+
+  Future<Map<String, dynamic>> fetchUserFitnessDetails() async {
+    // Replace this with your actual implementation
+    return {
+      'user_info': {'username': 'JohnDoe'},
+      'fitness_data': {'steps': 10000, 'calories': 500},
+    };
+  }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: Colors.grey[100],
-      body: Center(
-        child: SingleChildScrollView(
-          child: Padding(
-            padding: const EdgeInsets.all(16.0),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.center,
-              children: [
-                Text(
-                  "Congratulations!\nPlan is ready",
-                  textAlign: TextAlign.center,
-                  style: TextStyle(
-                    fontSize: 45,
-                    fontWeight: FontWeight.bold,
-                    color: Colors.black,
-                  ),
-                ),
-                SizedBox(height: 8),
-                Text(
-                  "Body Re-composition - 3 Months Plan",
-                  textAlign: TextAlign.center,
-                  style: TextStyle(
-                    fontSize: 20,
-                    fontWeight: FontWeight.bold,
-                    color: Colors.black,
-                  ),
-                ),
-                SizedBox(height: 20),
-                // Scrollable list of day cards
-                ListView.builder(
-                  shrinkWrap: true,
-                  physics:
-                      NeverScrollableScrollPhysics(), // Prevents inner scrolling within SingleChildScrollView
-                  itemCount: daysData.length,
-                  itemBuilder: (context, index) {
-                    final dayData = daysData[index];
-                    return Padding(
-                      padding: const EdgeInsets.only(bottom: 16.0),
-                      child:
-                          _buildDayCard(dayData["day"], dayData["exercises"]),
-                    );
-                  },
-                ),
-                SizedBox(height: 20),
-                Text.rich(
-                  TextSpan(
-                    text: "Your plan is tailored to fit your body and goals. ",
-                    style: TextStyle(
-                        color: Colors.grey[600],
-                        fontSize: 14,
-                        fontStyle: FontStyle.italic),
-                    children: [
-                      TextSpan(
-                        text: "Work hard",
-                        style: TextStyle(fontWeight: FontWeight.bold),
-                      ),
-                      TextSpan(text: ", and results will follow!"),
-                    ],
-                  ),
-                  textAlign: TextAlign.center,
-                ),
-                SizedBox(height: 20),
-                ElevatedButton(
-                  style: ElevatedButton.styleFrom(
-                    padding: EdgeInsets.symmetric(horizontal: 65, vertical: 22),
-                    backgroundColor: Color(0xFFB30000),
-                    shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(19),
-                    ),
-                  ),
-                    onPressed: () {
-                    Navigator.pushNamed(context, '/home');
-                    },
-                  child: Text(
-                    "Continue To Home",
-                    style: TextStyle(fontSize: 16, color: Colors.white),
-                  ),
-                ),
-              ],
-            ),
-          ),
-        ),
-      ),
-    );
-  }
-
-  Widget _buildDayCard(String dayTitle, List<List<String>> exercises) {
-    return Card(
-      shape: RoundedRectangleBorder(
-        borderRadius: BorderRadius.circular(16),
-      ),
-      elevation: 4,
-      child: Padding(
-        padding: const EdgeInsets.all(16.0),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Text(
-              dayTitle,
-              style: TextStyle(
-                fontSize: 18,
-                fontWeight: FontWeight.bold,
+      body: FutureBuilder<Map<String, dynamic>>(
+        future: userFitnessData,
+        builder: (context, snapshot) {
+          if (snapshot.connectionState == ConnectionState.waiting) {
+            return const Center(child: CircularProgressIndicator());
+          } else if (snapshot.hasError) {
+            return Center(
+              child: Text(
+                "Failed to load fitness data.",
+                style: TextStyle(color: Colors.red, fontSize: 16),
               ),
-            ),
-            SizedBox(height: 10),
-            Table(
-              columnWidths: {
-                0: FlexColumnWidth(3),
-                1: FlexColumnWidth(2),
-                2: FlexColumnWidth(1),
-                3: FlexColumnWidth(1),
-              },
-              children: [
-                TableRow(
-                  decoration: BoxDecoration(
-                    border:
-                        Border(bottom: BorderSide(color: Colors.grey[300]!)),
-                  ),
+            );
+          } else if (snapshot.hasData && snapshot.data!.isNotEmpty) {
+            final data = snapshot.data!;
+            // You can now use the fetched data in the UI
+            return Center(
+              child: SingleChildScrollView(
+                child: Column(
                   children: [
-                    _buildTableHeader("Exercise"),
-                    _buildTableHeader("Target Area"),
-                    _buildTableHeader("Sets"),
-                    _buildTableHeader("Reps"),
+                    Text(
+                      "Welcome ${data['user_info']['username']}!",
+                      style:
+                          TextStyle(fontSize: 24, fontWeight: FontWeight.bold),
+                    ),
+                    SizedBox(height: 20),
+                    Text(
+                      "Your fitness details are successfully loaded.",
+                      textAlign: TextAlign.center,
+                      style: TextStyle(fontSize: 18, color: Colors.black),
+                    ),
+                    SizedBox(height: 20),
+                    ElevatedButton(
+                      onPressed: () {
+                        Navigator.pushNamed(context, '/home');
+                      },
+                      child: const Text("Go to Home"),
+                    ),
                   ],
                 ),
-                ...exercises.map((exercise) => TableRow(
-                      children: exercise
-                          .map((data) => Padding(
-                                padding:
-                                    const EdgeInsets.symmetric(vertical: 8.0),
-                                child: Text(
-                                  data,
-                                  textAlign: TextAlign.center,
-                                ),
-                              ))
-                          .toList(),
-                    )),
-              ],
-            ),
-          ],
-        ),
-      ),
-    );
-  }
-
-  Widget _buildTableHeader(String title) {
-    return Padding(
-      padding: const EdgeInsets.symmetric(vertical: 8.0),
-      child: Text(
-        title,
-        textAlign: TextAlign.center,
-        style: TextStyle(fontWeight: FontWeight.bold),
+              ),
+            );
+          } else {
+            return const Center(
+              child: Text("No data found. Please try again."),
+            );
+          }
+        },
       ),
     );
   }
