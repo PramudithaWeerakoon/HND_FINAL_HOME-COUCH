@@ -16,6 +16,7 @@ import 'pages/auth_provider.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'pages/analysis.dart';
 import 'pages/goal_byday.dart';
+import 'pages/cameraset2.dart';
 import 'package:flutter_local_notifications/flutter_local_notifications.dart';
 
 final FlutterLocalNotificationsPlugin flutterLocalNotificationsPlugin =
@@ -74,6 +75,7 @@ class MyApp extends StatelessWidget {
         '/loading': (context) => const LoadingScreen(),
         '/statistics': (context) => const WeightTrackerPage(),
         '/goal_byday': (context) => const GoalsByDay(weekNumber: 1),
+
       },
     );
   }

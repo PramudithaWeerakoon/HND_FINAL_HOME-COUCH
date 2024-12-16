@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:q1/widgets/gradient_background.dart';
 import 'camera.dart';
+import 'package:url_launcher/url_launcher.dart';
 
 class InstructionPage extends StatefulWidget {
   const InstructionPage({super.key});
@@ -37,7 +38,7 @@ class _InstructionPageState extends State<InstructionPage> {
                         borderRadius: BorderRadius.circular(50),
                       ),
                       child: Text(
-                        'Bicep Curls - 4 Sets',
+                        'Bicep Curls - 2 Sets',
                         style: TextStyle(
                           color: Colors.white,
                           fontSize: screenWidth * 0.05,
@@ -60,7 +61,21 @@ class _InstructionPageState extends State<InstructionPage> {
                     SizedBox(height: screenHeight * 0.01),
                     // Tutorial Button
                     ElevatedButton(
-                      onPressed: () {},
+                       onPressed: () async {
+    final Uri url = Uri.parse('https://youtu.be/XE_pHwbst04?si=9XKSpMMw-F4O_KVD');
+    try {
+      // Launch the URL
+      if (await canLaunch(url.toString())) {
+        await launch(url.toString());
+      } else {
+        throw 'Could not launch $url';
+      }
+    } catch (e) {
+      print('Error launching URL: $e');
+      // Optionally, show a message to the user
+    }
+  },
+
                       style: ElevatedButton.styleFrom(
                         backgroundColor: const Color.fromARGB(179, 175, 2, 2),
                         shape: RoundedRectangleBorder(
@@ -138,7 +153,7 @@ class _InstructionPageState extends State<InstructionPage> {
                     SizedBox(height: screenHeight * 0.02),
                     // Sets and Reps Info
                     Text(
-                      '4 Sets x 10 Reps',
+                      '2 Sets x 10 Reps',
                       style: TextStyle(
                         fontSize: screenWidth * 0.045,
                         fontWeight: FontWeight.bold,

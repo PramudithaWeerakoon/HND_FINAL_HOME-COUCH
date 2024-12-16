@@ -40,7 +40,7 @@ class WorkoutPlanScreen extends StatelessWidget {
                         height: 180,
                         decoration: BoxDecoration(
                           image: DecorationImage(
-                            image: AssetImage('lib/assets/profileimage.jpg'),
+                            image: AssetImage('lib/assets/workoutplanimg.jpg'),
                             fit: BoxFit.cover,
                           ),
                           borderRadius: BorderRadius.circular(8.0),

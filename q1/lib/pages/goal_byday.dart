@@ -246,7 +246,7 @@ class DayProgressCard extends StatelessWidget {
               CircularPercentIndicator(
                 radius: 40.0,
                 lineWidth: 8.0,
-                percent: progress,
+                percent: progress.clamp(0.0, 1.0),
                 center: Text(
                   "${(progress * 100).toInt()}%",
                   style: TextStyle(

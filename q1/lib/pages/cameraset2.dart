@@ -7,14 +7,13 @@ import 'package:http/http.dart' as http;
 import 'package:image/image.dart' as img;
 import 'db_connection.dart'; // Import the database connection
 import 'congratsScreen.dart';
-import 'rest.dart';
 
-class CameraScreen extends StatefulWidget {
+class CameraScreenSet2 extends StatefulWidget {
   @override
-  _CameraScreenState createState() => _CameraScreenState();
+  _CameraScreenSet2State createState() => _CameraScreenSet2State();
 }
 
-class _CameraScreenState extends State<CameraScreen> {
+class _CameraScreenSet2State extends State<CameraScreenSet2> {
   CameraController? _cameraController;
   List<CameraDescription>? _cameras;
   int repCount = 0; // Repetition counter
@@ -188,7 +187,7 @@ class _CameraScreenState extends State<CameraScreen> {
         print("Exercise data saved successfully.");
         Navigator.pushReplacement(
           context,
-          MaterialPageRoute(builder: (context) => RestScreen()),
+          MaterialPageRoute(builder: (context) => CongratulationsScreen()),
         );
       } catch (e) {
         print("Error saving exercise data: $e");
@@ -211,7 +210,7 @@ class _CameraScreenState extends State<CameraScreen> {
               borderRadius: BorderRadius.circular(20.0),
               ),
               child: Text(
-              'Bicep Curls - Set 1',
+              'Bicep Curls - Set 2',
               style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold, color: Colors.white),
               textAlign: TextAlign.center,
               ),
@@ -243,7 +242,7 @@ class _CameraScreenState extends State<CameraScreen> {
                 : Center(child: CircularProgressIndicator()),
             ),
             ),
-            Column(
+Column(
   mainAxisAlignment: MainAxisAlignment.end,
   children: [
     Row(
@@ -297,7 +296,6 @@ class _CameraScreenState extends State<CameraScreen> {
 
 
 SizedBox(height: 5),
-
           Padding(
             padding: const EdgeInsets.symmetric(vertical: 16.0, horizontal: 16.0),
             child: Row(
@@ -317,10 +315,7 @@ SizedBox(height: 5),
                 ),
                 ElevatedButton.icon(
                   onPressed: () {
-                    Navigator.pushReplacement(
-                      context,
-                      MaterialPageRoute(builder: (context) => RestScreen()),
-                    );
+                    Navigator.pushReplacementNamed(context, '/home');
                   },
                   style: ElevatedButton.styleFrom(backgroundColor: const Color(0xFFB30000)),
                   icon: Icon(Icons.skip_next, color: Colors.white),

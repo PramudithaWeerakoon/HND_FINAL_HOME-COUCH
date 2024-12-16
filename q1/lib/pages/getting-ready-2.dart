@@ -89,7 +89,7 @@ class GettingReadyPage2 extends StatelessWidget {
                     decoration: BoxDecoration(
                       borderRadius: BorderRadius.circular(20),
                       image: const DecorationImage(
-                        image: AssetImage('lib/assets/profileimage.jpg'), // Replace with your image path
+                        image: AssetImage('lib/assets/step2.jpeg'), // Replace with your image path
                         fit: BoxFit.cover,
                       ),
                     ),

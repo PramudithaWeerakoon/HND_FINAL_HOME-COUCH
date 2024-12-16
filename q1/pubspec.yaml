@@ -52,7 +52,7 @@ dependencies:
   flutter_local_notifications: ^18.0.1
   image: ^4.5.0
   http: ^1.2.2
- 
+  url_launcher: ^6.3.1
 
   
 dependency_overrides:

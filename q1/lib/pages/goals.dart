@@ -257,19 +257,19 @@ class WeekProgressCard extends StatelessWidget {
               crossAxisAlignment: CrossAxisAlignment.center,
               children: [
                 CircularPercentIndicator(
-                  radius: 40.0,
-                  lineWidth: 8.0,
-                  percent: progress,
-                  center: Text(
-                    "${(progress * 100).toInt()}%",
-                    style: TextStyle(
-                      fontSize: 14,
-                      fontWeight: FontWeight.bold,
-                    ),
-                  ),
-                  progressColor: progressColor,
-                  backgroundColor: Colors.grey[200]!,
-                ),
+  radius: 40.0,
+  lineWidth: 8.0,
+  percent: progress.clamp(0.0, 1.0), // Clamp the percent value between 0.0 and 1.0
+  center: Text(
+    "${(progress * 100).clamp(0, 100).toInt()}%", // Ensure the displayed percentage is also clamped
+    style: TextStyle(
+      fontSize: 14,
+      fontWeight: FontWeight.bold,
+    ),
+  ),
+  progressColor: progressColor,
+  backgroundColor: Colors.grey[200]!,
+),
                 SizedBox(width: 16.0),
                 Expanded(
                   child: Column(

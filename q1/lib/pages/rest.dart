@@ -1,6 +1,7 @@
 import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:q1/widgets/gradient_background.dart';
+import 'cameraset2.dart';
 
 class RestScreen extends StatefulWidget {
   const RestScreen({super.key});
@@ -16,11 +17,11 @@ class _RestScreenState extends State<RestScreen> {
 
   // Mock data from database
   final nextExercise = {
-    'name': 'Dumbbell Fly',
-    'sets': 3,
+    'name': 'Bicep Curls',
+    'sets': 2,
     'reps': 10,
     'duration': 8,
-    'gifUrl': 'lib/assets/d.gif', // Adjusted asset path
+    'gifUrl': 'lib/assets/bicepcurls.gif', // Adjusted asset path
   };
 
   @override
@@ -29,17 +30,23 @@ class _RestScreenState extends State<RestScreen> {
     _startTimer();
   }
 
-  void _startTimer() {
-    _timer = Timer.periodic(const Duration(seconds: 1), (timer) {
-      if (_remainingTime > 0) {
-        setState(() {
-          _remainingTime--;
-        });
-      } else {
-        _timer.cancel();
-      }
-    });
-  }
+void _startTimer() {
+  _timer = Timer.periodic(const Duration(seconds: 1), (timer) {
+    if (_remainingTime > 0) {
+      setState(() {
+        _remainingTime--;
+      });
+    } else {
+      _timer.cancel();
+      // Navigate to CameraScreenSet2
+      Navigator.pushReplacement(
+        context,
+        MaterialPageRoute(builder: (context) => CameraScreenSet2()),
+      );
+    }
+  });
+}
+
 
   @override
   void dispose() {
@@ -74,7 +81,7 @@ class _RestScreenState extends State<RestScreen> {
             children: [
               const SizedBox(height: 20),
               const Text(
-                "Congratulations! Overhead\nPress Completed",
+                "Congratulations! Bicep Curls \nset 1 Completed",
                 textAlign: TextAlign.center,
                 style: TextStyle(
                   fontSize: 20,
