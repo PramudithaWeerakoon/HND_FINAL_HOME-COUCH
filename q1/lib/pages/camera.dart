@@ -113,7 +113,7 @@ class _CameraScreenState extends State<CameraScreen> {
 
   Future<void> sendToAPI(Uint8List bytes) async {
     print('Sending frame to API...');
-    final url = Uri.parse('http://192.168.1.5:8080/process_frame');
+    final url = Uri.parse('http://172.16.101.1:8080/process_frame');
 
     try {
       var request = http.MultipartRequest('POST', url)

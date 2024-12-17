@@ -75,11 +75,6 @@ class _UpdatePasswordPageState extends State<UpdatePasswordPage> {
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: Colors.white,
-      appBar: AppBar(
-        backgroundColor: Colors.deepPurple,
-        elevation: 0,
-        title: Text('Update Password'),
-      ),
       body: Center(
         child: SingleChildScrollView(
           child: Padding(
@@ -91,7 +86,7 @@ class _UpdatePasswordPageState extends State<UpdatePasswordPage> {
                 Text(
                   "Update Your Password",
                   style: TextStyle(
-                    color: Colors.deepPurple,
+                    color: const Color(0xFF21007E),
                     fontWeight: FontWeight.bold,
                     fontSize: 24,
                   ),
@@ -142,7 +137,7 @@ class _UpdatePasswordPageState extends State<UpdatePasswordPage> {
                   child: ElevatedButton(
                     onPressed: updatePassword,
                     style: ElevatedButton.styleFrom(
-                      backgroundColor: Colors.deepPurple,
+                      backgroundColor: const Color(0xFF21007E),
                       shape: RoundedRectangleBorder(
                         borderRadius: BorderRadius.circular(12),
                       ),

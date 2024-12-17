@@ -60,6 +60,7 @@ class MyApp extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
+      debugShowCheckedModeBanner: false,
       initialRoute: '/loading',
       routes: {
         '/login': (context) => const LoginPage(),
@@ -75,7 +76,6 @@ class MyApp extends StatelessWidget {
         '/loading': (context) => const LoadingScreen(),
         '/statistics': (context) => const WeightTrackerPage(),
         '/goal_byday': (context) => const GoalsByDay(weekNumber: 1),
-
       },
     );
   }
