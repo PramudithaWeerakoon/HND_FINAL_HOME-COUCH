@@ -5,6 +5,7 @@ import 'package:fl_chart/fl_chart.dart';
 import 'package:http/http.dart' as http;
 import 'package:path_provider/path_provider.dart';
 import 'db_connection.dart';
+import 'q20.dart';
 
 // Placeholder for Gemini API Key
 const String apiKey = 'AIzaSyCdyu5kUDnS-Igl4ZoSzMgiz4umASepWJg';
@@ -314,21 +315,17 @@ Future<void> saveJsonToFile(String jsonContent) async {
 }
 
 // Generate a workout plan
-Future<Map<String, dynamic>> generateWorkoutPlan() async {
+Future<void> generateWorkoutPlan(BuildContext context) async {
   print("Generating workout plan...");
   final db = DatabaseConnection();
   final userMetrics = await db.fetchUserFitnessDetails();
 
-  // Build the complete prompt
   final prompt = '''
 $dataSet
 Based on this dataset and the given user input metrics:
 ${jsonEncode(userMetrics)}
 $outputStructure
 ''';
-
-  print("Prompt generated successfully.");
-  print("Prompt: $prompt");
 
   try {
     final response = await http.post(
@@ -343,35 +340,34 @@ $outputStructure
     );
 
     if (response.statusCode == 200) {
-      print("Workout plan generated successfully.");
       final result = jsonDecode(response.body);
-
-      // Extract and clean the content
       String content = result['candidates'][0]['content']['parts'][0]['text'];
       content = content.replaceAll("```json", "").replaceAll("```", "").trim();
 
-      print("Cleaned Content: $content");
-      final List<Map<String, dynamic>> workoutPlanList = List<Map<String, dynamic>>.from(jsonDecode(content)['workout_plan']);
-      db.insertWorkoutPlan(workoutPlanList);
+      final List<Map<String, dynamic>> workoutPlanList =
+          List<Map<String, dynamic>>.from(jsonDecode(content)['workout_plan']);
 
-      // Save the JSON response to a file
+      // Save to database and file
+      await db.insertWorkoutPlan(workoutPlanList);
       await saveJsonToFile(content);
 
-      // Decode and return the cleaned JSON
-      return jsonDecode(content);
-       // Insert workout plan into the database
-      
-} else {
+      // Navigate to PlanSummaryScreen
+      Navigator.push(
+        context,
+        MaterialPageRoute(
+          builder: (context) => PlanSummaryScreen(),
+        ),
+      );
+    } else {
       print("Error in Gemini API Response: ${response.body}");
-      throw Exception("Failed to fetch workout plan from Gemini API");
     }
   } catch (e) {
     print("Error generating workout plan: $e");
-    throw Exception("Failed to generate workout plan");
   }
 }
 
 // CustomizedPlanScreen to display the chart and generated workout plan
+// CustomizedPlanScreen to display chart and start generation
 class CustomizedPlanScreen extends StatefulWidget {
   const CustomizedPlanScreen({super.key});
 
@@ -380,26 +376,7 @@ class CustomizedPlanScreen extends StatefulWidget {
 }
 
 class _CustomizedPlanScreenState extends State<CustomizedPlanScreen> {
-  Map<String, dynamic>? workoutPlan;
-
-  @override
-  void initState() {
-    super.initState();
-    loadWorkoutPlan();
-  }
-
-  Future<void> loadWorkoutPlan() async {
-    print("Loading workout plan...");
-    try {
-      final plan = await generateWorkoutPlan();
-      setState(() {
-        workoutPlan = plan;
-      });
-      print("Workout plan loaded successfully.");
-    } catch (e) {
-      print("Error: $e");
-    }
-  }
+  bool _isGenerating = false;
 
   @override
   Widget build(BuildContext context) {
@@ -409,7 +386,6 @@ class _CustomizedPlanScreenState extends State<CustomizedPlanScreen> {
         child: Padding(
           padding: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 20.0),
           child: Column(
-            mainAxisAlignment: MainAxisAlignment.start,
             children: [
               const SizedBox(height: 40),
               Text(
@@ -440,45 +416,53 @@ class _CustomizedPlanScreenState extends State<CustomizedPlanScreen> {
                     ),
                   ],
                 ),
-                child: Column(
-                  children: [
-                    SizedBox(
-                      height: 250,
-                      child: LineChart(
-                        LineChartData(
-                          minX: 0,
-                          maxX: 3,
-                          minY: 60,
-                          maxY: 70,
-                          lineBarsData: [
-                            LineChartBarData(
-                              spots: [
-                                FlSpot(0, 70),
-                                FlSpot(1, 68),
-                                FlSpot(2, 65),
-                                FlSpot(3, 62),
-                              ],
-                              isCurved: true,
-                              color: Colors.yellow,
-                              barWidth: 4,
-                            ),
+                child: SizedBox(
+                  height: 250,
+                  child: LineChart(
+                    LineChartData(
+                      minX: 0,
+                      maxX: 3,
+                      minY: 60,
+                      maxY: 70,
+                      lineBarsData: [
+                        LineChartBarData(
+                          spots: [
+                            FlSpot(0, 70),
+                            FlSpot(1, 68),
+                            FlSpot(2, 65),
+                            FlSpot(3, 62),
                           ],
+                          isCurved: true,
+                          color: Colors.yellow,
+                          barWidth: 4,
                         ),
-                      ),
+                      ],
                     ),
-                    SizedBox(height: 20),
-                    Text("Generated Plan:",
-                        style: TextStyle(
-                            fontSize: 20, fontWeight: FontWeight.bold)),
-                    workoutPlan == null
-                        ? CircularProgressIndicator()
-                        : Text(
-                            const JsonEncoder.withIndent("  ")
-                                .convert(workoutPlan),
-                            style: TextStyle(fontSize: 12, color: Colors.black),
-                          ),
-                  ],
+                  ),
                 ),
+              ),
+              SizedBox(height: 20),
+              ElevatedButton(
+                style: ElevatedButton.styleFrom(
+                  padding: EdgeInsets.symmetric(horizontal: 50, vertical: 16),
+                  backgroundColor: Color(0xFFB30000),
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(10),
+                  ),
+                ),
+                onPressed: _isGenerating
+                    ? null
+                    : () async {
+                        setState(() => _isGenerating = true);
+                        await generateWorkoutPlan(context);
+                        setState(() => _isGenerating = false);
+                      },
+                child: _isGenerating
+                    ? CircularProgressIndicator(color: Colors.white)
+                    : Text(
+                        "Generate Plan",
+                        style: TextStyle(fontSize: 18, color: Colors.white),
+                      ),
               ),
             ],
           ),
