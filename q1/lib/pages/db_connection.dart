@@ -1671,6 +1671,43 @@ Future<double> getBeginningWeight(String userEmail) async {
   }
 }
 
+
+
+
+ Future<List<Map<String, dynamic>>> fetchWorkoutPlan() async {
+  final conn = await getConnection();
+  final email = SessionManager.getUserEmail();
+  try {
+    final result = await conn.query('''
+      SELECT bp_daynumber, bp_exercise, bp_reps, bp_sets
+      FROM bodyplan
+      WHERE bp_userid = @userId
+      ORDER BY bp_daynumber, bp_exercise
+    ''', substitutionValues: {'userId': email});
+
+    Map<int, List<Map<String, dynamic>>> groupedDays = {};
+
+    for (var row in result) {
+      final dayNumber = row[0];
+      groupedDays.putIfAbsent(dayNumber, () => []);
+      groupedDays[dayNumber]!.add({
+        "exercise": row[1], // Exercise name
+        "reps": row[2]?.toString() ?? "0", // Reps
+        "sets": row[3]?.toString() ?? "0", // Sets
+      });
+    }
+
+    // Convert groupedDays map to list of day-wise exercises
+    return groupedDays.entries.map((entry) {
+      return {
+        "day": "Day ${entry.key}",
+        "exercises": entry.value,
+      };
+    }).toList();
+  } catch (e) {
+    print("Error fetching workout plan: $e");
+    rethrow;
+  }
 }
 
-
+}
